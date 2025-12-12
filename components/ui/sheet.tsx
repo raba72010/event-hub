@@ -51,14 +51,14 @@ export function SheetTrigger({ asChild = false, className, children }: SheetTrig
   const handleClick = useCallback(() => setOpen(true), [setOpen])
 
   if (asChild && children && typeof children === "object") {
-    const element = children as ReactElement
+    const element = children as ReactElement<any>
     return cloneElement(element, {
       onClick: (event: MouseEvent) => {
         element.props?.onClick?.(event)
         if (!event.defaultPrevented) handleClick()
       },
       className: cn(element.props?.className, className),
-    })
+    } as any)
   }
 
   return createElement(
