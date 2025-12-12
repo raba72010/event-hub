@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, usePathname } from "next/navigation"
 import { Bookmark, CalendarCheck, LogIn, Settings, User2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
@@ -16,6 +16,7 @@ interface UserSidebarProps {
 
 export function UserSidebar(_props: UserSidebarProps = {}) {
   const router = useRouter()
+  const pathname = usePathname()
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
@@ -87,8 +88,18 @@ export function UserSidebar(_props: UserSidebarProps = {}) {
       </div>
 
       <div className="space-y-2">
-        <SidebarLink icon={<CalendarCheck className="h-4 w-4" />} label="My registrations" active />
-        <SidebarLink icon={<Bookmark className="h-4 w-4" />} label="Saved sessions" />
+        <SidebarLink
+          icon={<CalendarCheck className="h-4 w-4" />}
+          label="My registrations"
+          href="/registrations"
+          active={pathname === "/registrations"}
+        />
+        <SidebarLink
+          icon={<Bookmark className="h-4 w-4" />}
+          label="Saved sessions"
+          href="/favorites"
+          active={pathname === "/favorites"}
+        />
         <SidebarLink icon={<Settings className="h-4 w-4" />} label="Preferences" />
         {!isAuthenticated && <SidebarLink icon={<LogIn className="h-4 w-4" />} label="Create an account" />}
       </div>
@@ -104,18 +115,41 @@ export function UserSidebar(_props: UserSidebarProps = {}) {
   )
 }
 
-function SidebarLink({ icon, label, active = false }: { icon: React.ReactNode; label: string; active?: boolean }) {
-  return (
-    <button
-      type="button"
-      className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition active:scale-95 ${
-        active
-          ? "bg-gray-100 font-semibold text-gray-900"
-          : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-      }`}
-    >
+function SidebarLink({
+  icon,
+  label,
+  href,
+  active = false,
+}: {
+  icon: React.ReactNode
+  label: string
+  href?: string
+  active?: boolean
+}) {
+  const content = (
+    <>
       <span className="text-gray-600">{icon}</span>
       <span>{label}</span>
+    </>
+  )
+
+  const className = `flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition active:scale-95 ${
+    active
+      ? "bg-gray-100 font-semibold text-gray-900"
+      : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+  }`
+
+  if (href) {
+    return (
+      <Link href={href} className={className}>
+        {content}
+      </Link>
+    )
+  }
+
+  return (
+    <button type="button" className={className}>
+      {content}
     </button>
   )
 }

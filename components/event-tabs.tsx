@@ -1,10 +1,12 @@
 "use client"
 
-import { useMemo, useState, type ReactNode } from "react"
-import { CalendarClock, Clock, Play } from "lucide-react"
+import { useMemo, useState, useEffect, type ReactNode } from "react"
+import { CalendarClock, Clock, Play, Heart } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import type { Event } from "@/types/event"
+import { supabase } from "@/lib/supabase"
+import { toggleFavorite, isEventFavorited } from "@/lib/favorites"
 
 interface EventTabsProps {
   events: Event[]
@@ -18,6 +20,48 @@ const tabs = [
 
 export function EventTabs({ events, onSelectEvent }: EventTabsProps) {
   const [activeTab, setActiveTab] = useState<(typeof tabs)[number]["id"]>(tabs[0].id)
+  const [userId, setUserId] = useState<string | null>(null)
+  const [favoritedEvents, setFavoritedEvents] = useState<Set<string>>(new Set())
+
+  useEffect(() => {
+    // Get current user and their favorites
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setUserId(user?.id || null)
+      if (user && events.length > 0) {
+        // Load all favorites for this user
+        Promise.all(events.map((event) => isEventFavorited(event.id, user.id))).then((results) => {
+          const favorited = new Set<string>()
+          results.forEach((isFav, index) => {
+            if (isFav) favorited.add(events[index].id)
+          })
+          setFavoritedEvents(favorited)
+        })
+      }
+    })
+  }, [events])
+
+  const handleFavorite = async (eventId: string) => {
+    if (!userId) {
+      alert("Please sign in to favorite events")
+      return
+    }
+
+    try {
+      const newState = await toggleFavorite(eventId, userId)
+      setFavoritedEvents((prev) => {
+        const next = new Set(prev)
+        if (newState) {
+          next.add(eventId)
+        } else {
+          next.delete(eventId)
+        }
+        return next
+      })
+    } catch (error) {
+      console.error("Error toggling favorite:", error)
+      alert("Failed to update favorite. Please try again.")
+    }
+  }
 
   const filteredEvents = useMemo(
     () =>
@@ -59,20 +103,33 @@ export function EventTabs({ events, onSelectEvent }: EventTabsProps) {
       </p>
 
       <div className="mt-6 grid gap-4 grid-cols-1 lg:grid-cols-2">
-        {filteredEvents.map((event) => (
-          <article
-            key={event.id}
-            className="group relative overflow-hidden rounded-xl border border-gray-200 bg-white p-5 transition hover:-translate-y-1 hover:shadow-lg"
-          >
-            <div className="flex items-center justify-between gap-3">
-              <div className="space-y-1">
-                <p className="text-xs uppercase tracking-[0.15em] text-slate-700">{event.category}</p>
-                <h4 className="text-lg font-semibold text-gray-900">{event.title}</h4>
+        {filteredEvents.map((event) => {
+          const isFavorited = favoritedEvents.has(event.id)
+          return (
+            <article
+              key={event.id}
+              className="group relative overflow-hidden rounded-xl border border-gray-200 bg-white p-5 transition hover:-translate-y-1 hover:shadow-lg"
+            >
+              <div className="flex items-center justify-between gap-3">
+                <div className="space-y-1 flex-1">
+                  <p className="text-xs uppercase tracking-[0.15em] text-slate-700">{event.category}</p>
+                  <h4 className="text-lg font-semibold text-gray-900">{event.title}</h4>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => handleFavorite(event.id)}
+                    className="inline-flex items-center justify-center rounded-full p-1.5 text-gray-600 hover:bg-gray-100 active:scale-95 transition-all"
+                    aria-label={isFavorited ? "Remove from favorites" : "Add to favorites"}
+                  >
+                    <Heart
+                      className={cn("h-4 w-4 transition-colors", isFavorited ? "fill-red-500 text-red-500" : "")}
+                    />
+                  </button>
+                  <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700">
+                    {event.level ?? "All levels"}
+                  </span>
+                </div>
               </div>
-              <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700">
-                {event.level ?? "All levels"}
-              </span>
-            </div>
 
             <p className="mt-2 text-sm text-gray-600 line-clamp-2">{event.summary ?? event.description}</p>
 
@@ -107,7 +164,8 @@ export function EventTabs({ events, onSelectEvent }: EventTabsProps) {
               </Button>
             </div>
           </article>
-        ))}
+          )
+        })}
       </div>
     </section>
   )

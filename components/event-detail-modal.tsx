@@ -1,10 +1,14 @@
 "use client"
 
 import { useEffect, useState, type ReactNode } from "react"
-import { CalendarClock, Clock, MapPin, X } from "lucide-react"
+import { CalendarClock, Clock, MapPin, X, Heart } from "lucide-react"
 import { createPortal } from "react-dom"
 import { Button } from "@/components/ui/button"
 import type { Event } from "@/types/event"
+import { supabase } from "@/lib/supabase"
+import { toggleFavorite, isEventFavorited } from "@/lib/favorites"
+import { toggleRegistration, isEventRegistered } from "@/lib/registrations"
+import { cn } from "@/lib/utils"
 
 interface EventDetailModalProps {
   event: Event
@@ -15,8 +19,63 @@ interface EventDetailModalProps {
 
 export function EventDetailModal({ event, isOpen, isSignedIn, onClose }: EventDetailModalProps) {
   const [mounted, setMounted] = useState(false)
+  const [isFavorited, setIsFavorited] = useState(false)
+  const [isRegistered, setIsRegistered] = useState(false)
+  const [userId, setUserId] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => setMounted(true), [])
+
+  useEffect(() => {
+    if (!isOpen) return
+
+    // Get current user and check favorite/registration status
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setUserId(user?.id || null)
+      if (user) {
+        Promise.all([
+          isEventFavorited(event.id, user.id),
+          isEventRegistered(event.id, user.id),
+        ]).then(([favorited, registered]) => {
+          setIsFavorited(favorited)
+          setIsRegistered(registered)
+          setIsLoading(false)
+        })
+      } else {
+        setIsLoading(false)
+      }
+    })
+  }, [isOpen, event.id])
+
+  const handleFavorite = async () => {
+    if (!userId) {
+      alert("Please sign in to favorite events")
+      return
+    }
+
+    try {
+      const newState = await toggleFavorite(event.id, userId)
+      setIsFavorited(newState)
+    } catch (error) {
+      console.error("Error toggling favorite:", error)
+      alert("Failed to update favorite. Please try again.")
+    }
+  }
+
+  const handleRegister = async () => {
+    if (!userId) {
+      alert("Please sign in to register for events")
+      return
+    }
+
+    try {
+      const newState = await toggleRegistration(event.id, userId)
+      setIsRegistered(newState)
+    } catch (error) {
+      console.error("Error toggling registration:", error)
+      alert("Failed to update registration. Please try again.")
+    }
+  }
 
   useEffect(() => {
     if (!isOpen) return
@@ -48,7 +107,18 @@ export function EventDetailModal({ event, isOpen, isSignedIn, onClose }: EventDe
 
         <div className="grid gap-6 p-6 md:grid-cols-[1fr_0.6fr]">
           <div className="space-y-3">
-            <p className="text-xs uppercase tracking-[0.15em] text-slate-700">{event.category}</p>
+            <div className="flex items-center justify-between">
+              <p className="text-xs uppercase tracking-[0.15em] text-slate-700">{event.category}</p>
+              <button
+                onClick={handleFavorite}
+                className="inline-flex items-center justify-center rounded-full p-2 text-gray-600 hover:bg-gray-100 active:scale-95 transition-all"
+                aria-label={isFavorited ? "Remove from favorites" : "Add to favorites"}
+              >
+                <Heart
+                  className={cn("h-5 w-5 transition-colors", isFavorited ? "fill-red-500 text-red-500" : "")}
+                />
+              </button>
+            </div>
             <h3 className="text-2xl font-semibold text-gray-900">{event.title}</h3>
             <p className="text-sm text-gray-600">{event.description}</p>
 
@@ -101,8 +171,14 @@ export function EventDetailModal({ event, isOpen, isSignedIn, onClose }: EventDe
             </div>
 
             <div className="flex gap-2">
-              <Button className="flex-1" size="lg">
-                {isSignedIn ? "Save my spot" : "Register free"}
+              <Button
+                className="flex-1"
+                size="lg"
+                variant={isRegistered ? "secondary" : "default"}
+                onClick={handleRegister}
+                disabled={isLoading}
+              >
+                {isRegistered ? "You are going!" : isSignedIn ? "Save my spot" : "Register free"}
               </Button>
               <Button variant="outline" size="lg" onClick={onClose}>
                 Close
