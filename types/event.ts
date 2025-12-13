@@ -19,6 +19,7 @@ export interface Event {
   status: EventStatus
   description: string
   summary?: string
+  resources?: { title: string; url: string }[]
   image?: string
   tags: string[]
   speakers: EventSpeaker[]

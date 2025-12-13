@@ -49,6 +49,7 @@ function cleanEventData(row: any) {
     location: row.location || "Virtual",
     description: row.description || "",
     image: row.image,
+    resources: row.resources || [],
     tags, // Now guaranteed to be an array
     speakers, // Now guaranteed to be an array
   }

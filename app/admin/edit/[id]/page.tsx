@@ -5,12 +5,12 @@ import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { 
   ArrowLeft, Upload, Calendar, MapPin, 
-  User, Tag, Type, Loader2, LayoutDashboard, Image as ImageIcon, Save, Grid, CheckCircle2 
+  User, Tag, Type, Loader2, LayoutDashboard, Image as ImageIcon, Save, Grid, CheckCircle2, Link as LinkIcon, Plus, Trash2 
 } from "lucide-react"
 import { supabase } from "@/lib/supabase"
 import { cn } from "@/lib/utils"
 
-// 1. Define standard categories (Must match Create Page)
+// 1. Standard categories
 const PREDEFINED_CATEGORIES = [
   "Design",
   "Engineering",
@@ -21,7 +21,7 @@ const PREDEFINED_CATEGORIES = [
   "Sales"
 ]
 
-// 2. Stock Images (Must match Create Page)
+// 2. Stock Images
 const STOCK_IMAGES = [
   { id: "code", label: "Coding", url: "https://images.unsplash.com/photo-1542831371-29b0f74f9713?auto=format&fit=crop&w=1000&q=80" },
   { id: "design", label: "Abstract Design", url: "https://images.unsplash.com/photo-1561070791-2526d30994b5?auto=format&fit=crop&w=1000&q=80" },
@@ -46,6 +46,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
   const [isCustomCategory, setIsCustomCategory] = useState(false)
   const [imageMode, setImageMode] = useState<"upload" | "stock">("upload")
 
+  // Form Data
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -62,11 +63,14 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
     status: "upcoming",
   })
   
+  // Resources State (NEW)
+  const [resources, setResources] = useState<{ title: string, url: string }[]>([])
+
   const [imageFile, setImageFile] = useState<File | null>(null)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [currentImageUrl, setCurrentImageUrl] = useState<string | null>(null)
 
-  // 1. Check Auth & Fetch Event Data
+  // 1. Check Auth & Fetch Event
   useEffect(() => {
     async function init() {
       try {
@@ -106,10 +110,14 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
 
         const speaker = event.speakers && event.speakers[0] ? event.speakers[0] : { name: "", title: "", company: "" }
 
-        // Check if category is standard or custom
         const category = event.category || PREDEFINED_CATEGORIES[0]
         if (!PREDEFINED_CATEGORIES.includes(category)) {
            setIsCustomCategory(true)
+        }
+        
+        // Populate Resources
+        if (event.resources && Array.isArray(event.resources)) {
+            setResources(event.resources)
         }
 
         setFormData({
@@ -169,6 +177,23 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
     }
   }
 
+  // Resource Handlers
+  const addResource = () => {
+    setResources([...resources, { title: "", url: "" }])
+  }
+  
+  const removeResource = (index: number) => {
+    const newRes = [...resources]
+    newRes.splice(index, 1)
+    setResources(newRes)
+  }
+
+  const updateResource = (index: number, field: "title" | "url", value: string) => {
+    const newRes = [...resources]
+    newRes[index][field] = value
+    setResources(newRes)
+  }
+
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
@@ -176,13 +201,10 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
     try {
       let imageUrl = currentImageUrl
 
-      // 1. Handle Image Logic
-      // If user selected a stock image (preview changed, but no file)
+      // 1. Handle Image
       if (imageMode === "stock" && imagePreview !== currentImageUrl) {
          imageUrl = imagePreview
-      }
-      // If user uploaded a new file
-      else if (imageMode === "upload" && imageFile) {
+      } else if (imageMode === "upload" && imageFile) {
         const fileExt = imageFile.name.split(".").pop()
         const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`
         
@@ -208,7 +230,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
         company: formData.speakerCompany || undefined,
       }]
 
-      // 3. Update Database
+      // 3. Update DB
       const { error: updateError } = await supabase
         .from("events")
         .update({
@@ -227,6 +249,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
             speaker_company: formData.speakerCompany || null,
             image: imageUrl,
             summary: formData.description.substring(0, 150) + "...",
+            resources: resources, // Save the resources array!
         })
         .eq('id', eventId)
 
@@ -286,8 +309,6 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                     <textarea required rows={5} value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} className="w-full border p-2 rounded focus:ring-2 focus:ring-amber-200 outline-none" />
                  </div>
                  <div className="grid grid-cols-2 gap-4">
-                    
-                    {/* UPDATED CATEGORY LOGIC */}
                     <div>
                       <label className="block text-sm font-medium mb-1">Category</label>
                       {!isCustomCategory ? (
@@ -309,14 +330,11 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                              value={formData.category}
                              onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                              className="w-full border p-2 rounded focus:ring-2 focus:ring-amber-200 outline-none"
-                             placeholder="Type category..."
                            />
                            <Button type="button" variant="outline" size="icon" onClick={() => setIsCustomCategory(false)}><ArrowLeft className="h-4 w-4" /></Button>
                         </div>
                       )}
                     </div>
-                    {/* END CATEGORY LOGIC */}
-
                     <div>
                       <label className="block text-sm font-medium mb-1">Tags</label>
                       <input type="text" value={formData.tags} onChange={e => setFormData({...formData, tags: e.target.value})} className="w-full border p-2 rounded focus:ring-2 focus:ring-amber-200 outline-none" />
@@ -325,7 +343,52 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                </div>
             </div>
 
-            {/* Card 2: Time */}
+            {/* Card 2: Resources (NEW) */}
+            <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+               <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2 text-amber-600">
+                      <LinkIcon className="h-5 w-5" />
+                      <h3 className="font-semibold text-gray-900">Resources & Links</h3>
+                  </div>
+                  <Button type="button" size="sm" variant="outline" onClick={addResource}>
+                     <Plus className="h-4 w-4 mr-2" /> Add Link
+                  </Button>
+               </div>
+               
+               <div className="space-y-3">
+                  {resources.length === 0 ? (
+                    <p className="text-sm text-gray-400 text-center py-4 border border-dashed rounded-lg">
+                      No resources added yet. Add slides, recordings, or PDF links.
+                    </p>
+                  ) : (
+                    resources.map((res, i) => (
+                      <div key={i} className="flex gap-2 items-start">
+                         <div className="flex-1 space-y-2">
+                            <input 
+                              type="text" 
+                              placeholder="Title (e.g. Slide Deck)" 
+                              value={res.title}
+                              onChange={(e) => updateResource(i, "title", e.target.value)}
+                              className="w-full text-sm border p-2 rounded"
+                            />
+                            <input 
+                              type="text" 
+                              placeholder="URL (https://...)" 
+                              value={res.url}
+                              onChange={(e) => updateResource(i, "url", e.target.value)}
+                              className="w-full text-sm border p-2 rounded bg-gray-50"
+                            />
+                         </div>
+                         <Button type="button" size="icon" variant="ghost" className="text-red-500 hover:text-red-700" onClick={() => removeResource(i)}>
+                            <Trash2 className="h-4 w-4" />
+                         </Button>
+                      </div>
+                    ))
+                  )}
+               </div>
+            </div>
+
+            {/* Card 3: Time & Place */}
             <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
                <div className="flex items-center gap-2 mb-4 text-amber-600">
                   <Calendar className="h-5 w-5" />
@@ -351,7 +414,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                </div>
             </div>
 
-             {/* Card 3: Speaker */}
+             {/* Card 4: Speaker */}
              <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
                <div className="flex items-center gap-2 mb-4 text-amber-600">
                   <User className="h-5 w-5" />
@@ -379,64 +442,29 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
           {/* RIGHT COLUMN */}
           <div className="space-y-6">
             
-            {/* Card 4: Event Poster (UPDATED WITH STOCK) */}
+            {/* Card 5: Poster */}
             <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
                <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2 text-amber-600">
                      <ImageIcon className="h-5 w-5" />
                      <h3 className="font-semibold text-gray-900">Event Poster</h3>
                   </div>
-                   {/* Toggle Switch */}
                    <div className="flex bg-gray-100 rounded-lg p-1">
-                     <button
-                       type="button"
-                       onClick={() => setImageMode("upload")}
-                       className={cn("px-3 py-1 text-xs font-medium rounded-md transition-all", imageMode === "upload" ? "bg-white shadow text-gray-900" : "text-gray-500 hover:text-gray-700")}
-                     >
-                       Upload
-                     </button>
-                     <button
-                       type="button"
-                       onClick={() => setImageMode("stock")}
-                       className={cn("px-3 py-1 text-xs font-medium rounded-md transition-all", imageMode === "stock" ? "bg-white shadow text-gray-900" : "text-gray-500 hover:text-gray-700")}
-                     >
-                       Stock
-                     </button>
+                     <button type="button" onClick={() => setImageMode("upload")} className={cn("px-3 py-1 text-xs font-medium rounded-md transition-all", imageMode === "upload" ? "bg-white shadow text-gray-900" : "text-gray-500 hover:text-gray-700")}>Upload</button>
+                     <button type="button" onClick={() => setImageMode("stock")} className={cn("px-3 py-1 text-xs font-medium rounded-md transition-all", imageMode === "stock" ? "bg-white shadow text-gray-900" : "text-gray-500 hover:text-gray-700")}>Stock</button>
                   </div>
                </div>
-
                <div className="space-y-4">
-                   {/* PREVIEW BOX */}
                   <div className="relative h-48 rounded border-2 border-dashed flex items-center justify-center overflow-hidden bg-gray-50">
-                     {imagePreview ? (
-                        <img src={imagePreview} className="w-full h-full object-cover" />
-                     ) : (
-                        <p className="text-gray-400">No Image Selected</p>
-                     )}
-                     
-                     {imageMode === "upload" && (
-                        <input type="file" accept="image/*" onChange={handleImageChange} className="absolute inset-0 opacity-0 cursor-pointer" />
-                     )}
+                     {imagePreview ? <img src={imagePreview} className="w-full h-full object-cover" /> : <p className="text-gray-400">No Image Selected</p>}
+                     {imageMode === "upload" && <input type="file" accept="image/*" onChange={handleImageChange} className="absolute inset-0 opacity-0 cursor-pointer" />}
                   </div>
-
-                  {/* STOCK GRID */}
                   {imageMode === "stock" && (
                     <div className="grid grid-cols-2 gap-2 mt-4 max-h-48 overflow-y-auto pr-1">
                       {STOCK_IMAGES.map((img) => (
-                        <div 
-                          key={img.id} 
-                          onClick={() => handleStockSelect(img.url)}
-                          className={cn(
-                            "relative aspect-video cursor-pointer rounded-md overflow-hidden border-2 transition-all hover:opacity-90",
-                            imagePreview === img.url ? "border-amber-600 ring-2 ring-amber-200" : "border-transparent"
-                          )}
-                        >
+                        <div key={img.id} onClick={() => handleStockSelect(img.url)} className={cn("relative aspect-video cursor-pointer rounded-md overflow-hidden border-2 transition-all hover:opacity-90", imagePreview === img.url ? "border-amber-600 ring-2 ring-amber-200" : "border-transparent")}>
                           <img src={img.url} alt={img.label} className="w-full h-full object-cover" />
-                          {imagePreview === img.url && (
-                             <div className="absolute inset-0 bg-amber-900/20 flex items-center justify-center">
-                                <CheckCircle2 className="text-white h-6 w-6 drop-shadow-md" />
-                             </div>
-                          )}
+                          {imagePreview === img.url && <div className="absolute inset-0 bg-amber-900/20 flex items-center justify-center"><CheckCircle2 className="text-white h-6 w-6 drop-shadow-md" /></div>}
                         </div>
                       ))}
                     </div>

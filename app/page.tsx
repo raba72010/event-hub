@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Menu, User, Calendar, Clock, MapPin, ArrowRight, Star, X, Edit, Search, Filter, Trash2, History } from "lucide-react"
+import { Menu, User, Calendar, Clock, MapPin, ArrowRight, Star, X, Edit, Search, Filter, Trash2, History, Users, Check } from "lucide-react"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { supabase } from "@/lib/supabase"
 import { UserSidebar } from "@/components/user-sidebar"
@@ -20,12 +20,15 @@ export default function ProWebinarHub() {
   const [userEmail, setUserEmail] = useState<string | null>(null)
   const [events, setEvents] = useState<Event[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  
+  // 🔍 NEW: Store user's registrations
+  const [registeredEventIds, setRegisteredEventIds] = useState<Set<string>>(new Set())
 
   // 🔍 Search & Filter States
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("All")
 
-  // 1. AUTH LOGIC + ADMIN CHECK
+  // 1. AUTH LOGIC + ADMIN CHECK + FETCH REGISTRATIONS
   useEffect(() => {
     async function checkAuth() {
       const { data: { session } } = await supabase.auth.getSession()
@@ -33,6 +36,7 @@ export default function ProWebinarHub() {
       setUserEmail(session?.user?.email || null)
 
       if (session?.user) {
+        // Check Admin
         const { data: profile } = await supabase
           .from('profiles')
           .select('role')
@@ -40,9 +44,21 @@ export default function ProWebinarHub() {
           .single()
         
         if (profile?.role === 'admin') setIsAdmin(true)
+
+        // Fetch User Registrations
+        const { data: registrations } = await supabase
+          .from('registrations')
+          .select('event_id')
+          .eq('user_id', session.user.id)
+        
+        if (registrations) {
+           const ids = new Set(registrations.map((r: any) => r.event_id))
+           setRegisteredEventIds(ids)
+        }
       }
     }
     checkAuth()
+    
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setIsSignedIn(!!session)
       setUserEmail(session?.user?.email || null)
@@ -91,6 +107,7 @@ export default function ProWebinarHub() {
             status: row.status === "past" ? "on-demand" : "upcoming", 
             description: row.description || "",
             summary: row.summary,
+            resources: row.resources || [],
             image: row.image,
             tags, speakers,
           }
@@ -142,14 +159,12 @@ export default function ProWebinarHub() {
           
           {/* LOGO SECTION */}
           <div className="flex items-center gap-3">
-            {/* Try to load logo.png, fallback to text if missing */}
             <img 
               src="/logo.png" 
               alt="SPC Logo" 
               className="h-10 w-10 object-contain rounded-full bg-white"
               onError={(e) => { e.currentTarget.style.display = 'none'; e.currentTarget.nextElementSibling?.classList.remove('hidden') }} 
             />
-            {/* Fallback Icon if image fails */}
             <div className="hidden h-10 w-10 items-center justify-center rounded-full bg-slate-900 text-white font-bold">SPC</div>
             
             <div className="flex flex-col">
@@ -169,7 +184,6 @@ export default function ProWebinarHub() {
             ) : (
               <>
                 <Link href="/login"><Button variant="ghost">Log in</Button></Link>
-                {/* 👇 UPDATED BUTTON TEXT */}
                 <Link href="/login?view=sign_up"><Button className="bg-slate-900 hover:bg-slate-800 text-white">Join Now</Button></Link>
               </>
             )}
@@ -181,37 +195,31 @@ export default function ProWebinarHub() {
         </div>
       </nav>
 
-      {/* HERO SECTION - REBRANDED */}
+      {/* HERO SECTION */}
       {!isSignedIn && (
         <section className="relative overflow-hidden bg-slate-900 py-20 md:py-32">
-          {/* Background Elements */}
           <div className="absolute top-0 left-1/2 -translate-x-1/2 h-full w-full max-w-7xl opacity-20 pointer-events-none">
              <div className="absolute top-10 right-10 h-96 w-96 rounded-full bg-emerald-500 blur-[100px]" />
              <div className="absolute bottom-10 left-10 h-72 w-72 rounded-full bg-red-500 blur-[100px]" />
           </div>
 
           <div className="container relative mx-auto px-4 text-center md:px-6">
-            {/* 👇 UPDATED BADGE YEAR */}
             <div className="inline-flex items-center rounded-full border border-slate-700 bg-slate-800/50 px-3 py-1 text-sm font-medium text-slate-300 mb-6">
               <Star className="mr-2 h-3.5 w-3.5 text-yellow-500" /> Connecting Professionals Since 2024
             </div>
-            
             <h1 className="mx-auto max-w-5xl text-4xl font-bold tracking-tight text-white md:text-6xl lg:text-7xl leading-tight">
                نادي المحترفين السودانيين <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-white to-red-400">
                 Sudanese Professionals Club
               </span>
             </h1>
-            
             <p className="mx-auto mt-6 max-w-2xl text-lg text-slate-400">
                Empowering professionals, fostering innovation, and building a stronger community through knowledge sharing.
             </p>
-            
             <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
               <Button size="lg" className="h-12 px-8 bg-white text-slate-900 hover:bg-slate-100 font-semibold rounded-full" onClick={() => window.scrollTo({ top: 800, behavior: 'smooth' })}>
                 Explore Activities
               </Button>
-              {/* 👇 UPDATED BUTTON TEXT */}
               <Link href="/login?view=sign_up">
                 <Button size="lg" variant="outline" className="h-12 px-8 border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white rounded-full">
                    Join Now
@@ -224,7 +232,7 @@ export default function ProWebinarHub() {
 
       <div className="container mx-auto px-4 py-12 md:px-6">
         
-        {/* CONTROLS (Search & Filter) */}
+        {/* CONTROLS */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
           <div>
             <h2 className="text-3xl font-bold tracking-tight text-slate-900">
@@ -274,6 +282,7 @@ export default function ProWebinarHub() {
                       key={event.id} 
                       event={event} 
                       isAdmin={isAdmin} 
+                      isRegistered={registeredEventIds.has(event.id)}
                       router={router} 
                       onDelete={handleDelete} 
                       onSelect={() => setSelectedEvent(event)} 
@@ -305,6 +314,7 @@ export default function ProWebinarHub() {
                         key={event.id} 
                         event={event} 
                         isAdmin={isAdmin} 
+                        isRegistered={registeredEventIds.has(event.id)}
                         router={router} 
                         onDelete={handleDelete} 
                         onSelect={() => setSelectedEvent(event)} 
@@ -334,7 +344,7 @@ export default function ProWebinarHub() {
   )
 }
 
-function EventCard({ event, isAdmin, router, onDelete, onSelect, isPast = false }: any) {
+function EventCard({ event, isAdmin, isRegistered, router, onDelete, onSelect, isPast = false }: any) {
   return (
     <div 
       onClick={onSelect} 
@@ -345,6 +355,13 @@ function EventCard({ event, isAdmin, router, onDelete, onSelect, isPast = false 
     >
       {isAdmin && (
         <div className="absolute top-3 right-3 z-20 flex gap-2">
+            <button 
+              onClick={(e) => { e.stopPropagation(); router.push(`/admin/attendees/${event.id}`) }}
+              className="p-2 bg-white/90 rounded-full hover:bg-blue-50 text-blue-600 shadow-sm border border-blue-100 transition-colors"
+              title="View Attendees"
+            >
+              <Users className="h-4 w-4" />
+            </button>
             <button 
               onClick={(e) => { e.stopPropagation(); router.push(`/admin/edit/${event.id}`) }}
               className="p-2 bg-white/90 rounded-full hover:bg-emerald-50 text-emerald-600 shadow-sm border border-emerald-100 transition-colors"
@@ -390,12 +407,22 @@ function EventCard({ event, isAdmin, router, onDelete, onSelect, isPast = false 
           </div>
         </div>
         
-        <Button 
-          variant={isPast ? "outline" : "default"}
-          className={cn("w-full rounded-lg transition-colors", !isPast && "bg-slate-900 hover:bg-slate-800 text-white group-hover:bg-emerald-600")}
-        >
-          {isPast ? "View Details" : "Register Now"} <ArrowRight className="ml-2 h-4 w-4" />
-        </Button>
+        {/* 👇 UPDATED BUTTON LOGIC */}
+        {isRegistered ? (
+          <Button 
+            variant="outline"
+            className="w-full rounded-lg border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 cursor-default"
+          >
+            <Check className="mr-2 h-4 w-4" /> Registered
+          </Button>
+        ) : (
+          <Button 
+            variant={isPast ? "outline" : "default"}
+            className={cn("w-full rounded-lg transition-colors", !isPast && "bg-slate-900 hover:bg-slate-800 text-white group-hover:bg-emerald-600")}
+          >
+            {isPast ? "View Details" : "Register Now"} <ArrowRight className="ml-2 h-4 w-4" />
+          </Button>
+        )}
       </div>
     </div>
   )
