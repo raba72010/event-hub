@@ -168,8 +168,7 @@ export default function ProWebinarHub() {
             <div className="hidden h-10 w-10 items-center justify-center rounded-full bg-slate-900 text-white font-bold">SPC</div>
             
             <div className="flex flex-col">
-               <span className="text-sm font-bold leading-none text-slate-900">SPC</span>
-               <span className="text-[10px] font-medium text-slate-500">Sudanese Professionals Club</span>
+               <span className="text-sm font-bold leading-none text-slate-900">Sudanese Professionals Club</span>
             </div>
           </div>
 
