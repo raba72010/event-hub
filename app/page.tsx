@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Menu, User, Calendar, Clock, MapPin, ArrowRight, Star, X, Edit } from "lucide-react"
+import { Menu, User, Calendar, Clock, MapPin, ArrowRight, Star, X, Edit, Search, Filter } from "lucide-react"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { supabase } from "@/lib/supabase"
 import { UserSidebar } from "@/components/user-sidebar"
@@ -20,6 +20,10 @@ export default function ProWebinarHub() {
   const [events, setEvents] = useState<Event[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
+  // 🔍 NEW: Search & Filter States
+  const [searchQuery, setSearchQuery] = useState("")
+  const [selectedCategory, setSelectedCategory] = useState("All")
+
   // 1. AUTH LOGIC + ADMIN CHECK
   useEffect(() => {
     async function checkAuth() {
@@ -28,30 +32,24 @@ export default function ProWebinarHub() {
       setUserEmail(session?.user?.email || null)
 
       if (session?.user) {
-        // Check if user is admin
         const { data: profile } = await supabase
           .from('profiles')
           .select('role')
           .eq('id', session.user.id)
           .single()
         
-        if (profile?.role === 'admin') {
-          setIsAdmin(true)
-        }
+        if (profile?.role === 'admin') setIsAdmin(true)
       }
     }
-    
     checkAuth()
-
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setIsSignedIn(!!session)
       setUserEmail(session?.user?.email || null)
     })
-
     return () => subscription.unsubscribe()
   }, [])
 
-  // 2. DATA FETCHING LOGIC
+  // 2. DATA FETCHING
   useEffect(() => {
     async function fetchEvents() {
       try {
@@ -60,69 +58,47 @@ export default function ProWebinarHub() {
           .select("*")
           .order("start_time", { ascending: true })
 
-        if (error) {
-          console.error("Error fetching events:", error)
-          setIsLoading(false)
-          return
-        }
+        if (error) { setIsLoading(false); return }
 
         const mappedEvents: Event[] = (data || []).map((row: any) => {
+          // ... (Your existing mapping logic kept exactly the same) ...
           const startTime = row.start_time ? new Date(row.start_time) : null
-          const date = startTime
-            ? startTime.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
-            : row.date || ""
-          const time = startTime
-            ? startTime.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true })
-            : row.time || ""
-
+          const date = startTime ? startTime.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : row.date || ""
+          const time = startTime ? startTime.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true }) : row.time || ""
+          
           let tags: string[] = []
           if (row.tags) {
-            if (typeof row.tags === "string") {
-              try { tags = JSON.parse(row.tags) } catch { tags = row.tags.split(",").map((t: string) => t.trim()) }
-            } else if (Array.isArray(row.tags)) { tags = row.tags }
+             if (typeof row.tags === "string") { try { tags = JSON.parse(row.tags) } catch { tags = row.tags.split(",").map((t: string) => t.trim()) } }
+             else if (Array.isArray(row.tags)) { tags = row.tags }
           }
-
+          
           let speakers: Event["speakers"] = []
           if (row.speakers) {
-            if (typeof row.speakers === "string") {
-              try { speakers = JSON.parse(row.speakers) } catch { /* fallback */ }
-            } else if (Array.isArray(row.speakers)) { speakers = row.speakers }
-          } 
+             if (typeof row.speakers === "string") { try { speakers = JSON.parse(row.speakers) } catch { } }
+             else if (Array.isArray(row.speakers)) { speakers = row.speakers }
+          }
           if (speakers.length === 0 && row.speaker_name) {
-             speakers = [{
-                name: row.speaker_name,
-                title: row.speaker_title || "",
-                company: row.speaker_company,
-                avatarUrl: row.speaker_avatar_url,
-              }]
+              speakers = [{ name: row.speaker_name, title: row.speaker_title || "", company: row.speaker_company, avatarUrl: row.speaker_avatar_url }]
           }
 
           return {
             id: row.id?.toString() || "",
             title: row.title || "",
             category: row.category || "General",
-            date,
-            time,
-            duration: row.duration || "",
+            date, time, duration: row.duration || "",
             location: row.location || "Virtual",
             level: row.level,
             status: row.status === "past" ? "on-demand" : "upcoming",
             description: row.description || "",
             summary: row.summary,
             image: row.image,
-            tags,
-            speakers,
+            tags, speakers,
           }
         })
-
         setEvents(mappedEvents)
-      } catch (error) {
-        console.error("Error fetching events:", error)
-      } finally {
-        setIsLoading(false)
-      }
+      } catch (error) { console.error(error) } 
+      finally { setIsLoading(false) }
     }
-
     fetchEvents()
   }, [])
 
@@ -130,6 +106,16 @@ export default function ProWebinarHub() {
     await supabase.auth.signOut()
     window.location.reload()
   }
+
+  // 🔍 NEW: Filter Logic
+  const categories = ["All", ...Array.from(new Set(events.map(e => e.category)))]
+  
+  const filteredEvents = events.filter((event) => {
+    const matchesSearch = event.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                          event.description.toLowerCase().includes(searchQuery.toLowerCase())
+    const matchesCategory = selectedCategory === "All" || event.category === selectedCategory
+    return matchesSearch && matchesCategory
+  })
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-900">
@@ -145,18 +131,8 @@ export default function ProWebinarHub() {
           <div className="hidden md:flex items-center gap-4">
             {isSignedIn ? (
               <>
-                {isAdmin && (
-                  <Link href="/admin">
-                    <Button variant="ghost" className="text-indigo-600 font-medium">Admin Dashboard</Button>
-                  </Link>
-                )}
-                {/* 👇 UPDATED: Link to Profile Page */}
-                <Link href="/profile">
-                  <Button variant="ghost" className="text-slate-600 hover:text-slate-900">
-                    <User className="h-4 w-4 mr-2" />
-                    My Profile
-                  </Button>
-                </Link>
+                {isAdmin && <Link href="/admin"><Button variant="ghost" className="text-indigo-600 font-medium">Admin Dashboard</Button></Link>}
+                <Link href="/profile"><Button variant="ghost" className="text-slate-600 hover:text-slate-900"><User className="h-4 w-4 mr-2" />My Profile</Button></Link>
                 <div className="h-6 w-px bg-slate-200" />
                 <Button onClick={handleLogout} variant="outline" size="sm" className="border-slate-300">Sign Out</Button>
               </>
@@ -167,117 +143,133 @@ export default function ProWebinarHub() {
               </>
             )}
           </div>
-
           <Sheet>
-            <SheetTrigger asChild className="md:hidden">
-              <Button variant="ghost" size="icon"><Menu className="h-5 w-5" /></Button>
-            </SheetTrigger>
-            <SheetContent side="right" className="w-80 bg-white">
-              <UserSidebar isSignedIn={isSignedIn} userEmail={userEmail} />
-            </SheetContent>
+            <SheetTrigger asChild className="md:hidden"><Button variant="ghost" size="icon"><Menu className="h-5 w-5" /></Button></SheetTrigger>
+            <SheetContent side="right" className="w-80 bg-white"><UserSidebar isSignedIn={isSignedIn} userEmail={userEmail} /></SheetContent>
           </Sheet>
         </div>
       </nav>
 
-      {/* HERO */}
-      <section className="relative overflow-hidden bg-slate-900 py-20 md:py-32">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 h-full w-full max-w-7xl opacity-20 pointer-events-none">
-           <div className="absolute top-10 right-10 h-96 w-96 rounded-full bg-indigo-500 blur-[100px]" />
-           <div className="absolute bottom-10 left-10 h-72 w-72 rounded-full bg-purple-500 blur-[100px]" />
-        </div>
-
-        <div className="container relative mx-auto px-4 text-center md:px-6">
-          <div className="inline-flex items-center rounded-full border border-indigo-500/30 bg-indigo-500/10 px-3 py-1 text-sm font-medium text-indigo-300 mb-6">
-            <Star className="mr-2 h-3.5 w-3.5" /> New Events Added Weekly
+      {/* HERO SECTION (Hidden when Signed In) */}
+      {!isSignedIn && (
+        <section className="relative overflow-hidden bg-slate-900 py-20 md:py-32">
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 h-full w-full max-w-7xl opacity-20 pointer-events-none">
+             <div className="absolute top-10 right-10 h-96 w-96 rounded-full bg-indigo-500 blur-[100px]" />
+             <div className="absolute bottom-10 left-10 h-72 w-72 rounded-full bg-purple-500 blur-[100px]" />
           </div>
-          <h1 className="mx-auto max-w-4xl text-4xl font-bold tracking-tight text-white md:text-6xl lg:text-7xl">
-            Discover World-Class <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">Workshops & Events</span>
-          </h1>
-          <p className="mx-auto mt-6 max-w-2xl text-lg text-slate-400">Join expert-led sessions on Design, Coding, and Product.</p>
-          <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-            <Button size="lg" className="h-12 px-8 bg-white text-slate-900 hover:bg-slate-100 font-semibold rounded-full">Explore Events</Button>
-            {isAdmin && (
-              <Link href="/admin">
-                 <Button size="lg" variant="outline" className="h-12 px-8 border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white rounded-full">Host an Event</Button>
+          <div className="container relative mx-auto px-4 text-center md:px-6">
+            <div className="inline-flex items-center rounded-full border border-indigo-500/30 bg-indigo-500/10 px-3 py-1 text-sm font-medium text-indigo-300 mb-6">
+              <Star className="mr-2 h-3.5 w-3.5" /> New Events Added Weekly
+            </div>
+            <h1 className="mx-auto max-w-4xl text-4xl font-bold tracking-tight text-white md:text-6xl lg:text-7xl">
+              Discover World-Class <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">Workshops & Events</span>
+            </h1>
+            <p className="mx-auto mt-6 max-w-2xl text-lg text-slate-400">Join expert-led sessions on Design, Coding, and Product.</p>
+            <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
+              <Button size="lg" className="h-12 px-8 bg-white text-slate-900 hover:bg-slate-100 font-semibold rounded-full">Explore Events</Button>
+              <Link href="/login?view=sign_up">
+                <Button size="lg" variant="outline" className="h-12 px-8 border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white rounded-full">Get Started</Button>
               </Link>
-            )}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* EVENTS GRID */}
-      <section className="container mx-auto px-4 py-20 md:px-6">
-        <div className="flex items-center justify-between mb-10">
-          <h2 className="text-3xl font-bold tracking-tight text-slate-900">Upcoming Events</h2>
-          <span className="text-sm font-medium text-slate-500">{events.length} events available</span>
+      <section className="container mx-auto px-4 py-12 md:px-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
+          <div>
+            <h2 className="text-3xl font-bold tracking-tight text-slate-900">{isSignedIn ? "Welcome Back" : "Upcoming Events"}</h2>
+            <p className="text-slate-500 mt-1">{isSignedIn ? "Here are the latest workshops for you." : "Browse our upcoming sessions."}</p>
+          </div>
+          
+          {/* 🔍 SEARCH BAR & FILTER */}
+          <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+             <div className="relative">
+                <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+                <input 
+                  type="text" 
+                  placeholder="Search events..." 
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 pr-4 py-2 w-full sm:w-64 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
+                />
+             </div>
+             <div className="relative">
+                <select 
+                  value={selectedCategory}
+                  onChange={(e) => setSelectedCategory(e.target.value)}
+                  className="pl-4 pr-8 py-2 w-full sm:w-auto rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white appearance-none cursor-pointer"
+                >
+                  {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+                </select>
+                <Filter className="absolute right-3 top-2.5 h-4 w-4 text-gray-400 pointer-events-none" />
+             </div>
+          </div>
         </div>
 
+        {/* LOADING STATE */}
         {isLoading ? (
            <div className="flex justify-center py-20"><p className="text-slate-400 animate-pulse">Loading amazing events...</p></div>
         ) : (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {events.map((event) => (
-              <div 
-                key={event.id}
-                onClick={() => setSelectedEvent(event)} 
-                className="group relative flex flex-col overflow-hidden rounded-2xl bg-white border border-slate-200 shadow-sm transition-all hover:shadow-xl hover:-translate-y-1 cursor-pointer"
-              >
-                {/* ADMIN EDIT BUTTON */}
-                {isAdmin && (
-                  <button 
-                    onClick={(e) => {
-                      e.stopPropagation() // Don't open modal
-                      router.push(`/admin/edit/${event.id}`)
-                    }}
-                    className="absolute top-3 right-3 z-20 p-2 bg-white/90 rounded-full hover:bg-indigo-50 text-indigo-600 shadow-sm border border-indigo-100 transition-colors"
-                    title="Edit Event"
-                  >
-                    <Edit className="h-4 w-4" />
-                  </button>
-                )}
-
-                {/* Event Image */}
-                <div className="relative h-48 w-full bg-slate-100 overflow-hidden">
-                   {event.image ? (
-                     <img src={event.image} alt={event.title} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                   ) : (
-                     <div className="h-full w-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white/50 text-4xl font-bold">
-                       {event.title.charAt(0)}
-                     </div>
-                   )}
-                   <div className="absolute top-4 left-4 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-slate-900 shadow-sm backdrop-blur-sm">
-                     {event.category}
-                   </div>
-                </div>
-
-                {/* Event Content */}
-                <div className="flex flex-1 flex-col p-6">
-                  <div className="flex items-center gap-2 text-xs font-medium text-indigo-600 mb-3">
-                    <Calendar className="h-3.5 w-3.5" />
-                    {event.date} • {event.time}
+            {filteredEvents.length > 0 ? (
+              filteredEvents.map((event) => (
+                <div 
+                  key={event.id}
+                  onClick={() => setSelectedEvent(event)} 
+                  className="group relative flex flex-col overflow-hidden rounded-2xl bg-white border border-slate-200 shadow-sm transition-all hover:shadow-xl hover:-translate-y-1 cursor-pointer"
+                >
+                  {isAdmin && (
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); router.push(`/admin/edit/${event.id}`) }}
+                      className="absolute top-3 right-3 z-20 p-2 bg-white/90 rounded-full hover:bg-indigo-50 text-indigo-600 shadow-sm border border-indigo-100 transition-colors"
+                      title="Edit Event"
+                    >
+                      <Edit className="h-4 w-4" />
+                    </button>
+                  )}
+                  <div className="relative h-48 w-full bg-slate-100 overflow-hidden">
+                     {event.image ? (
+                       <img src={event.image} alt={event.title} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                     ) : (
+                       <div className="h-full w-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white/50 text-4xl font-bold">{event.title.charAt(0)}</div>
+                     )}
+                     <div className="absolute top-4 left-4 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-slate-900 shadow-sm backdrop-blur-sm">{event.category}</div>
                   </div>
-                  <h3 className="text-xl font-bold text-slate-900 mb-2 line-clamp-2">{event.title}</h3>
-                  <p className="text-sm text-slate-500 line-clamp-2 mb-4 flex-1">{event.description}</p>
-                  <div className="flex items-center gap-3 border-t border-slate-100 pt-4 mb-5">
-                    <div className="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center overflow-hidden">
-                       {event.speakers && event.speakers[0]?.avatarUrl ? (
-                         <img src={event.speakers[0].avatarUrl} alt="" className="h-full w-full object-cover" />
-                       ) : (
-                         <User className="h-4 w-4 text-slate-500" />
-                       )}
+                  <div className="flex flex-1 flex-col p-6">
+                    <div className="flex items-center gap-2 text-xs font-medium text-indigo-600 mb-3"><Calendar className="h-3.5 w-3.5" />{event.date} • {event.time}</div>
+                    <h3 className="text-xl font-bold text-slate-900 mb-2 line-clamp-2">{event.title}</h3>
+                    <p className="text-sm text-slate-500 line-clamp-2 mb-4 flex-1">{event.description}</p>
+                    <div className="flex items-center gap-3 border-t border-slate-100 pt-4 mb-5">
+                      <div className="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center overflow-hidden">
+                         {event.speakers && event.speakers[0]?.avatarUrl ? <img src={event.speakers[0].avatarUrl} className="h-full w-full object-cover" /> : <User className="h-4 w-4 text-slate-500" />}
+                      </div>
+                      <div className="text-sm">
+                        <p className="font-medium text-slate-900">{event.speakers?.[0]?.name || "Guest Speaker"}</p>
+                        <p className="text-xs text-slate-500">{event.speakers?.[0]?.company || "Presenter"}</p>
+                      </div>
                     </div>
-                    <div className="text-sm">
-                      <p className="font-medium text-slate-900">{event.speakers?.[0]?.name || "Guest Speaker"}</p>
-                      <p className="text-xs text-slate-500">{event.speakers?.[0]?.company || "Presenter"}</p>
-                    </div>
+                    <Button className="w-full bg-slate-900 hover:bg-slate-800 text-white rounded-lg group-hover:bg-indigo-600 transition-colors">View Details <ArrowRight className="ml-2 h-4 w-4" /></Button>
                   </div>
-                  <Button className="w-full bg-slate-900 hover:bg-slate-800 text-white rounded-lg group-hover:bg-indigo-600 transition-colors">
-                    View Details <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
                 </div>
-              </div>
-            ))}
+              ))
+            ) : (
+              <div className="col-span-full text-center py-20 bg-white rounded-2xl border border-dashed border-gray-200">
+                <Search className="h-10 w-10 text-gray-300 mx-auto mb-3" />
+                <h3 className="text-lg font-medium text-gray-900">No events found</h3>
+                <p className="text-gray-500">Try adjusting your search or category filter.</p>
+                {/* 👇 FIXED: Changed variant="link" to variant="ghost" */}
+                <Button 
+                  variant="ghost" 
+                  onClick={() => { setSearchQuery(""); setSelectedCategory("All"); }} 
+                  className="mt-2 text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50"
+                >
+                  Clear filters
+                </Button>
+            </div>
+            )}
           </div>
         )}
       </section>
@@ -289,14 +281,7 @@ export default function ProWebinarHub() {
         </div>
       </footer>
 
-      {selectedEvent && (
-        <EventDetailModal
-          event={selectedEvent}
-          isOpen={!!selectedEvent}
-          onClose={() => setSelectedEvent(null)}
-          isSignedIn={isSignedIn}
-        />
-      )}
+      {selectedEvent && <EventDetailModal event={selectedEvent} isOpen={!!selectedEvent} onClose={() => setSelectedEvent(null)} isSignedIn={isSignedIn} />}
     </div>
   )
 }
