@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useRouter, usePathname } from "next/navigation"
-import { Bookmark, CalendarCheck, LogIn, Settings, User2 } from "lucide-react"
+import { Bookmark, CalendarCheck, LogIn, Settings, User2, Shield } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { supabase } from "@/lib/supabase"
@@ -19,6 +19,7 @@ export function UserSidebar(_props: UserSidebarProps = {}) {
   const pathname = usePathname()
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [userRole, setUserRole] = useState<string | null>(null)
 
   useEffect(() => {
     // Check auth state on mount
@@ -26,9 +27,23 @@ export function UserSidebar(_props: UserSidebarProps = {}) {
       try {
         const { data: { user } } = await supabase.auth.getUser()
         setUser(user)
+
+        // Fetch user profile to get role
+        if (user) {
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("role")
+            .eq("id", user.id)
+            .single()
+
+          setUserRole(profile?.role || null)
+        } else {
+          setUserRole(null)
+        }
       } catch (error) {
         console.error("Error checking auth:", error)
         setUser(null)
+        setUserRole(null)
       } finally {
         setIsLoading(false)
       }
@@ -39,8 +54,21 @@ export function UserSidebar(_props: UserSidebarProps = {}) {
     // Listen for auth state changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setUser(session?.user ?? null)
+
+      // Fetch role when auth state changes
+      if (session?.user) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("role")
+          .eq("id", session.user.id)
+          .single()
+
+        setUserRole(profile?.role || null)
+      } else {
+        setUserRole(null)
+      }
     })
 
     return () => subscription.unsubscribe()
@@ -100,6 +128,14 @@ export function UserSidebar(_props: UserSidebarProps = {}) {
           href="/favorites"
           active={pathname === "/favorites"}
         />
+        {userRole === "admin" && (
+          <SidebarLink
+            icon={<Shield className="h-4 w-4" />}
+            label="Admin Dashboard"
+            href="/admin"
+            active={pathname === "/admin"}
+          />
+        )}
         <SidebarLink icon={<Settings className="h-4 w-4" />} label="Preferences" />
         {!isAuthenticated && <SidebarLink icon={<LogIn className="h-4 w-4" />} label="Create an account" />}
       </div>
