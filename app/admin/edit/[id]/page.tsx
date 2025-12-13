@@ -5,13 +5,35 @@ import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { 
   ArrowLeft, Upload, Calendar, MapPin, 
-  User, Tag, Type, Loader2, LayoutDashboard, Image as ImageIcon, Save
+  User, Tag, Type, Loader2, LayoutDashboard, Image as ImageIcon, Save, Grid, CheckCircle2 
 } from "lucide-react"
 import { supabase } from "@/lib/supabase"
+import { cn } from "@/lib/utils"
 
-// Helper to unwrap params in Next.js 13+
+// 1. Define standard categories (Must match Create Page)
+const PREDEFINED_CATEGORIES = [
+  "Design",
+  "Engineering",
+  "Product Management",
+  "Marketing",
+  "Data Science",
+  "Business",
+  "Sales"
+]
+
+// 2. Stock Images (Must match Create Page)
+const STOCK_IMAGES = [
+  { id: "code", label: "Coding", url: "https://images.unsplash.com/photo-1542831371-29b0f74f9713?auto=format&fit=crop&w=1000&q=80" },
+  { id: "design", label: "Abstract Design", url: "https://images.unsplash.com/photo-1561070791-2526d30994b5?auto=format&fit=crop&w=1000&q=80" },
+  { id: "meeting", label: "Business Meeting", url: "https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&w=1000&q=80" },
+  { id: "conf", label: "Conference", url: "https://images.unsplash.com/photo-1544531586-fde5298cdd40?auto=format&fit=crop&w=1000&q=80" },
+  { id: "laptop", label: "Workplace", url: "https://images.unsplash.com/photo-1497215728101-856f4ea42174?auto=format&fit=crop&w=1000&q=80" },
+  { id: "neon", label: "Cyberpunk", url: "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&w=1000&q=80" },
+  { id: "data", label: "Data & Charts", url: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1000&q=80" },
+  { id: "team", label: "Teamwork", url: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1000&q=80" },
+]
+
 export default function EditEventPage({ params }: { params: Promise<{ id: string }> }) {
-  // Unwrap params using React.use()
   const resolvedParams = use(params)
   const eventId = resolvedParams.id
 
@@ -20,6 +42,10 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
   const [isAuthorized, setIsAuthorized] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   
+  // UI States
+  const [isCustomCategory, setIsCustomCategory] = useState(false)
+  const [imageMode, setImageMode] = useState<"upload" | "stock">("upload")
+
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -44,7 +70,6 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
   useEffect(() => {
     async function init() {
       try {
-        // A. Check Admin Status
         const { data: { user } } = await supabase.auth.getUser()
         if (!user) { router.push("/login"); return }
 
@@ -57,7 +82,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
         if (profile?.role !== "admin") { router.push("/"); return }
         setIsAuthorized(true)
 
-        // B. Fetch Event Details
+        // Fetch Event Details
         const { data: event, error } = await supabase
           .from("events")
           .select("*")
@@ -70,18 +95,22 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
           return
         }
 
-        // C. Populate Form
+        // Populate Form
         const dateObj = new Date(event.start_time)
         const dateStr = dateObj.toISOString().split('T')[0]
-        const timeStr = dateObj.toTimeString().slice(0, 5) // HH:MM
+        const timeStr = dateObj.toTimeString().slice(0, 5)
 
-        // Handle tags (array or string)
         let tagsStr = ""
         if (Array.isArray(event.tags)) tagsStr = event.tags.join(", ")
         else if (typeof event.tags === "string") tagsStr = event.tags
 
-        // Handle speakers (take first one)
         const speaker = event.speakers && event.speakers[0] ? event.speakers[0] : { name: "", title: "", company: "" }
+
+        // Check if category is standard or custom
+        const category = event.category || PREDEFINED_CATEGORIES[0]
+        if (!PREDEFINED_CATEGORIES.includes(category)) {
+           setIsCustomCategory(true)
+        }
 
         setFormData({
             title: event.title || "",
@@ -93,7 +122,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
             speakerTitle: speaker.title || event.speaker_title || "",
             speakerCompany: speaker.company || event.speaker_company || "",
             tags: tagsStr,
-            category: event.category || "",
+            category: category,
             location: event.location || "",
             level: event.level || "Beginner",
             status: event.status || "upcoming"
@@ -124,6 +153,22 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
     }
   }
 
+  const handleStockSelect = (url: string) => {
+    setImageFile(null)
+    setImagePreview(url)
+  }
+
+  const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value
+    if (value === "custom") {
+      setIsCustomCategory(true)
+      setFormData({ ...formData, category: "" })
+    } else {
+      setIsCustomCategory(false)
+      setFormData({ ...formData, category: value })
+    }
+  }
+
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
@@ -131,8 +176,13 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
     try {
       let imageUrl = currentImageUrl
 
-      // Upload new image if selected
-      if (imageFile) {
+      // 1. Handle Image Logic
+      // If user selected a stock image (preview changed, but no file)
+      if (imageMode === "stock" && imagePreview !== currentImageUrl) {
+         imageUrl = imagePreview
+      }
+      // If user uploaded a new file
+      else if (imageMode === "upload" && imageFile) {
         const fileExt = imageFile.name.split(".").pop()
         const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`
         
@@ -149,7 +199,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
         imageUrl = publicUrl
       }
 
-      // Prepare Data
+      // 2. Prepare Data
       const startDateTime = new Date(`${formData.startDate}T${formData.startTime}`)
       const tagsArray = formData.tags.split(",").map(tag => tag.trim()).filter(t => t.length > 0)
       const speakersArray = [{
@@ -158,7 +208,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
         company: formData.speakerCompany || undefined,
       }]
 
-      // Update Database
+      // 3. Update Database
       const { error: updateError } = await supabase
         .from("events")
         .update({
@@ -193,7 +243,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
   }
 
   if (isLoading) {
-    return <div className="min-h-screen flex items-center justify-center"><Loader2 className="animate-spin" /></div>
+    return <div className="min-h-screen flex items-center justify-center"><Loader2 className="animate-spin text-indigo-600" /></div>
   }
 
   if (!isAuthorized) return null
@@ -219,47 +269,108 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
           
           {/* LEFT COLUMN */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Details */}
+            
+            {/* Card 1: Details */}
             <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
                <div className="flex items-center gap-2 mb-4 text-amber-600">
                   <Type className="h-5 w-5" />
                   <h3 className="font-semibold text-gray-900">Event Details</h3>
                </div>
                <div className="space-y-4">
-                 <input required type="text" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} className="w-full border p-2 rounded" placeholder="Title" />
-                 <textarea required rows={5} value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} className="w-full border p-2 rounded" placeholder="Description" />
+                 <div>
+                    <label className="block text-sm font-medium mb-1">Title</label>
+                    <input required type="text" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} className="w-full border p-2 rounded focus:ring-2 focus:ring-amber-200 outline-none" />
+                 </div>
+                 <div>
+                    <label className="block text-sm font-medium mb-1">Description</label>
+                    <textarea required rows={5} value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} className="w-full border p-2 rounded focus:ring-2 focus:ring-amber-200 outline-none" />
+                 </div>
                  <div className="grid grid-cols-2 gap-4">
-                    <input required type="text" value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})} className="w-full border p-2 rounded" placeholder="Category" />
-                    <input type="text" value={formData.tags} onChange={e => setFormData({...formData, tags: e.target.value})} className="w-full border p-2 rounded" placeholder="Tags" />
+                    
+                    {/* UPDATED CATEGORY LOGIC */}
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Category</label>
+                      {!isCustomCategory ? (
+                        <select
+                          value={PREDEFINED_CATEGORIES.includes(formData.category) ? formData.category : "custom"}
+                          onChange={handleCategoryChange}
+                          className="w-full border p-2 rounded bg-white"
+                        >
+                          {PREDEFINED_CATEGORIES.map(cat => (
+                            <option key={cat} value={cat}>{cat}</option>
+                          ))}
+                          <option value="custom" className="font-bold text-amber-600">+ Custom...</option>
+                        </select>
+                      ) : (
+                        <div className="flex gap-2">
+                           <input
+                             required
+                             type="text"
+                             value={formData.category}
+                             onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                             className="w-full border p-2 rounded focus:ring-2 focus:ring-amber-200 outline-none"
+                             placeholder="Type category..."
+                           />
+                           <Button type="button" variant="outline" size="icon" onClick={() => setIsCustomCategory(false)}><ArrowLeft className="h-4 w-4" /></Button>
+                        </div>
+                      )}
+                    </div>
+                    {/* END CATEGORY LOGIC */}
+
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Tags</label>
+                      <input type="text" value={formData.tags} onChange={e => setFormData({...formData, tags: e.target.value})} className="w-full border p-2 rounded focus:ring-2 focus:ring-amber-200 outline-none" />
+                    </div>
                  </div>
                </div>
             </div>
 
-            {/* Time */}
+            {/* Card 2: Time */}
             <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
                <div className="flex items-center gap-2 mb-4 text-amber-600">
                   <Calendar className="h-5 w-5" />
                   <h3 className="font-semibold text-gray-900">Time & Place</h3>
                </div>
                <div className="grid grid-cols-2 gap-4">
-                  <input required type="date" value={formData.startDate} onChange={e => setFormData({...formData, startDate: e.target.value})} className="w-full border p-2 rounded" />
-                  <input required type="time" value={formData.startTime} onChange={e => setFormData({...formData, startTime: e.target.value})} className="w-full border p-2 rounded" />
-                  <input required type="number" value={formData.duration} onChange={e => setFormData({...formData, duration: e.target.value})} className="w-full border p-2 rounded" placeholder="Duration (min)" />
-                  <input type="text" value={formData.location} onChange={e => setFormData({...formData, location: e.target.value})} className="w-full border p-2 rounded" placeholder="Location" />
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Date</label>
+                    <input required type="date" value={formData.startDate} onChange={e => setFormData({...formData, startDate: e.target.value})} className="w-full border p-2 rounded" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Time</label>
+                    <input required type="time" value={formData.startTime} onChange={e => setFormData({...formData, startTime: e.target.value})} className="w-full border p-2 rounded" />
+                  </div>
+                  <div>
+                     <label className="block text-sm font-medium mb-1">Duration (min)</label>
+                     <input required type="number" value={formData.duration} onChange={e => setFormData({...formData, duration: e.target.value})} className="w-full border p-2 rounded" />
+                  </div>
+                  <div>
+                     <label className="block text-sm font-medium mb-1">Location</label>
+                     <input type="text" value={formData.location} onChange={e => setFormData({...formData, location: e.target.value})} className="w-full border p-2 rounded" />
+                  </div>
                </div>
             </div>
 
-             {/* Speaker */}
+             {/* Card 3: Speaker */}
              <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
                <div className="flex items-center gap-2 mb-4 text-amber-600">
                   <User className="h-5 w-5" />
                   <h3 className="font-semibold text-gray-900">Speaker</h3>
                </div>
                <div className="space-y-4">
-                 <input required type="text" value={formData.speakerName} onChange={e => setFormData({...formData, speakerName: e.target.value})} className="w-full border p-2 rounded" placeholder="Name" />
+                 <div>
+                    <label className="block text-sm font-medium mb-1">Name</label>
+                    <input required type="text" value={formData.speakerName} onChange={e => setFormData({...formData, speakerName: e.target.value})} className="w-full border p-2 rounded" />
+                 </div>
                  <div className="grid grid-cols-2 gap-4">
-                    <input required type="text" value={formData.speakerTitle} onChange={e => setFormData({...formData, speakerTitle: e.target.value})} className="w-full border p-2 rounded" placeholder="Job Title" />
-                    <input type="text" value={formData.speakerCompany} onChange={e => setFormData({...formData, speakerCompany: e.target.value})} className="w-full border p-2 rounded" placeholder="Company" />
+                    <div>
+                        <label className="block text-sm font-medium mb-1">Title</label>
+                        <input required type="text" value={formData.speakerTitle} onChange={e => setFormData({...formData, speakerTitle: e.target.value})} className="w-full border p-2 rounded" />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium mb-1">Company</label>
+                        <input type="text" value={formData.speakerCompany} onChange={e => setFormData({...formData, speakerCompany: e.target.value})} className="w-full border p-2 rounded" />
+                    </div>
                  </div>
                </div>
             </div>
@@ -267,11 +378,69 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
 
           {/* RIGHT COLUMN */}
           <div className="space-y-6">
+            
+            {/* Card 4: Event Poster (UPDATED WITH STOCK) */}
             <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-               <h3 className="font-semibold text-gray-900 mb-4">Event Poster</h3>
-               <div className="relative h-48 rounded border-2 border-dashed flex items-center justify-center overflow-hidden">
-                  {imagePreview ? <img src={imagePreview} className="w-full h-full object-cover" /> : <p className="text-gray-400">Upload Image</p>}
-                  <input type="file" accept="image/*" onChange={handleImageChange} className="absolute inset-0 opacity-0 cursor-pointer" />
+               <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2 text-amber-600">
+                     <ImageIcon className="h-5 w-5" />
+                     <h3 className="font-semibold text-gray-900">Event Poster</h3>
+                  </div>
+                   {/* Toggle Switch */}
+                   <div className="flex bg-gray-100 rounded-lg p-1">
+                     <button
+                       type="button"
+                       onClick={() => setImageMode("upload")}
+                       className={cn("px-3 py-1 text-xs font-medium rounded-md transition-all", imageMode === "upload" ? "bg-white shadow text-gray-900" : "text-gray-500 hover:text-gray-700")}
+                     >
+                       Upload
+                     </button>
+                     <button
+                       type="button"
+                       onClick={() => setImageMode("stock")}
+                       className={cn("px-3 py-1 text-xs font-medium rounded-md transition-all", imageMode === "stock" ? "bg-white shadow text-gray-900" : "text-gray-500 hover:text-gray-700")}
+                     >
+                       Stock
+                     </button>
+                  </div>
+               </div>
+
+               <div className="space-y-4">
+                   {/* PREVIEW BOX */}
+                  <div className="relative h-48 rounded border-2 border-dashed flex items-center justify-center overflow-hidden bg-gray-50">
+                     {imagePreview ? (
+                        <img src={imagePreview} className="w-full h-full object-cover" />
+                     ) : (
+                        <p className="text-gray-400">No Image Selected</p>
+                     )}
+                     
+                     {imageMode === "upload" && (
+                        <input type="file" accept="image/*" onChange={handleImageChange} className="absolute inset-0 opacity-0 cursor-pointer" />
+                     )}
+                  </div>
+
+                  {/* STOCK GRID */}
+                  {imageMode === "stock" && (
+                    <div className="grid grid-cols-2 gap-2 mt-4 max-h-48 overflow-y-auto pr-1">
+                      {STOCK_IMAGES.map((img) => (
+                        <div 
+                          key={img.id} 
+                          onClick={() => handleStockSelect(img.url)}
+                          className={cn(
+                            "relative aspect-video cursor-pointer rounded-md overflow-hidden border-2 transition-all hover:opacity-90",
+                            imagePreview === img.url ? "border-amber-600 ring-2 ring-amber-200" : "border-transparent"
+                          )}
+                        >
+                          <img src={img.url} alt={img.label} className="w-full h-full object-cover" />
+                          {imagePreview === img.url && (
+                             <div className="absolute inset-0 bg-amber-900/20 flex items-center justify-center">
+                                <CheckCircle2 className="text-white h-6 w-6 drop-shadow-md" />
+                             </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
                </div>
             </div>
 
