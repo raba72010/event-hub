@@ -169,7 +169,8 @@ export default function ProWebinarHub() {
             ) : (
               <>
                 <Link href="/login"><Button variant="ghost">Log in</Button></Link>
-                <Link href="/login?view=sign_up"><Button className="bg-slate-900 hover:bg-slate-800 text-white">Join the Club</Button></Link>
+                {/* 👇 UPDATED BUTTON TEXT */}
+                <Link href="/login?view=sign_up"><Button className="bg-slate-900 hover:bg-slate-800 text-white">Join Now</Button></Link>
               </>
             )}
           </div>
@@ -190,8 +191,9 @@ export default function ProWebinarHub() {
           </div>
 
           <div className="container relative mx-auto px-4 text-center md:px-6">
+            {/* 👇 UPDATED BADGE YEAR */}
             <div className="inline-flex items-center rounded-full border border-slate-700 bg-slate-800/50 px-3 py-1 text-sm font-medium text-slate-300 mb-6">
-              <Star className="mr-2 h-3.5 w-3.5 text-yellow-500" /> Connecting Professionals Since 2025
+              <Star className="mr-2 h-3.5 w-3.5 text-yellow-500" /> Connecting Professionals Since 2024
             </div>
             
             <h1 className="mx-auto max-w-5xl text-4xl font-bold tracking-tight text-white md:text-6xl lg:text-7xl leading-tight">
@@ -209,9 +211,10 @@ export default function ProWebinarHub() {
               <Button size="lg" className="h-12 px-8 bg-white text-slate-900 hover:bg-slate-100 font-semibold rounded-full" onClick={() => window.scrollTo({ top: 800, behavior: 'smooth' })}>
                 Explore Activities
               </Button>
+              {/* 👇 UPDATED BUTTON TEXT */}
               <Link href="/login?view=sign_up">
                 <Button size="lg" variant="outline" className="h-12 px-8 border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white rounded-full">
-                   Become a Member
+                   Join Now
                 </Button>
               </Link>
             </div>

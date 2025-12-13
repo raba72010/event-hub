@@ -10,6 +10,49 @@ import {
 } from "lucide-react"
 import { supabase } from "@/lib/supabase"
 import Link from "next/link"
+import { EventDetailModal } from "@/components/event-detail-modal" 
+
+// Helper to format raw DB event into the clean "Event" type our Modal expects
+function cleanEventData(row: any) {
+  if (!row) return null
+
+  const startTime = row.start_time ? new Date(row.start_time) : null
+  const date = startTime ? startTime.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : row.date || ""
+  const time = startTime ? startTime.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true }) : row.time || ""
+  
+  // Safe Tags Parsing
+  let tags: string[] = []
+  if (row.tags) {
+      if (typeof row.tags === "string") { try { tags = JSON.parse(row.tags) } catch { tags = row.tags.split(",").map((t: string) => t.trim()) } }
+      else if (Array.isArray(row.tags)) { tags = row.tags }
+  }
+  
+  // Safe Speakers Parsing
+  let speakers: any[] = []
+  if (row.speakers) {
+      if (typeof row.speakers === "string") { try { speakers = JSON.parse(row.speakers) } catch { } }
+      else if (Array.isArray(row.speakers)) { speakers = row.speakers }
+  }
+  // Fallback if legacy speaker columns exist
+  if (speakers.length === 0 && row.speaker_name) {
+      speakers = [{ name: row.speaker_name, title: row.speaker_title || "", company: row.speaker_company, avatarUrl: row.speaker_avatar_url }]
+  }
+
+  return {
+    ...row,
+    id: row.id?.toString() || "",
+    title: row.title || "",
+    category: row.category || "General",
+    date,
+    time,
+    duration: row.duration || "",
+    location: row.location || "Virtual",
+    description: row.description || "",
+    image: row.image,
+    tags, // Now guaranteed to be an array
+    speakers, // Now guaranteed to be an array
+  }
+}
 
 export default function ProfilePage() {
   const router = useRouter()
@@ -22,6 +65,9 @@ export default function ProfilePage() {
   const [profile, setProfile] = useState<any>({})
   const [registrations, setRegistrations] = useState<any[]>([])
   const [favorites, setFavorites] = useState<any[]>([])
+
+  // Modal State
+  const [selectedEvent, setSelectedEvent] = useState<any>(null)
 
   useEffect(() => {
     async function init() {
@@ -47,7 +93,7 @@ export default function ProfilePage() {
         .select("*, events(*)")
         .eq("user_id", user.id)
       
-      // Filter out any where event might be null (deleted events)
+      // Filter out null events and map them
       setRegistrations((regData || []).filter(r => r.events))
 
       // 3. Fetch Favorites
@@ -90,6 +136,12 @@ export default function ProfilePage() {
   const handleSignOut = async () => {
     await supabase.auth.signOut()
     router.push("/")
+  }
+
+  // 👇 NEW: Handle clicking a card to open Modal safely
+  const handleEventClick = (rawEvent: any) => {
+    const cleanEvent = cleanEventData(rawEvent) // Clean it first!
+    setSelectedEvent(cleanEvent)
   }
 
   if (isLoading) {
@@ -164,7 +216,12 @@ export default function ProfilePage() {
                 ) : (
                   <div className="grid gap-4">
                     {registrations.map(({ events: event }) => (
-                      <EventRow key={event.id} event={event} type="ticket" />
+                      <EventRow 
+                        key={event.id} 
+                        event={event} 
+                        type="ticket" 
+                        onClick={() => handleEventClick(event)} 
+                      />
                     ))}
                   </div>
                 )}
@@ -180,7 +237,12 @@ export default function ProfilePage() {
                 ) : (
                   <div className="grid gap-4">
                     {favorites.map(({ events: event }) => (
-                      <EventRow key={event.id} event={event} type="favorite" />
+                      <EventRow 
+                        key={event.id} 
+                        event={event} 
+                        type="favorite" 
+                        onClick={() => handleEventClick(event)} 
+                      />
                     ))}
                   </div>
                 )}
@@ -244,11 +306,20 @@ export default function ProfilePage() {
           </main>
         </div>
       </div>
+
+      {selectedEvent && (
+        <EventDetailModal
+          event={selectedEvent}
+          isOpen={!!selectedEvent}
+          onClose={() => setSelectedEvent(null)}
+          isSignedIn={true}
+        />
+      )}
     </div>
   )
 }
 
-// Sub-components for clean code
+// Sub-components
 function EmptyState({ title, message }: { title: string, message: string }) {
   return (
     <div className="text-center py-12 bg-white rounded-xl border border-dashed border-gray-200">
@@ -261,18 +332,16 @@ function EmptyState({ title, message }: { title: string, message: string }) {
   )
 }
 
-function EventRow({ event, type }: { event: any, type: "ticket" | "favorite" }) {
-  const router = useRouter()
-  // Format date
-  const date = new Date(event.start_time).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-  const time = new Date(event.start_time).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
+function EventRow({ event, type, onClick }: { event: any, type: "ticket" | "favorite", onClick: () => void }) {
+  const dateObj = new Date(event.start_time)
+  const date = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+  const time = dateObj.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
 
   return (
     <div 
-      onClick={() => router.push('/')} // Ideally this opens the modal, but for now we go home
+      onClick={onClick}
       className="group flex flex-col md:flex-row gap-4 bg-white p-4 rounded-xl border border-gray-200 hover:border-indigo-300 hover:shadow-md transition-all cursor-pointer"
     >
-      {/* Image */}
       <div className="h-32 md:h-24 w-full md:w-40 bg-slate-100 rounded-lg overflow-hidden shrink-0">
         {event.image ? (
           <img src={event.image} className="w-full h-full object-cover" />
@@ -283,7 +352,6 @@ function EventRow({ event, type }: { event: any, type: "ticket" | "favorite" }) 
         )}
       </div>
       
-      {/* Content */}
       <div className="flex-1">
          <div className="flex justify-between items-start">
             <span className="text-xs font-semibold text-indigo-600 bg-indigo-50 px-2 py-1 rounded-full mb-2 inline-block">
