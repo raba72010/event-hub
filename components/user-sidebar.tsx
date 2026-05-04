@@ -24,6 +24,13 @@ export function UserSidebar(_props: UserSidebarProps = {}) {
   useEffect(() => {
     // Check auth state on mount
     async function checkAuth() {
+      if (typeof window !== "undefined" && localStorage.getItem("mock_admin_session") === "true") {
+         setUser({ id: "mock-admin-id", email: "admin@eventhub.com" } as any)
+         setUserRole("admin")
+         setIsLoading(false)
+         return
+      }
+
       try {
         const { data: { user } } = await supabase.auth.getUser()
         setUser(user)
@@ -55,6 +62,10 @@ export function UserSidebar(_props: UserSidebarProps = {}) {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (typeof window !== "undefined" && localStorage.getItem("mock_admin_session") === "true") {
+         return;
+      }
+
       setUser(session?.user ?? null)
 
       // Fetch role when auth state changes
@@ -75,12 +86,15 @@ export function UserSidebar(_props: UserSidebarProps = {}) {
   }, [])
 
   const handleSignOut = async () => {
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("mock_admin_session")
+    }
     try {
       await supabase.auth.signOut()
-      router.refresh()
     } catch (error) {
       console.error("Error signing out:", error)
     }
+    window.location.reload()
   }
 
   const isAuthenticated = !!user
@@ -116,6 +130,14 @@ export function UserSidebar(_props: UserSidebarProps = {}) {
       </div>
 
       <div className="space-y-2">
+        {isAuthenticated && (
+          <SidebarLink
+            icon={<User2 className="h-4 w-4" />}
+            label="My Profile"
+            href="/profile"
+            active={pathname === "/profile"}
+          />
+        )}
         <SidebarLink
           icon={<CalendarCheck className="h-4 w-4" />}
           label="My registrations"

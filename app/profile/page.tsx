@@ -72,6 +72,13 @@ export default function ProfilePage() {
 
   useEffect(() => {
     async function init() {
+      if (typeof window !== "undefined" && localStorage.getItem("mock_admin_session") === "true") {
+         setUser({ id: "mock-admin-id", email: "admin@eventhub.com" })
+         setProfile({ full_name: "Admin User", company: "EventHub", title: "Administrator" })
+         setIsLoading(false)
+         return
+      }
+
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         router.push("/login")

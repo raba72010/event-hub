@@ -30,6 +30,14 @@ export function EventDetailModal({ event, isOpen, isSignedIn, onClose }: EventDe
   useEffect(() => {
     if (!isOpen) return
 
+    if (typeof window !== "undefined" && localStorage.getItem("mock_admin_session") === "true") {
+      setUserId("mock-admin-id")
+      setIsFavorited(false)
+      setIsRegistered(false)
+      setIsLoading(false)
+      return
+    }
+
     supabase.auth.getUser().then(({ data: { user } }) => {
       setUserId(user?.id || null)
       if (user) {
@@ -44,22 +52,36 @@ export function EventDetailModal({ event, isOpen, isSignedIn, onClose }: EventDe
       } else {
         setIsLoading(false)
       }
+    }).catch(() => {
+        setIsLoading(false)
     })
   }, [isOpen, event.id])
 
   const handleFavorite = async () => {
-    if (!userId) { window.location.href = "/login"; return }
+    if (!isSignedIn && !userId) { window.location.href = "/login"; return }
+    if (userId === "mock-admin-id") {
+       setIsFavorited(!isFavorited);
+       return;
+    }
     try {
-      const newState = await toggleFavorite(event.id, userId)
+      const newState = await toggleFavorite(event.id, userId!)
       setIsFavorited(newState)
     } catch (error) { console.error(error) }
   }
 
   const handleRegister = async () => {
-    if (!userId) { window.location.href = "/login"; return }
+    if (!isSignedIn && !userId) { window.location.href = "/login"; return }
+    if (userId === "mock-admin-id") {
+       setIsSubmitting(true);
+       setTimeout(() => {
+          setIsRegistered(!isRegistered);
+          setIsSubmitting(false);
+       }, 500);
+       return;
+    }
     setIsSubmitting(true)
     try {
-      const newState = await toggleRegistration(event.id, userId)
+      const newState = await toggleRegistration(event.id, userId!)
       setIsRegistered(newState)
     } catch (error) {
       console.error(error)

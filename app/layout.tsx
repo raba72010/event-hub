@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { cookies } from "next/headers";
+import { I18nProvider } from "@/lib/i18n-context";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -21,17 +23,33 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+import { Navbar } from "@/components/navbar";
+import { Footer } from "@/components/footer";
+
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const cookieStore = await cookies();
+  const localeCookie = cookieStore.get("NEXT_LOCALE");
+  const locale = (localeCookie?.value === "en" ? "en" : "ar") as "en" | "ar";
+  const dir = locale === "ar" ? "rtl" : "ltr";
+  
+  const dict = await import(`@/messages/${locale}.json`).then((module) => module.default);
+
   return (
-    <html lang="en">
+    <html lang={locale} dir={dir}>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col bg-slate-50`}
       >
-        {children}
+        <I18nProvider initialLocale={locale} dictionary={dict}>
+          <Navbar />
+          <main className="flex-1">
+            {children}
+          </main>
+          <Footer />
+        </I18nProvider>
       </body>
     </html>
   );
