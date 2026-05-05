@@ -1,14 +1,16 @@
 "use client"
 
 import { usePathname } from "next/navigation"
+import { useTranslation } from "@/lib/i18n-context"
 
 export function Footer() {
   const pathname = usePathname()
-  
+  const { locale } = useTranslation()
+
   if (pathname === '/login') return null;
 
   return (
-    <footer className="border-t border-slate-200 bg-white py-12" dir="rtl">
+    <footer className="border-t border-slate-200 bg-white py-12" dir={locale === "ar" ? "rtl" : "ltr"}>
       <div className="container mx-auto px-4 md:px-6 flex flex-col md:flex-row justify-between items-center gap-6">
          <div className="flex items-center gap-2">
            <div className="h-6 w-6 rounded-full bg-slate-900 text-white flex items-center justify-center text-[10px] font-bold">SPC</div>

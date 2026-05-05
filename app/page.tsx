@@ -11,8 +11,10 @@ import { UserSidebar } from "@/components/user-sidebar"
 import { EventDetailModal } from "@/components/event-detail-modal"
 import { cn } from "@/lib/utils"
 import type { Event } from "@/types/event"
+import { useTranslation } from "@/lib/i18n-context"
 
 export default function ProWebinarHub() {
+  const { t, locale } = useTranslation()
   const router = useRouter()
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null)
   const [isSignedIn, setIsSignedIn] = useState(false)
@@ -149,14 +151,14 @@ export default function ProWebinarHub() {
   }
 
   const handleDelete = async (eventId: string) => {
-    if (!confirm("Are you sure you want to delete this event?")) return
+    if (!confirm(t("home.delete_confirm"))) return
     try {
         const { error } = await supabase.from("events").delete().eq("id", eventId)
         if (error) throw error
         setEvents(prev => prev.filter(e => e.id !== eventId))
-        alert("Event deleted.")
+        alert(t("home.event_deleted"))
     } catch (error: any) {
-        alert("Error deleting event: " + error.message)
+        alert(t("home.delete_error") + error.message)
     }
   }
 
@@ -175,7 +177,7 @@ export default function ProWebinarHub() {
   const pastEvents = filteredEvents.filter(e => e.status === "on-demand")
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans text-slate-900">
+    <div className="min-h-screen bg-slate-50 font-sans text-slate-900" dir={locale === "ar" ? "rtl" : "ltr"}>
       
       {/* NAVIGATION */}
 
@@ -190,24 +192,24 @@ export default function ProWebinarHub() {
 
           <div className="container relative mx-auto px-4 text-center md:px-6">
             <div className="inline-flex items-center rounded-full border border-slate-700 bg-slate-800/50 px-3 py-1 text-sm font-medium text-slate-300 mb-6">
-              <Star className="mr-2 h-3.5 w-3.5 text-yellow-500" /> Connecting Professionals Since 2024
+              <Star className="me-2 h-3.5 w-3.5 text-yellow-500" /> {t("home.badge")}
             </div>
             <h1 className="mx-auto max-w-5xl text-4xl font-bold tracking-tight text-white md:text-6xl lg:text-7xl leading-tight">
-               نادي المحترفين السودانيين <br />
+              {t("home.hero_title_ar")} <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-white to-red-400">
-                Sudanese Professionals Club
+                {t("home.hero_subtitle")}
               </span>
             </h1>
             <p className="mx-auto mt-6 max-w-2xl text-lg text-slate-400">
-               Empowering professionals, fostering innovation, and building a stronger community through knowledge sharing.
+              {t("home.hero_desc")}
             </p>
             <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
               <Button size="lg" className="h-12 px-8 bg-white text-slate-900 hover:bg-slate-100 font-semibold rounded-full" onClick={() => window.scrollTo({ top: 800, behavior: 'smooth' })}>
-                Explore Activities
+                {t("home.explore")}
               </Button>
               <Link href="/login?view=sign_up">
                 <Button size="lg" variant="outline" className="h-12 px-8 border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white rounded-full">
-                   Join Now
+                  {t("home.join")}
                 </Button>
               </Link>
             </div>
@@ -221,22 +223,22 @@ export default function ProWebinarHub() {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
           <div>
             <h2 className="text-3xl font-bold tracking-tight text-slate-900">
-               {isSignedIn ? "Welcome Back, Professional" : "Upcoming Activities"}
+              {isSignedIn ? t("home.welcome_back") : t("home.upcoming")}
             </h2>
             <p className="text-slate-500 mt-1">
-               {isSignedIn ? "Here are the latest workshops tailored for you." : "Join our upcoming sessions and events."}
+              {isSignedIn ? t("home.welcome_back_desc") : t("home.upcoming_desc")}
             </p>
           </div>
           
           <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
              <div className="relative">
-                <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
-                <input 
-                  type="text" 
-                  placeholder="Search activities..." 
+                <Search className="absolute start-3 top-2.5 h-4 w-4 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder={t("home.search_placeholder")}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 pr-4 py-2 w-full sm:w-64 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white"
+                  className="ps-10 pe-4 py-2 w-full sm:w-64 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white"
                 />
              </div>
              <div className="relative">
@@ -254,7 +256,7 @@ export default function ProWebinarHub() {
 
         {/* LOADING STATE */}
         {isLoading ? (
-           <div className="flex justify-center py-20"><p className="text-slate-400 animate-pulse">Loading SPC events...</p></div>
+           <div className="flex justify-center py-20"><p className="text-slate-400 animate-pulse">{t("home.loading")}</p></div>
         ) : (
           <div className="space-y-16">
             
@@ -263,14 +265,15 @@ export default function ProWebinarHub() {
               {upcomingEvents.length > 0 ? (
                 <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                   {upcomingEvents.map((event) => (
-                    <EventCard 
-                      key={event.id} 
-                      event={event} 
-                      isAdmin={isAdmin} 
+                    <EventCard
+                      key={event.id}
+                      event={event}
+                      isAdmin={isAdmin}
                       isRegistered={registeredEventIds.has(event.id)}
-                      router={router} 
-                      onDelete={handleDelete} 
-                      onSelect={() => setSelectedEvent(event)} 
+                      router={router}
+                      onDelete={handleDelete}
+                      onSelect={() => setSelectedEvent(event)}
+                      t={t}
                     />
                   ))}
                 </div>
@@ -278,9 +281,9 @@ export default function ProWebinarHub() {
                  (pastEvents.length === 0 || searchQuery !== "") && (
                     <div className="text-center py-20 bg-white rounded-2xl border border-dashed border-gray-200">
                       <Search className="h-10 w-10 text-gray-300 mx-auto mb-3" />
-                      <h3 className="text-lg font-medium text-gray-900">No upcoming activities found</h3>
-                      <p className="text-gray-500">Try adjusting your search or check back later.</p>
-                      <Button variant="ghost" onClick={() => { setSearchQuery(""); setSelectedCategory("All"); }} className="mt-2 text-emerald-600">Clear filters</Button>
+                      <h3 className="text-lg font-medium text-gray-900">{t("home.no_upcoming")}</h3>
+                      <p className="text-gray-500">{t("home.no_upcoming_desc")}</p>
+                      <Button variant="ghost" onClick={() => { setSearchQuery(""); setSelectedCategory("All"); }} className="mt-2 text-emerald-600">{t("home.clear_filters")}</Button>
                     </div>
                  )
               )}
@@ -290,20 +293,21 @@ export default function ProWebinarHub() {
             {pastEvents.length > 0 && (
               <div className="relative">
                  <div className="flex items-center gap-4 mb-6">
-                    <h2 className="text-2xl font-bold text-slate-800">Past Events</h2>
+                    <h2 className="text-2xl font-bold text-slate-800">{t("home.past_events")}</h2>
                     <div className="h-px flex-1 bg-slate-200" />
                  </div>
                  <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 opacity-80 hover:opacity-100 transition-opacity">
                     {pastEvents.map((event) => (
-                      <EventCard 
-                        key={event.id} 
-                        event={event} 
-                        isAdmin={isAdmin} 
+                      <EventCard
+                        key={event.id}
+                        event={event}
+                        isAdmin={isAdmin}
                         isRegistered={registeredEventIds.has(event.id)}
-                        router={router} 
-                        onDelete={handleDelete} 
-                        onSelect={() => setSelectedEvent(event)} 
+                        router={router}
+                        onDelete={handleDelete}
+                        onSelect={() => setSelectedEvent(event)}
                         isPast={true}
+                        t={t}
                       />
                     ))}
                  </div>
@@ -321,7 +325,7 @@ export default function ProWebinarHub() {
   )
 }
 
-function EventCard({ event, isAdmin, isRegistered, router, onDelete, onSelect, isPast = false }: any) {
+function EventCard({ event, isAdmin, isRegistered, router, onDelete, onSelect, isPast = false, t }: any) {
   return (
     <div 
       onClick={onSelect} 
@@ -380,24 +384,24 @@ function EventCard({ event, isAdmin, isRegistered, router, onDelete, onSelect, i
              {event.speakers && event.speakers[0]?.avatarUrl ? <img src={event.speakers[0].avatarUrl} className="h-full w-full object-cover" /> : <User className="h-4 w-4 text-slate-500" />}
           </div>
           <div className="text-sm">
-            <p className="font-medium text-slate-900">{event.speakers?.[0]?.name || "Guest Speaker"}</p>
+            <p className="font-medium text-slate-900">{event.speakers?.[0]?.name || t("home.guest_speaker")}</p>
           </div>
         </div>
         
         {/* 👇 UPDATED BUTTON LOGIC */}
         {isRegistered ? (
-          <Button 
+          <Button
             variant="outline"
             className="w-full rounded-lg border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 cursor-default"
           >
-            <Check className="mr-2 h-4 w-4" /> Registered
+            <Check className="me-2 h-4 w-4" /> {t("home.registered")}
           </Button>
         ) : (
-          <Button 
+          <Button
             variant={isPast ? "outline" : "default"}
             className={cn("w-full rounded-lg transition-colors", !isPast && "bg-slate-900 hover:bg-slate-800 text-white group-hover:bg-emerald-600")}
           >
-            {isPast ? "View Details" : "Register Now"} <ArrowRight className="ml-2 h-4 w-4" />
+            {isPast ? t("home.view_details") : t("home.register_now")} <ArrowRight className="ms-2 h-4 w-4" />
           </Button>
         )}
       </div>

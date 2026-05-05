@@ -1,7 +1,6 @@
 "use client"
 
-import React, { createContext, useContext, useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
+import React, { createContext, useContext, useState } from "react"
 
 type Locale = "en" | "ar"
 
@@ -13,32 +12,33 @@ interface I18nContextType {
 
 const I18nContext = createContext<I18nContextType | null>(null)
 
-export function I18nProvider({ 
-  children, 
-  initialLocale, 
-  dictionary 
-}: { 
+export function I18nProvider({
+  children,
+  initialLocale,
+  dictionary
+}: {
   children: React.ReactNode
   initialLocale: Locale
-  dictionary: any 
+  dictionary: any
 }) {
-  const router = useRouter()
   const [locale, setLocaleState] = useState<Locale>(initialLocale)
+  const [dict, setDict] = useState<any>(dictionary)
 
   const t = (key: string): string => {
     const keys = key.split(".")
-    let value = dictionary
+    let value = dict
     for (const k of keys) {
-      if (value[k] === undefined) return key // fallback to key
+      if (value[k] === undefined) return key
       value = value[k]
     }
     return value as string
   }
 
-  const setLocale = (newLocale: Locale) => {
+  const setLocale = async (newLocale: Locale) => {
+    const newDict = await import(`@/messages/${newLocale}.json`).then(m => m.default)
     setLocaleState(newLocale)
+    setDict(newDict)
     document.cookie = `NEXT_LOCALE=${newLocale}; path=/; max-age=31536000`
-    window.location.reload()
   }
 
   return (

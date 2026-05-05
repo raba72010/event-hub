@@ -4,26 +4,22 @@ import { useState, useEffect } from "react"
 import { useRouter, usePathname } from "next/navigation"
 import Link from "next/link"
 import { supabase } from "@/lib/supabase"
-import { 
-  LayoutDashboard, 
-  CalendarDays, 
-  Users, 
+import { useTranslation } from "@/lib/i18n-context"
+import {
+  LayoutDashboard,
+  CalendarDays,
+  Users,
   Settings,
   LogOut,
   Loader2
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
-const ADMIN_LINKS = [
-  { name: "لوحة القيادة", href: "/admin", icon: LayoutDashboard },
-  { name: "الفعاليات", href: "/admin/events", icon: CalendarDays },
-  { name: "الأعضاء", href: "/admin/members", icon: Users },
-  { name: "الإعدادات", href: "/admin/settings", icon: Settings },
-]
-
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const pathname = usePathname()
+  const { t, locale } = useTranslation()
+  const isRtl = locale === "ar"
   const [isLoading, setIsLoading] = useState(true)
   const [isAdmin, setIsAdmin] = useState(false)
 
@@ -76,7 +72,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   if (isLoading) {
     return (
-      <div className="min-h-[80vh] bg-slate-50 flex items-center justify-center" dir="rtl">
+      <div className="min-h-[80vh] bg-slate-50 flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-emerald-600" />
       </div>
     )
@@ -84,48 +80,57 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   if (!isAdmin) return null
 
+  const ADMIN_LINKS = [
+    { key: "nav_dashboard", href: "/admin", icon: LayoutDashboard },
+    { key: "nav_events", href: "/admin/events", icon: CalendarDays },
+    { key: "nav_members", href: "/admin/members", icon: Users },
+    { key: "nav_settings", href: "/admin/settings", icon: Settings },
+  ]
+
   return (
-    <div className="min-h-screen bg-slate-50 flex" dir="rtl">
+    <div className="min-h-screen bg-slate-50 flex" dir={isRtl ? "rtl" : "ltr"}>
       {/* Sidebar Navigation */}
-      <aside className="w-64 bg-slate-900 text-slate-300 hidden md:flex flex-col border-l border-slate-800">
+      <aside className={cn(
+        "w-64 bg-slate-900 text-slate-300 hidden md:flex flex-col",
+        isRtl ? "border-r border-slate-800" : "border-r border-slate-800"
+      )}>
         <div className="p-6">
-          <h2 className="text-xl font-bold text-white tracking-tight">بوابة الإدارة</h2>
-          <p className="text-xs text-slate-400 mt-1">نادي المحترفين السودانيين</p>
+          <h2 className="text-xl font-bold text-white tracking-tight">{t("admin.portal_title")}</h2>
+          <p className="text-xs text-slate-400 mt-1">{t("admin.portal_subtitle")}</p>
         </div>
-        
+
         <nav className="flex-1 px-4 space-y-2 mt-4">
           {ADMIN_LINKS.map((link) => {
             const Icon = link.icon
-            // Exact match for dashboard, startswith for others
-            const isActive = link.href === "/admin" 
-                ? pathname === "/admin" 
+            const isActive = link.href === "/admin"
+                ? pathname === "/admin"
                 : pathname.startsWith(link.href)
-                
+
             return (
               <Link
                 key={link.href}
                 href={link.href}
                 className={cn(
                   "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
-                  isActive 
-                    ? "bg-emerald-600 text-white shadow-sm" 
+                  isActive
+                    ? "bg-emerald-600 text-white shadow-sm"
                     : "hover:bg-slate-800 hover:text-white"
                 )}
               >
                 <Icon className="h-4 w-4 shrink-0" />
-                {link.name}
+                {t(`admin.${link.key}`)}
               </Link>
             )
           })}
         </nav>
 
         <div className="p-4 border-t border-slate-800">
-          <button 
+          <button
             onClick={handleSignOut}
             className="flex w-full items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-colors"
           >
             <LogOut className="h-4 w-4 shrink-0" />
-            تسجيل الخروج
+            {t("admin.sign_out")}
           </button>
         </div>
       </aside>
@@ -134,12 +139,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <main className="flex-1 overflow-x-hidden min-h-screen">
         {/* Mobile Header */}
         <header className="md:hidden bg-slate-900 text-white p-4 flex items-center justify-between">
-            <h2 className="text-lg font-bold">بوابة الإدارة</h2>
-            <Link href="/admin" className="text-sm text-emerald-400">لوحة القيادة</Link>
+          <h2 className="text-lg font-bold">{t("admin.mobile_title")}</h2>
+          <Link href="/admin" className="text-sm text-emerald-400">{t("admin.mobile_link")}</Link>
         </header>
 
         <div className="p-4 md:p-8 max-w-6xl mx-auto">
-            {children}
+          {children}
         </div>
       </main>
     </div>

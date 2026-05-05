@@ -117,17 +117,17 @@ export function Navbar() {
         </div>
 
         {/* USER CONTROLS & LANGUAGE SWITCHER */}
-        <div className="hidden md:flex items-center gap-4" dir={locale === "ar" ? "ltr" : "rtl"}>
+        <div className="hidden md:flex items-center gap-4">
           
           <div className="h-6 w-px bg-slate-200 mx-2" />
           
-          <Button 
-            variant="ghost" 
-            size="sm" 
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={() => setLocale(locale === "ar" ? "en" : "ar")}
             className="text-slate-600 hover:text-slate-900"
           >
-            <Globe className="h-4 w-4 mr-2" />
+            <Globe className="h-4 w-4 me-2" />
             {locale === "ar" ? "English" : "عربي"}
           </Button>
 
