@@ -185,32 +185,38 @@ export default function ProWebinarHub() {
 
       {/* HERO SECTION */}
       {!isSignedIn && (
-        <section className="relative overflow-hidden bg-slate-950 py-20 md:py-32">
-          {/* Animated gradient mesh */}
+        <section className="relative overflow-hidden bg-slate-950 py-24 md:py-40 min-h-[600px] flex items-center">
+          {/* Background video */}
+          <video
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="auto"
+            aria-hidden="true"
+            className="absolute inset-0 w-full h-full object-cover"
+          >
+            <source src="/hero.mp4" type="video/mp4" />
+          </video>
+          {/* Dark gradient overlay for text readability */}
+          <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-b from-slate-950/70 via-slate-950/55 to-slate-950/85" />
+          {/* Subtle accent glow */}
           <div aria-hidden="true" className="absolute inset-0 pointer-events-none">
-            <div className="absolute -top-1/4 -left-1/4 h-[600px] w-[600px] rounded-full bg-emerald-500/30 blur-[120px] animate-mesh-1" />
-            <div className="absolute top-1/3 -right-1/4 h-[500px] w-[500px] rounded-full bg-indigo-500/25 blur-[120px] animate-mesh-2" />
-            <div className="absolute -bottom-1/4 left-1/3 h-[450px] w-[450px] rounded-full bg-rose-500/20 blur-[120px] animate-mesh-3" />
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[300px] w-[300px] rounded-full bg-amber-400/10 blur-[100px] animate-mesh-1" />
+            <div className="absolute top-1/4 left-1/2 -translate-x-1/2 h-[500px] w-[500px] rounded-full bg-emerald-500/12 blur-[140px] animate-mesh-1" />
+            <div className="absolute bottom-0 right-1/4 h-[400px] w-[400px] rounded-full bg-cyan-500/10 blur-[120px] animate-mesh-2" />
           </div>
-          {/* Subtle grain overlay */}
-          <div aria-hidden="true" className="absolute inset-0 opacity-[0.04] mix-blend-overlay pointer-events-none"
-            style={{
-              backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")",
-            }}
-          />
 
           <div className="container relative mx-auto px-4 text-center md:px-6">
-            <div className="inline-flex items-center rounded-full border border-slate-700 bg-slate-800/50 px-3 py-1 text-sm font-medium text-slate-300 mb-6">
-              <Star className="me-2 h-3.5 w-3.5 text-yellow-500" /> {t("home.badge")}
+            <div className="inline-flex items-center rounded-full border border-white/15 bg-white/5 backdrop-blur-md px-4 py-1.5 text-sm font-medium text-slate-200 mb-6 shadow-lg">
+              <Star className="me-2 h-3.5 w-3.5 text-yellow-400" /> {t("home.badge")}
             </div>
-            <h1 className="mx-auto max-w-5xl text-4xl font-bold tracking-tight text-white md:text-6xl lg:text-7xl leading-tight">
+            <h1 className="mx-auto max-w-5xl text-4xl font-bold tracking-tight text-white md:text-6xl lg:text-7xl leading-tight drop-shadow-2xl">
               {t("home.hero_title_ar")} <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-white to-red-400">
                 {t("home.hero_subtitle")}
               </span>
             </h1>
-            <p className="mx-auto mt-6 max-w-2xl text-lg text-slate-400">
+            <p className="mx-auto mt-6 max-w-2xl text-lg text-slate-200/90 drop-shadow-lg">
               {t("home.hero_desc")}
             </p>
             <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
