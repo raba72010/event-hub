@@ -39,12 +39,43 @@
   --color-primary-foreground: var(--primary-foreground);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-tajawal);
   --font-mono: var(--font-geist-mono);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-tajawal), system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+/* Animated hero gradient mesh */
+@keyframes mesh-drift-1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33%      { transform: translate(8%, -6%) scale(1.1); }
+  66%      { transform: translate(-6%, 4%) scale(0.95); }
+}
+@keyframes mesh-drift-2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33%      { transform: translate(-10%, 8%) scale(1.05); }
+  66%      { transform: translate(6%, -10%) scale(1.1); }
+}
+@keyframes mesh-drift-3 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50%      { transform: translate(4%, 6%) scale(1.15); }
+}
+
+.animate-mesh-1 { animation: mesh-drift-1 18s ease-in-out infinite; }
+.animate-mesh-2 { animation: mesh-drift-2 22s ease-in-out infinite; }
+.animate-mesh-3 { animation: mesh-drift-3 26s ease-in-out infinite; }
+
+/* Skeleton shimmer */
+@keyframes skeleton-shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.skeleton {
+  background: linear-gradient(90deg, #e2e8f0 0%, #f1f5f9 50%, #e2e8f0 100%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.6s ease-in-out infinite;
 }

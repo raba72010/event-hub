@@ -8,7 +8,7 @@ import { EventDetailModal } from "@/components/event-detail-modal"
 import { EventCard } from "@/components/event-card"
 import type { Event } from "@/types/event"
 import { useTranslation } from "@/lib/i18n-context"
-import { Loader2 } from "lucide-react"
+import { EventCardSkeletonGrid } from "@/components/event-card-skeleton"
 
 export default function FavoritesPage() {
   const router = useRouter()
@@ -93,9 +93,7 @@ export default function FavoritesPage() {
         </div>
 
         {isLoading ? (
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="animate-spin h-6 w-6 text-emerald-600" />
-          </div>
+          <EventCardSkeletonGrid count={4} />
         ) : events.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 rounded-2xl border border-gray-200 bg-white">
             <p className="text-gray-600 text-center">{t("favorites.empty")}</p>

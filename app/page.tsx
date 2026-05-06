@@ -12,6 +12,7 @@ import { EventDetailModal } from "@/components/event-detail-modal"
 import { cn } from "@/lib/utils"
 import type { Event } from "@/types/event"
 import { useTranslation } from "@/lib/i18n-context"
+import { EventCardSkeletonGrid } from "@/components/event-card-skeleton"
 
 export default function ProWebinarHub() {
   const { t, locale } = useTranslation()
@@ -184,11 +185,20 @@ export default function ProWebinarHub() {
 
       {/* HERO SECTION */}
       {!isSignedIn && (
-        <section className="relative overflow-hidden bg-slate-900 py-20 md:py-32">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 h-full w-full max-w-7xl opacity-20 pointer-events-none">
-             <div className="absolute top-10 right-10 h-96 w-96 rounded-full bg-emerald-500 blur-[100px]" />
-             <div className="absolute bottom-10 left-10 h-72 w-72 rounded-full bg-red-500 blur-[100px]" />
+        <section className="relative overflow-hidden bg-slate-950 py-20 md:py-32">
+          {/* Animated gradient mesh */}
+          <div aria-hidden="true" className="absolute inset-0 pointer-events-none">
+            <div className="absolute -top-1/4 -left-1/4 h-[600px] w-[600px] rounded-full bg-emerald-500/30 blur-[120px] animate-mesh-1" />
+            <div className="absolute top-1/3 -right-1/4 h-[500px] w-[500px] rounded-full bg-indigo-500/25 blur-[120px] animate-mesh-2" />
+            <div className="absolute -bottom-1/4 left-1/3 h-[450px] w-[450px] rounded-full bg-rose-500/20 blur-[120px] animate-mesh-3" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[300px] w-[300px] rounded-full bg-amber-400/10 blur-[100px] animate-mesh-1" />
           </div>
+          {/* Subtle grain overlay */}
+          <div aria-hidden="true" className="absolute inset-0 opacity-[0.04] mix-blend-overlay pointer-events-none"
+            style={{
+              backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")",
+            }}
+          />
 
           <div className="container relative mx-auto px-4 text-center md:px-6">
             <div className="inline-flex items-center rounded-full border border-slate-700 bg-slate-800/50 px-3 py-1 text-sm font-medium text-slate-300 mb-6">
@@ -256,7 +266,7 @@ export default function ProWebinarHub() {
 
         {/* LOADING STATE */}
         {isLoading ? (
-           <div className="flex justify-center py-20"><p className="text-slate-400 animate-pulse">{t("home.loading")}</p></div>
+          <EventCardSkeletonGrid count={6} />
         ) : (
           <div className="space-y-16">
             
