@@ -199,7 +199,7 @@ export default function ProWebinarHub() {
             <source src="/hero.mp4" type="video/mp4" />
           </video>
           {/* Dark gradient overlay for text readability */}
-          <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-b from-slate-950/70 via-slate-950/55 to-slate-950/85" />
+          <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-b from-slate-950/55 via-slate-950/35 to-slate-950/75" />
           {/* Subtle accent glow */}
           <div aria-hidden="true" className="absolute inset-0 pointer-events-none">
             <div className="absolute top-1/4 left-1/2 -translate-x-1/2 h-[500px] w-[500px] rounded-full bg-emerald-500/12 blur-[140px] animate-mesh-1" />
