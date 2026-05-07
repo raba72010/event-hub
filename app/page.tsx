@@ -178,16 +178,17 @@ export default function ProWebinarHub() {
     return matchesSearch && matchesCategory
   })
 
-  // ✂️ SPLIT EVENTS
-  const upcomingEvents = filteredEvents.filter(e => e.status !== "on-demand")
-  const pastEvents = filteredEvents.filter(e => e.status === "on-demand")
-
   // Dashboard derived data
   const myUpcomingEvents = events.filter(e => registeredEventIds.has(e.id) && e.status !== "on-demand")
   const attendedCount    = events.filter(e => registeredEventIds.has(e.id) && e.status === "on-demand").length
 
   // Next upcoming event (events array is already sorted by start_time asc)
   const nextEvent = events.find(e => e.status !== "on-demand")
+
+  // ✂️ SPLIT EVENTS — for the Browse grid, signed-in users skip events already shown in "Your Upcoming"
+  const myUpcomingIds = new Set(myUpcomingEvents.slice(0, 3).map(e => e.id))
+  const upcomingEvents = filteredEvents.filter(e => e.status !== "on-demand" && (!isSignedIn || !myUpcomingIds.has(e.id)))
+  const pastEvents = filteredEvents.filter(e => e.status === "on-demand")
 
   const scrollToEvents = () => {
     eventsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
@@ -203,6 +204,7 @@ export default function ProWebinarHub() {
           upcomingCount={myUpcomingEvents.length}
           attendedCount={attendedCount}
           savedCount={savedCount}
+          isAdmin={isAdmin}
         />
       )}
 
@@ -291,10 +293,10 @@ export default function ProWebinarHub() {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
           <div>
             <h2 className="text-3xl font-bold tracking-tight text-slate-900">
-              {isSignedIn ? t("home.welcome_back") : t("home.upcoming")}
+              {isSignedIn ? t("home.dash.discover_title") : t("home.upcoming")}
             </h2>
             <p className="text-slate-500 mt-1">
-              {isSignedIn ? t("home.welcome_back_desc") : t("home.upcoming_desc")}
+              {isSignedIn ? t("home.dash.discover_desc") : t("home.upcoming_desc")}
             </p>
           </div>
 

@@ -95,10 +95,13 @@
       "stat_upcoming": "القادمة",
       "stat_attended": "حضرتها",
       "stat_saved": "محفوظة",
+      "admin_btn": "لوحة الإدارة",
       "my_upcoming": "فعالياتك القادمة",
       "my_upcoming_desc": "الفعاليات التي سجلت فيها.",
       "my_upcoming_empty": "لم تسجل في أي فعالية بعد.",
-      "browse_below": "تصفح الفعاليات أدناه"
+      "browse_below": "تصفح الفعاليات أدناه",
+      "discover_title": "استكشف المزيد من الجلسات",
+      "discover_desc": "فعاليات قادمة أخرى في النادي."
     }
   },
   "communities": {

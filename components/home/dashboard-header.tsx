@@ -1,16 +1,25 @@
 "use client"
 
+import Link from "next/link"
+import { Button } from "@/components/ui/button"
 import { useTranslation } from "@/lib/i18n-context"
-import { Calendar, CheckCircle2, Heart } from "lucide-react"
+import { Calendar, CheckCircle2, Heart, Shield } from "lucide-react"
 
 interface DashboardHeaderProps {
   fullName?: string | null
   upcomingCount: number
   attendedCount: number
   savedCount: number
+  isAdmin?: boolean
 }
 
-export function DashboardHeader({ fullName, upcomingCount, attendedCount, savedCount }: DashboardHeaderProps) {
+export function DashboardHeader({
+  fullName,
+  upcomingCount,
+  attendedCount,
+  savedCount,
+  isAdmin = false,
+}: DashboardHeaderProps) {
   const { t } = useTranslation()
   const firstName = fullName?.trim().split(" ")[0]
 
@@ -29,6 +38,17 @@ export function DashboardHeader({ fullName, upcomingCount, attendedCount, savedC
               {firstName ? `${t("home.dash.greeting")}، ${firstName}` : t("home.dash.greeting_default")}
             </h1>
             <p className="mt-2 text-base md:text-lg text-slate-400">{t("home.dash.subtitle")}</p>
+
+            {isAdmin && (
+              <div className="mt-5">
+                <Link href="/admin">
+                  <Button size="sm" className="bg-indigo-500 hover:bg-indigo-400 text-white gap-2 rounded-full shadow-lg">
+                    <Shield className="h-4 w-4" />
+                    {t("home.dash.admin_btn")}
+                  </Button>
+                </Link>
+              </div>
+            )}
           </div>
 
           <div className="flex flex-wrap gap-3">

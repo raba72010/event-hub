@@ -95,10 +95,13 @@
       "stat_upcoming": "Upcoming",
       "stat_attended": "Attended",
       "stat_saved": "Saved",
+      "admin_btn": "Admin Dashboard",
       "my_upcoming": "Your Upcoming Events",
       "my_upcoming_desc": "Events you've registered for.",
       "my_upcoming_empty": "You haven't registered for any events yet.",
-      "browse_below": "Browse events below"
+      "browse_below": "Browse events below",
+      "discover_title": "Discover More Sessions",
+      "discover_desc": "Other upcoming events from across the Club."
     }
   },
   "communities": {
