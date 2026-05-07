@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Menu, User, ChevronDown } from "lucide-react"
+import { Menu, User, Shield } from "lucide-react"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { UserSidebar } from "@/components/user-sidebar"
 import { supabase } from "@/lib/supabase"
@@ -134,14 +134,26 @@ export function Navbar() {
           <div className="h-6 w-px bg-slate-200 mx-2" />
           {isSignedIn ? (
             <>
-              {isAdmin && <Link href="/admin"><Button variant="ghost" className="text-indigo-600 font-medium">{t('nav.admin')}</Button></Link>}
-              <Link href="/profile"><Button variant="ghost" className="text-slate-600 hover:text-slate-900"><User className="h-4 w-4 mr-2" />{t('nav.profile')}</Button></Link>
-              <Button onClick={handleLogout} variant="outline" size="sm" className="border-slate-300 ml-2">{t('nav.logout')}</Button>
+              {isAdmin && (
+                <Link href="/admin">
+                  <Button variant="ghost" className="text-indigo-600 font-medium gap-2">
+                    <Shield className="h-4 w-4" />
+                    {t('nav.admin')}
+                  </Button>
+                </Link>
+              )}
+              <Link href="/profile">
+                <Button variant="ghost" className="text-slate-600 hover:text-slate-900 gap-2">
+                  <User className="h-4 w-4" />
+                  {t('nav.profile')}
+                </Button>
+              </Link>
+              <Button onClick={handleLogout} variant="outline" size="sm" className="border-slate-300 ms-2">{t('nav.logout')}</Button>
             </>
           ) : (
             <>
               <Link href="/login"><Button variant="ghost">{t('nav.login')}</Button></Link>
-              <Link href="/login?view=sign_up"><Button className="bg-slate-900 hover:bg-slate-800 text-white ml-2">{t('nav.join')}</Button></Link>
+              <Link href="/login?view=sign_up"><Button className="bg-slate-900 hover:bg-slate-800 text-white ms-2">{t('nav.join')}</Button></Link>
             </>
           )}
         </div>
@@ -149,12 +161,12 @@ export function Navbar() {
         {/* MOBILE MENU */}
         <Sheet>
           <SheetTrigger asChild className="md:hidden"><Button variant="ghost" size="icon"><Menu className="h-5 w-5" /></Button></SheetTrigger>
-          <SheetContent side="right" className="w-80 bg-white overflow-y-auto">
-            <div className="flex flex-col gap-6 mt-6" dir="rtl">
+          <SheetContent side={locale === "ar" ? "left" : "right"} className="w-80 bg-white overflow-y-auto" dir={locale === "ar" ? "rtl" : "ltr"}>
+            <div className="flex flex-col gap-6 mt-6">
               <div className="flex flex-col gap-3 border-b border-slate-100 pb-6">
                 {NAV_PATHS.map(link => (
-                  <Link 
-                    key={link.href} 
+                  <Link
+                    key={link.href}
                     href={link.href}
                     className={cn("text-lg font-medium", pathname === link.href ? "text-emerald-600" : "text-slate-700")}
                   >
@@ -162,9 +174,19 @@ export function Navbar() {
                   </Link>
                 ))}
               </div>
-              <div dir="ltr">
-                <UserSidebar isSignedIn={isSignedIn} userEmail={userEmail} />
-              </div>
+
+              {/* Language switcher (mobile) */}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setLocale(locale === "ar" ? "en" : "ar")}
+                className="self-start gap-2"
+              >
+                <Globe className="h-4 w-4" />
+                {locale === "ar" ? "English" : "عربي"}
+              </Button>
+
+              <UserSidebar isSignedIn={isSignedIn} userEmail={userEmail} />
             </div>
           </SheetContent>
         </Sheet>

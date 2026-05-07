@@ -1,48 +1,45 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useRouter, usePathname } from "next/navigation"
+import { usePathname } from "next/navigation"
 import { Bookmark, CalendarCheck, LogIn, Settings, User2, Shield } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { supabase } from "@/lib/supabase"
+import { useTranslation } from "@/lib/i18n-context"
 import type { User } from "@supabase/supabase-js"
 
 interface UserSidebarProps {
-  // Props kept for backward compatibility but component manages its own auth state
   isSignedIn?: boolean
   userEmail?: string | null
 }
 
 export function UserSidebar(_props: UserSidebarProps = {}) {
-  const router = useRouter()
   const pathname = usePathname()
+  const { t } = useTranslation()
   const [user, setUser] = useState<User | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
+  const [, setIsLoading] = useState(true)
   const [userRole, setUserRole] = useState<string | null>(null)
 
   useEffect(() => {
-    // Check auth state on mount
     async function checkAuth() {
       if (typeof window !== "undefined" && localStorage.getItem("mock_admin_session") === "true") {
-         setUser({ id: "mock-admin-id", email: "admin@eventhub.com" } as any)
-         setUserRole("admin")
-         setIsLoading(false)
-         return
+        setUser({ id: "mock-admin-id", email: "admin@spc.sd" } as any)
+        setUserRole("admin")
+        setIsLoading(false)
+        return
       }
 
       try {
         const { data: { user } } = await supabase.auth.getUser()
         setUser(user)
 
-        // Fetch user profile to get role
         if (user) {
           const { data: profile } = await supabase
             .from("profiles")
             .select("role")
             .eq("id", user.id)
             .single()
-
           setUserRole(profile?.role || null)
         } else {
           setUserRole(null)
@@ -58,24 +55,15 @@ export function UserSidebar(_props: UserSidebarProps = {}) {
 
     checkAuth()
 
-    // Listen for auth state changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      if (typeof window !== "undefined" && localStorage.getItem("mock_admin_session") === "true") {
-         return;
-      }
-
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (typeof window !== "undefined" && localStorage.getItem("mock_admin_session") === "true") return
       setUser(session?.user ?? null)
-
-      // Fetch role when auth state changes
       if (session?.user) {
         const { data: profile } = await supabase
           .from("profiles")
           .select("role")
           .eq("id", session.user.id)
           .single()
-
         setUserRole(profile?.role || null)
       } else {
         setUserRole(null)
@@ -86,9 +74,7 @@ export function UserSidebar(_props: UserSidebarProps = {}) {
   }, [])
 
   const handleSignOut = async () => {
-    if (typeof window !== "undefined") {
-      localStorage.removeItem("mock_admin_session")
-    }
+    if (typeof window !== "undefined") localStorage.removeItem("mock_admin_session")
     try {
       await supabase.auth.signOut()
     } catch (error) {
@@ -106,25 +92,21 @@ export function UserSidebar(_props: UserSidebarProps = {}) {
         <div className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-800 text-white">
           <User2 className="h-5 w-5" />
         </div>
-        <div className="flex-1">
+        <div className="flex-1 min-w-0">
           <p className="text-sm font-semibold text-gray-900">
-            {isAuthenticated ? "Welcome back" : "Join the hub"}
+            {isAuthenticated ? t("sidebar.welcome_back") : t("sidebar.join_hub")}
           </p>
-          <p className="text-xs text-gray-600">
-            {isAuthenticated
-              ? email || "See your schedule and saved sessions."
-              : "Sign in to sync your registrations."}
+          <p className="text-xs text-gray-600 truncate">
+            {isAuthenticated ? (email || t("sidebar.see_schedule")) : t("sidebar.sign_in_sync")}
           </p>
         </div>
         {isAuthenticated ? (
           <Button variant="outline" size="sm" onClick={handleSignOut}>
-            Sign Out
+            {t("sidebar.sign_out")}
           </Button>
         ) : (
           <Link href="/login">
-            <Button variant="outline" size="sm">
-              Sign In
-            </Button>
+            <Button variant="outline" size="sm">{t("sidebar.sign_in")}</Button>
           </Link>
         )}
       </div>
@@ -133,40 +115,40 @@ export function UserSidebar(_props: UserSidebarProps = {}) {
         {isAuthenticated && (
           <SidebarLink
             icon={<User2 className="h-4 w-4" />}
-            label="My Profile"
+            label={t("sidebar.my_profile")}
             href="/profile"
             active={pathname === "/profile"}
           />
         )}
         <SidebarLink
           icon={<CalendarCheck className="h-4 w-4" />}
-          label="My registrations"
+          label={t("sidebar.my_registrations")}
           href="/registrations"
           active={pathname === "/registrations"}
         />
         <SidebarLink
           icon={<Bookmark className="h-4 w-4" />}
-          label="Saved sessions"
+          label={t("sidebar.saved_sessions")}
           href="/favorites"
           active={pathname === "/favorites"}
         />
         {userRole === "admin" && (
           <SidebarLink
             icon={<Shield className="h-4 w-4" />}
-            label="Admin Dashboard"
+            label={t("sidebar.admin_dashboard")}
             href="/admin"
-            active={pathname === "/admin"}
+            active={pathname?.startsWith("/admin") || false}
           />
         )}
-        <SidebarLink icon={<Settings className="h-4 w-4" />} label="Preferences" />
-        {!isAuthenticated && <SidebarLink icon={<LogIn className="h-4 w-4" />} label="Create an account" />}
+        <SidebarLink icon={<Settings className="h-4 w-4" />} label={t("sidebar.preferences")} />
+        {!isAuthenticated && <SidebarLink icon={<LogIn className="h-4 w-4" />} label={t("sidebar.create_account")} href="/login?view=sign_up" />}
       </div>
 
       <div className="rounded-xl border border-gray-200 bg-gray-50 p-4 text-sm text-gray-600">
-        <p className="font-medium text-gray-900">Need help?</p>
-        <p className="mt-1">Chat with our team to find the right session for your goals.</p>
-        <Button className="mt-3 w-full" variant="ghost" size="sm">
-          Talk to us
+        <p className="font-medium text-gray-900">{t("sidebar.need_help")}</p>
+        <p className="mt-1">{t("sidebar.chat_team")}</p>
+        <Button className="mt-3 w-full" variant="ghost" size="sm" asChild>
+          <Link href="/contact">{t("sidebar.talk_to_us")}</Link>
         </Button>
       </div>
     </div>
@@ -174,15 +156,9 @@ export function UserSidebar(_props: UserSidebarProps = {}) {
 }
 
 function SidebarLink({
-  icon,
-  label,
-  href,
-  active = false,
+  icon, label, href, active = false,
 }: {
-  icon: React.ReactNode
-  label: string
-  href?: string
-  active?: boolean
+  icon: React.ReactNode; label: string; href?: string; active?: boolean
 }) {
   const content = (
     <>
@@ -190,25 +166,9 @@ function SidebarLink({
       <span>{label}</span>
     </>
   )
-
   const className = `flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition active:scale-95 ${
-    active
-      ? "bg-gray-100 font-semibold text-gray-900"
-      : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+    active ? "bg-gray-100 font-semibold text-gray-900" : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
   }`
-
-  if (href) {
-    return (
-      <Link href={href} className={className}>
-        {content}
-      </Link>
-    )
-  }
-
-  return (
-    <button type="button" className={className}>
-      {content}
-    </button>
-  )
+  if (href) return <Link href={href} className={className}>{content}</Link>
+  return <button type="button" className={className}>{content}</button>
 }
-

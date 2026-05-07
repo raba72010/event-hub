@@ -137,12 +137,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
       {/* Main Content Area */}
       <main className="flex-1 overflow-x-hidden min-h-screen">
-        {/* Mobile Header */}
-        <header className="md:hidden bg-slate-900 text-white p-4 flex items-center justify-between">
-          <h2 className="text-lg font-bold">{t("admin.mobile_title")}</h2>
-          <Link href="/admin" className="text-sm text-emerald-400">{t("admin.mobile_link")}</Link>
-        </header>
-
         <div className="p-4 md:p-8 max-w-6xl mx-auto">
           {children}
         </div>

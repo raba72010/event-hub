@@ -127,19 +127,6 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-slate-50" dir={isRtl ? "rtl" : "ltr"}>
-      {/* Header */}
-      <header className="sticky top-0 z-40 w-full border-b border-gray-200 bg-white/80 backdrop-blur-md">
-        <div className="container mx-auto flex h-16 items-center justify-between px-4 md:px-6">
-          <Link href="/" className="flex items-center gap-3">
-            <img src="/logo.png" alt="SPC" className="h-8 w-8 object-contain rounded-full bg-white" />
-            <span className="font-bold text-slate-900 hidden sm:block">نادي المحترفين السودانيين</span>
-          </Link>
-          <Button variant="ghost" size="sm" onClick={() => router.push("/")}>
-            <BackIcon className="h-4 w-4 me-2" /> {t("profile.back")}
-          </Button>
-        </div>
-      </header>
-
       <div className="container mx-auto px-4 py-8 max-w-5xl">
         <div className="flex flex-col md:flex-row gap-8">
 

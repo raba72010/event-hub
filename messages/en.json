@@ -198,6 +198,23 @@
     "have_account": "Already a member? Sign In",
     "email_confirm": "Please check your email to confirm your account."
   },
+  "sidebar": {
+    "welcome_back": "Welcome back",
+    "join_hub": "Join the Club",
+    "see_schedule": "See your schedule and saved sessions.",
+    "sign_in_sync": "Sign in to sync your registrations.",
+    "sign_in": "Sign In",
+    "sign_out": "Sign Out",
+    "my_profile": "My Profile",
+    "my_registrations": "My Registrations",
+    "saved_sessions": "Saved Sessions",
+    "admin_dashboard": "Admin Dashboard",
+    "preferences": "Preferences",
+    "create_account": "Create an Account",
+    "need_help": "Need help?",
+    "chat_team": "Chat with our team to find the right session for your goals.",
+    "talk_to_us": "Talk to us"
+  },
   "favorites": {
     "title": "Saved Sessions",
     "subtitle": "Events you've favourited",
