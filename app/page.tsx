@@ -205,10 +205,13 @@ export default function ProWebinarHub() {
       {/* ====================== SIGNED-OUT: HERO ====================== */}
       {!isSignedIn && (
         <section className="relative overflow-hidden bg-slate-950 py-24 md:py-40 min-h-[600px] flex items-center">
-          <video autoPlay muted loop playsInline preload="auto" aria-hidden="true" className="absolute inset-0 w-full h-full object-cover">
-            <source src="/hero.mp4" type="video/mp4" />
-          </video>
-          <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-b from-slate-950/55 via-slate-950/35 to-slate-950/75" />
+          <img
+            src="/spc/ana-sudan-panel.jpg"
+            alt=""
+            aria-hidden="true"
+            className="absolute inset-0 w-full h-full object-cover object-center"
+          />
+          <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-b from-slate-950/70 via-slate-950/55 to-slate-950/90" />
           <div aria-hidden="true" className="absolute inset-0 pointer-events-none">
             <div className="absolute top-1/4 left-1/2 -translate-x-1/2 h-[500px] w-[500px] rounded-full bg-emerald-500/12 blur-[140px] animate-mesh-1" />
             <div className="absolute bottom-0 right-1/4 h-[400px] w-[400px] rounded-full bg-cyan-500/10 blur-[120px] animate-mesh-2" />
