@@ -12,6 +12,7 @@ import type { Event } from "@/types/event"
 import { useTranslation } from "@/lib/i18n-context"
 import { EventCardSkeletonGrid } from "@/components/event-card-skeleton"
 import { AnnouncementBanner } from "@/components/home/announcement-banner"
+import { NextEventCard } from "@/components/home/next-event-card"
 import { PastHighlights } from "@/components/home/past-highlights"
 import { CommunitiesPreview } from "@/components/home/communities-preview"
 import { DashboardHeader } from "@/components/home/dashboard-header"
@@ -185,6 +186,9 @@ export default function ProWebinarHub() {
   const myUpcomingEvents = events.filter(e => registeredEventIds.has(e.id) && e.status !== "on-demand")
   const attendedCount    = events.filter(e => registeredEventIds.has(e.id) && e.status === "on-demand").length
 
+  // Next upcoming event (events array is already sorted by start_time asc)
+  const nextEvent = events.find(e => e.status !== "on-demand")
+
   const scrollToEvents = () => {
     eventsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
   }
@@ -244,8 +248,16 @@ export default function ProWebinarHub() {
         </section>
       )}
 
-      {/* ====================== SIGNED-OUT: ANNOUNCEMENT FROM THE COUNCIL ====================== */}
-      {!isSignedIn && <AnnouncementBanner />}
+      {/* ====================== SIGNED-OUT: NEXT SESSION (or fallback announcement) ====================== */}
+      {!isSignedIn && nextEvent && (
+        <NextEventCard
+          event={nextEvent}
+          isSignedIn={isSignedIn}
+          isRegistered={registeredEventIds.has(nextEvent.id)}
+          onSelect={setSelectedEvent}
+        />
+      )}
+      {!isSignedIn && !nextEvent && !isLoading && <AnnouncementBanner />}
 
       {/* ====================== SIGNED-OUT: PAST HIGHLIGHTS (real SPC sessions) ====================== */}
       {!isSignedIn && <PastHighlights />}

@@ -48,6 +48,12 @@
       "subtitle": "A selection of recent sessions hosted by the Club.",
       "view_archive": "Browse all sessions"
     },
+    "next_event": {
+      "eyebrow": "Next Session",
+      "view_details": "View Details",
+      "register": "Register",
+      "sign_in_to_register": "Sign in to register"
+    },
     "stats": {
       "members": "Active Members",
       "events_held": "Events Held",
