@@ -11,10 +11,8 @@ import { cn } from "@/lib/utils"
 import type { Event } from "@/types/event"
 import { useTranslation } from "@/lib/i18n-context"
 import { EventCardSkeletonGrid } from "@/components/event-card-skeleton"
-import { StatsBand } from "@/components/home/stats-band"
-import { FeatureGrid } from "@/components/home/feature-grid"
+import { AnnouncementBanner } from "@/components/home/announcement-banner"
 import { CommunitiesPreview } from "@/components/home/communities-preview"
-import { FinalCta } from "@/components/home/final-cta"
 import { DashboardHeader } from "@/components/home/dashboard-header"
 
 export default function ProWebinarHub() {
@@ -232,9 +230,9 @@ export default function ProWebinarHub() {
               <Button size="lg" className="h-12 px-8 bg-white text-slate-900 hover:bg-slate-100 font-semibold rounded-full" onClick={scrollToEvents}>
                 {t("home.explore")}
               </Button>
-              <Link href="/login?view=sign_up">
+              <Link href="/about">
                 <Button size="lg" variant="outline" className="h-12 px-8 border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white rounded-full">
-                  {t("home.join")}
+                  {t("home.about_club")}
                 </Button>
               </Link>
             </div>
@@ -242,8 +240,8 @@ export default function ProWebinarHub() {
         </section>
       )}
 
-      {/* ====================== SIGNED-OUT: STATS BAND ====================== */}
-      {!isSignedIn && <StatsBand />}
+      {/* ====================== SIGNED-OUT: ANNOUNCEMENT FROM THE COUNCIL ====================== */}
+      {!isSignedIn && <AnnouncementBanner />}
 
       {/* ====================== SIGNED-IN: YOUR REGISTERED EVENTS ====================== */}
       {isSignedIn && !isLoading && myUpcomingEvents.length > 0 && (
@@ -268,9 +266,6 @@ export default function ProWebinarHub() {
           </div>
         </section>
       )}
-
-      {/* ====================== SIGNED-OUT: WHAT WE OFFER ====================== */}
-      {!isSignedIn && <FeatureGrid />}
 
       {/* ====================== BROWSE EVENTS (BOTH) ====================== */}
       <div ref={eventsRef} id="events" className="container mx-auto px-4 py-12 md:py-16 md:px-6">
@@ -370,9 +365,6 @@ export default function ProWebinarHub() {
 
       {/* ====================== SIGNED-OUT: COMMUNITIES PREVIEW ====================== */}
       {!isSignedIn && <CommunitiesPreview />}
-
-      {/* ====================== SIGNED-OUT: FINAL CTA ====================== */}
-      {!isSignedIn && <FinalCta />}
 
       {selectedEvent && <EventDetailModal event={selectedEvent} isOpen={!!selectedEvent} onClose={() => setSelectedEvent(null)} isSignedIn={isSignedIn} />}
     </div>
