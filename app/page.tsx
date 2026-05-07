@@ -1,18 +1,21 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Menu, User, Calendar, Clock, MapPin, ArrowRight, Star, X, Edit, Search, Filter, Trash2, History, Users, Check } from "lucide-react"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { User, Calendar, ArrowRight, Star, Edit, Search, Filter, Trash2, History, Users, Check } from "lucide-react"
 import { supabase } from "@/lib/supabase"
-import { UserSidebar } from "@/components/user-sidebar"
 import { EventDetailModal } from "@/components/event-detail-modal"
 import { cn } from "@/lib/utils"
 import type { Event } from "@/types/event"
 import { useTranslation } from "@/lib/i18n-context"
 import { EventCardSkeletonGrid } from "@/components/event-card-skeleton"
+import { StatsBand } from "@/components/home/stats-band"
+import { FeatureGrid } from "@/components/home/feature-grid"
+import { CommunitiesPreview } from "@/components/home/communities-preview"
+import { FinalCta } from "@/components/home/final-cta"
+import { DashboardHeader } from "@/components/home/dashboard-header"
 
 export default function ProWebinarHub() {
   const { t, locale } = useTranslation()
@@ -26,10 +29,15 @@ export default function ProWebinarHub() {
   
   // 🔍 NEW: Store user's registrations
   const [registeredEventIds, setRegisteredEventIds] = useState<Set<string>>(new Set())
+  const [fullName, setFullName] = useState<string | null>(null)
+  const [savedCount, setSavedCount] = useState(0)
 
   // 🔍 Search & Filter States
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("All")
+
+  // Scroll target for hero CTA
+  const eventsRef = useRef<HTMLDivElement>(null)
 
   // 1. AUTH LOGIC + ADMIN CHECK + FETCH REGISTRATIONS
   useEffect(() => {
@@ -48,25 +56,22 @@ export default function ProWebinarHub() {
         setUserEmail(session?.user?.email || null)
 
         if (session?.user) {
-          // Check Admin
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('role')
-            .eq('id', session.user.id)
-            .single()
-          
-          if (profile?.role === 'admin') setIsAdmin(true)
+          // Parallel fetch: profile, registrations, favorites
+          const [profileRes, regsRes, favsRes] = await Promise.all([
+            supabase.from('profiles').select('role, full_name').eq('id', session.user.id).single(),
+            supabase.from('registrations').select('event_id').eq('user_id', session.user.id),
+            supabase.from('favorites').select('id', { count: 'exact', head: true }).eq('user_id', session.user.id),
+          ])
 
-          // Fetch User Registrations
-          const { data: registrations } = await supabase
-            .from('registrations')
-            .select('event_id')
-            .eq('user_id', session.user.id)
-          
-          if (registrations) {
-             const ids = new Set(registrations.map((r: any) => r.event_id))
-             setRegisteredEventIds(ids)
+          if (profileRes.data?.role === 'admin') setIsAdmin(true)
+          if (profileRes.data?.full_name) setFullName(profileRes.data.full_name)
+
+          if (regsRes.data) {
+            const ids = new Set(regsRes.data.map((r: any) => r.event_id))
+            setRegisteredEventIds(ids)
           }
+
+          setSavedCount(favsRes.count || 0)
         }
       } catch (e) {
         console.warn("Supabase auth failed (likely expired). Using guest mode.");
@@ -177,30 +182,34 @@ export default function ProWebinarHub() {
   const upcomingEvents = filteredEvents.filter(e => e.status !== "on-demand")
   const pastEvents = filteredEvents.filter(e => e.status === "on-demand")
 
+  // Dashboard derived data
+  const myUpcomingEvents = events.filter(e => registeredEventIds.has(e.id) && e.status !== "on-demand")
+  const attendedCount    = events.filter(e => registeredEventIds.has(e.id) && e.status === "on-demand").length
+
+  const scrollToEvents = () => {
+    eventsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
+  }
+
   return (
-    <div className="min-h-screen bg-slate-50 font-sans text-slate-900" dir={locale === "ar" ? "rtl" : "ltr"}>
-      
-      {/* NAVIGATION */}
+    <div className="min-h-screen bg-slate-50 text-slate-900" dir={locale === "ar" ? "rtl" : "ltr"}>
 
+      {/* ====================== SIGNED-IN: DASHBOARD ====================== */}
+      {isSignedIn && (
+        <DashboardHeader
+          fullName={fullName}
+          upcomingCount={myUpcomingEvents.length}
+          attendedCount={attendedCount}
+          savedCount={savedCount}
+        />
+      )}
 
-      {/* HERO SECTION */}
+      {/* ====================== SIGNED-OUT: HERO ====================== */}
       {!isSignedIn && (
         <section className="relative overflow-hidden bg-slate-950 py-24 md:py-40 min-h-[600px] flex items-center">
-          {/* Background video */}
-          <video
-            autoPlay
-            muted
-            loop
-            playsInline
-            preload="auto"
-            aria-hidden="true"
-            className="absolute inset-0 w-full h-full object-cover"
-          >
+          <video autoPlay muted loop playsInline preload="auto" aria-hidden="true" className="absolute inset-0 w-full h-full object-cover">
             <source src="/hero.mp4" type="video/mp4" />
           </video>
-          {/* Dark gradient overlay for text readability */}
           <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-b from-slate-950/55 via-slate-950/35 to-slate-950/75" />
-          {/* Subtle accent glow */}
           <div aria-hidden="true" className="absolute inset-0 pointer-events-none">
             <div className="absolute top-1/4 left-1/2 -translate-x-1/2 h-[500px] w-[500px] rounded-full bg-emerald-500/12 blur-[140px] animate-mesh-1" />
             <div className="absolute bottom-0 right-1/4 h-[400px] w-[400px] rounded-full bg-cyan-500/10 blur-[120px] animate-mesh-2" />
@@ -220,7 +229,7 @@ export default function ProWebinarHub() {
               {t("home.hero_desc")}
             </p>
             <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-              <Button size="lg" className="h-12 px-8 bg-white text-slate-900 hover:bg-slate-100 font-semibold rounded-full" onClick={() => window.scrollTo({ top: 800, behavior: 'smooth' })}>
+              <Button size="lg" className="h-12 px-8 bg-white text-slate-900 hover:bg-slate-100 font-semibold rounded-full" onClick={scrollToEvents}>
                 {t("home.explore")}
               </Button>
               <Link href="/login?view=sign_up">
@@ -233,9 +242,38 @@ export default function ProWebinarHub() {
         </section>
       )}
 
-      <div className="container mx-auto px-4 py-12 md:px-6">
-        
-        {/* CONTROLS */}
+      {/* ====================== SIGNED-OUT: STATS BAND ====================== */}
+      {!isSignedIn && <StatsBand />}
+
+      {/* ====================== SIGNED-IN: YOUR REGISTERED EVENTS ====================== */}
+      {isSignedIn && !isLoading && myUpcomingEvents.length > 0 && (
+        <section className="container mx-auto px-4 py-12 md:px-6">
+          <div className="mb-8">
+            <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-slate-900">{t("home.dash.my_upcoming")}</h2>
+            <p className="text-slate-500 mt-1">{t("home.dash.my_upcoming_desc")}</p>
+          </div>
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {myUpcomingEvents.slice(0, 3).map((event) => (
+              <EventCard
+                key={event.id}
+                event={event}
+                isAdmin={isAdmin}
+                isRegistered={true}
+                router={router}
+                onDelete={handleDelete}
+                onSelect={() => setSelectedEvent(event)}
+                t={t}
+              />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* ====================== SIGNED-OUT: WHAT WE OFFER ====================== */}
+      {!isSignedIn && <FeatureGrid />}
+
+      {/* ====================== BROWSE EVENTS (BOTH) ====================== */}
+      <div ref={eventsRef} id="events" className="container mx-auto px-4 py-12 md:py-16 md:px-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
           <div>
             <h2 className="text-3xl font-bold tracking-tight text-slate-900">
@@ -245,38 +283,35 @@ export default function ProWebinarHub() {
               {isSignedIn ? t("home.welcome_back_desc") : t("home.upcoming_desc")}
             </p>
           </div>
-          
+
           <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-             <div className="relative">
-                <Search className="absolute start-3 top-2.5 h-4 w-4 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder={t("home.search_placeholder")}
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="ps-10 pe-4 py-2 w-full sm:w-64 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white"
-                />
-             </div>
-             <div className="relative">
-                <select 
-                  value={selectedCategory}
-                  onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="pl-4 pr-8 py-2 w-full sm:w-auto rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white appearance-none cursor-pointer"
-                >
-                  {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
-                </select>
-                <Filter className="absolute right-3 top-2.5 h-4 w-4 text-gray-400 pointer-events-none" />
-             </div>
+            <div className="relative">
+              <Search className="absolute start-3 top-2.5 h-4 w-4 text-gray-400" />
+              <input
+                type="text"
+                placeholder={t("home.search_placeholder")}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="ps-10 pe-4 py-2 w-full sm:w-64 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white"
+              />
+            </div>
+            <div className="relative">
+              <select
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                className="ps-4 pe-8 py-2 w-full sm:w-auto rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white appearance-none cursor-pointer"
+              >
+                {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+              </select>
+              <Filter className="absolute end-3 top-2.5 h-4 w-4 text-gray-400 pointer-events-none" />
+            </div>
           </div>
         </div>
 
-        {/* LOADING STATE */}
         {isLoading ? (
           <EventCardSkeletonGrid count={6} />
         ) : (
           <div className="space-y-16">
-            
-            {/* --- UPCOMING EVENTS GRID --- */}
             <div>
               {upcomingEvents.length > 0 ? (
                 <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -294,47 +329,50 @@ export default function ProWebinarHub() {
                   ))}
                 </div>
               ) : (
-                 (pastEvents.length === 0 || searchQuery !== "") && (
-                    <div className="text-center py-20 bg-white rounded-2xl border border-dashed border-gray-200">
-                      <Search className="h-10 w-10 text-gray-300 mx-auto mb-3" />
-                      <h3 className="text-lg font-medium text-gray-900">{t("home.no_upcoming")}</h3>
-                      <p className="text-gray-500">{t("home.no_upcoming_desc")}</p>
-                      <Button variant="ghost" onClick={() => { setSearchQuery(""); setSelectedCategory("All"); }} className="mt-2 text-emerald-600">{t("home.clear_filters")}</Button>
-                    </div>
-                 )
+                (pastEvents.length === 0 || searchQuery !== "") && (
+                  <div className="text-center py-20 bg-white rounded-2xl border border-dashed border-gray-200">
+                    <Search className="h-10 w-10 text-gray-300 mx-auto mb-3" />
+                    <h3 className="text-lg font-medium text-gray-900">{t("home.no_upcoming")}</h3>
+                    <p className="text-gray-500">{t("home.no_upcoming_desc")}</p>
+                    <Button variant="ghost" onClick={() => { setSearchQuery(""); setSelectedCategory("All") }} className="mt-2 text-emerald-600">{t("home.clear_filters")}</Button>
+                  </div>
+                )
               )}
             </div>
 
-            {/* --- PAST EVENTS GRID --- */}
-            {pastEvents.length > 0 && (
+            {/* Past events: signed-in only */}
+            {isSignedIn && pastEvents.length > 0 && (
               <div className="relative">
-                 <div className="flex items-center gap-4 mb-6">
-                    <h2 className="text-2xl font-bold text-slate-800">{t("home.past_events")}</h2>
-                    <div className="h-px flex-1 bg-slate-200" />
-                 </div>
-                 <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 opacity-80 hover:opacity-100 transition-opacity">
-                    {pastEvents.map((event) => (
-                      <EventCard
-                        key={event.id}
-                        event={event}
-                        isAdmin={isAdmin}
-                        isRegistered={registeredEventIds.has(event.id)}
-                        router={router}
-                        onDelete={handleDelete}
-                        onSelect={() => setSelectedEvent(event)}
-                        isPast={true}
-                        t={t}
-                      />
-                    ))}
-                 </div>
+                <div className="flex items-center gap-4 mb-6">
+                  <h2 className="text-2xl font-bold text-slate-800">{t("home.past_events")}</h2>
+                  <div className="h-px flex-1 bg-slate-200" />
+                </div>
+                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 opacity-80 hover:opacity-100 transition-opacity">
+                  {pastEvents.map((event) => (
+                    <EventCard
+                      key={event.id}
+                      event={event}
+                      isAdmin={isAdmin}
+                      isRegistered={registeredEventIds.has(event.id)}
+                      router={router}
+                      onDelete={handleDelete}
+                      onSelect={() => setSelectedEvent(event)}
+                      isPast={true}
+                      t={t}
+                    />
+                  ))}
+                </div>
               </div>
             )}
-
           </div>
         )}
       </div>
 
+      {/* ====================== SIGNED-OUT: COMMUNITIES PREVIEW ====================== */}
+      {!isSignedIn && <CommunitiesPreview />}
 
+      {/* ====================== SIGNED-OUT: FINAL CTA ====================== */}
+      {!isSignedIn && <FinalCta />}
 
       {selectedEvent && <EventDetailModal event={selectedEvent} isOpen={!!selectedEvent} onClose={() => setSelectedEvent(null)} isSignedIn={isSignedIn} />}
     </div>

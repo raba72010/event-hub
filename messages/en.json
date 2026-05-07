@@ -36,7 +36,53 @@
     "guest_speaker": "Guest Speaker",
     "delete_confirm": "Are you sure you want to delete this event?",
     "event_deleted": "Event deleted.",
-    "delete_error": "Error deleting event: "
+    "delete_error": "Error deleting event: ",
+    "stats": {
+      "members": "Active Members",
+      "events_held": "Events Held",
+      "communities": "Communities",
+      "workshops": "Workshops Delivered"
+    },
+    "featured": {
+      "eyebrow": "Next Event",
+      "title": "Don't miss what's coming up next",
+      "cta": "View Details"
+    },
+    "offer": {
+      "title": "What We Offer",
+      "subtitle": "Everything a professional needs to grow, learn and connect.",
+      "explore": "Explore",
+      "workshops_title": "Workshops & Events",
+      "workshops_desc": "Live sessions led by experts in your field.",
+      "communities_title": "Specialised Communities",
+      "communities_desc": "Connect with peers across 8 professional fields.",
+      "library_title": "Digital Library",
+      "library_desc": "Research, books and worksheets at your fingertips.",
+      "network_title": "Networking",
+      "network_desc": "Build relationships with leading professionals."
+    },
+    "our_communities": {
+      "title": "Our Communities",
+      "subtitle": "Eight specialised communities for sharing knowledge across professional fields.",
+      "view_all": "View all communities"
+    },
+    "final_cta": {
+      "title": "Ready to grow with us?",
+      "desc": "Join a network of Sudanese professionals shaping the future of their fields. It takes one minute to sign up.",
+      "button": "Join Now — It's Free"
+    },
+    "dash": {
+      "greeting": "Welcome back",
+      "greeting_default": "Welcome back, Professional",
+      "subtitle": "Here's what's happening in your community.",
+      "stat_upcoming": "Upcoming",
+      "stat_attended": "Attended",
+      "stat_saved": "Saved",
+      "my_upcoming": "Your Upcoming Events",
+      "my_upcoming_desc": "Events you've registered for.",
+      "my_upcoming_empty": "You haven't registered for any events yet.",
+      "browse_below": "Browse events below"
+    }
   },
   "communities": {
     "title": "Club Communities",
