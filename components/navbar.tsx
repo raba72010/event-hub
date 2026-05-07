@@ -161,8 +161,8 @@ export function Navbar() {
         {/* MOBILE MENU */}
         <Sheet>
           <SheetTrigger asChild className="md:hidden"><Button variant="ghost" size="icon"><Menu className="h-5 w-5" /></Button></SheetTrigger>
-          <SheetContent side={locale === "ar" ? "left" : "right"} className="w-80 bg-white overflow-y-auto" dir={locale === "ar" ? "rtl" : "ltr"}>
-            <div className="flex flex-col gap-6 mt-6">
+          <SheetContent side={locale === "ar" ? "left" : "right"} className="w-80 bg-white overflow-y-auto">
+            <div className="flex flex-col gap-6 mt-6" dir={locale === "ar" ? "rtl" : "ltr"}>
               <div className="flex flex-col gap-3 border-b border-slate-100 pb-6">
                 {NAV_PATHS.map(link => (
                   <Link
