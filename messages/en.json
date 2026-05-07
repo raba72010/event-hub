@@ -43,6 +43,11 @@
       "title": "Welcome to the Sudanese Professionals Club",
       "body": "We are a community of Sudanese professionals committed to knowledge sharing, peer development, and supporting each other's growth. Browse the upcoming sessions below or explore our specialised communities."
     },
+    "highlights": {
+      "title": "Recent Activity",
+      "subtitle": "A selection of recent sessions hosted by the Club.",
+      "view_archive": "Browse all sessions"
+    },
     "stats": {
       "members": "Active Members",
       "events_held": "Events Held",

@@ -12,6 +12,7 @@ import type { Event } from "@/types/event"
 import { useTranslation } from "@/lib/i18n-context"
 import { EventCardSkeletonGrid } from "@/components/event-card-skeleton"
 import { AnnouncementBanner } from "@/components/home/announcement-banner"
+import { PastHighlights } from "@/components/home/past-highlights"
 import { CommunitiesPreview } from "@/components/home/communities-preview"
 import { DashboardHeader } from "@/components/home/dashboard-header"
 
@@ -242,6 +243,9 @@ export default function ProWebinarHub() {
 
       {/* ====================== SIGNED-OUT: ANNOUNCEMENT FROM THE COUNCIL ====================== */}
       {!isSignedIn && <AnnouncementBanner />}
+
+      {/* ====================== SIGNED-OUT: PAST HIGHLIGHTS (real SPC sessions) ====================== */}
+      {!isSignedIn && <PastHighlights />}
 
       {/* ====================== SIGNED-IN: YOUR REGISTERED EVENTS ====================== */}
       {isSignedIn && !isLoading && myUpcomingEvents.length > 0 && (
