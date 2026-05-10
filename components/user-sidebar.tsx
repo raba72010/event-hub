@@ -147,9 +147,11 @@ export function UserSidebar(_props: UserSidebarProps = {}) {
       <div className="rounded-xl border border-gray-200 bg-gray-50 p-4 text-sm text-gray-600">
         <p className="font-medium text-gray-900">{t("sidebar.need_help")}</p>
         <p className="mt-1">{t("sidebar.chat_team")}</p>
-        <Button className="mt-3 w-full" variant="ghost" size="sm" asChild>
-          <Link href="/contact">{t("sidebar.talk_to_us")}</Link>
-        </Button>
+        <Link href="/contact" className="mt-3 block">
+          <Button className="w-full" variant="ghost" size="sm">
+            {t("sidebar.talk_to_us")}
+          </Button>
+        </Link>
       </div>
     </div>
   )
