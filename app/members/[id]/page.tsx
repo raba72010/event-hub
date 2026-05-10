@@ -68,7 +68,7 @@ export default function MemberProfilePage({ params }: { params: Promise<{ id: st
   if (isLoading) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-emerald-600" />
+        <Loader2 className="h-8 w-8 animate-spin text-emerald-600 dark:text-emerald-400" />
       </div>
     )
   }
@@ -76,12 +76,12 @@ export default function MemberProfilePage({ params }: { params: Promise<{ id: st
   if (notFound || isPrivate) {
     return (
       <div dir={isRtl ? "rtl" : "ltr"} className="container mx-auto px-4 py-20 md:px-6 text-center">
-        <UsersIcon className="h-12 w-12 text-slate-300 mx-auto mb-4" />
-        <h1 className="text-2xl font-bold text-slate-900">
+        <UsersIcon className="h-12 w-12 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
           {isPrivate ? t("members.private_profile") : "—"}
         </h1>
         <Link href="/members" className="mt-6 inline-block">
-          <Button variant="outline" className="gap-2">
+          <Button variant="outline" className="gap-2 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800">
             <Arrow className="h-4 w-4" />
             {t("members.back_to_directory")}
           </Button>
@@ -100,7 +100,7 @@ export default function MemberProfilePage({ params }: { params: Promise<{ id: st
   const joinedYear = member.created_at ? new Date(member.created_at).getFullYear() : null
 
   return (
-    <div dir={isRtl ? "rtl" : "ltr"} className="min-h-screen bg-slate-50">
+    <div dir={isRtl ? "rtl" : "ltr"} className="min-h-screen bg-slate-50 dark:bg-slate-950">
       {/* Hero band */}
       <section className="relative overflow-hidden bg-slate-950 py-16 md:py-20">
         <div aria-hidden="true" className="absolute inset-0 pointer-events-none">
@@ -154,9 +154,9 @@ export default function MemberProfilePage({ params }: { params: Promise<{ id: st
             {member.email && (
               <a
                 href={`mailto:${member.email}`}
-                className="block rounded-xl border border-emerald-200 bg-emerald-50 p-4 hover:bg-emerald-100 transition-colors"
+                className="block rounded-xl border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/30 p-4 hover:bg-emerald-100 dark:hover:bg-emerald-950/50 transition-colors"
               >
-                <div className="flex items-center gap-2 text-sm font-medium text-emerald-700">
+                <div className="flex items-center gap-2 text-sm font-medium text-emerald-700 dark:text-emerald-300">
                   <Mail className="h-4 w-4" />
                   {member.email}
                 </div>
@@ -165,9 +165,9 @@ export default function MemberProfilePage({ params }: { params: Promise<{ id: st
           </aside>
 
           {/* About */}
-          <section className="md:col-span-2 bg-white rounded-2xl border border-slate-200 p-6 md:p-8 shadow-sm">
-            <h2 className="text-xl font-bold text-slate-900 mb-4">{t("members.fields.bio")}</h2>
-            <p className="text-base text-slate-600 leading-relaxed whitespace-pre-wrap">
+          <section className="md:col-span-2 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 md:p-8 shadow-sm">
+            <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-4">{t("members.fields.bio")}</h2>
+            <p className="text-base text-slate-600 dark:text-slate-300 leading-relaxed whitespace-pre-wrap">
               {member.bio || "—"}
             </p>
           </section>
@@ -179,12 +179,12 @@ export default function MemberProfilePage({ params }: { params: Promise<{ id: st
 
 function FactRow({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
-    <div className="rounded-xl bg-white border border-slate-200 p-4">
-      <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-500">
-        <span className="text-slate-400">{icon}</span>
+    <div className="rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4">
+      <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+        <span className="text-slate-400 dark:text-slate-500">{icon}</span>
         {label}
       </div>
-      <p className="mt-1.5 text-sm text-slate-900 font-medium">{value}</p>
+      <p className="mt-1.5 text-sm text-slate-900 dark:text-slate-100 font-medium">{value}</p>
     </div>
   )
 }

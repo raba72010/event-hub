@@ -11,17 +11,17 @@ export function AnnouncementBanner() {
       <div className="container mx-auto max-w-4xl">
         <article
           className={[
-            "rounded-2xl border border-slate-200 bg-white shadow-xl px-6 py-7 md:px-10 md:py-9",
+            "rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xl px-6 py-7 md:px-10 md:py-9",
             isRtl ? "border-r-4 border-r-emerald-600" : "border-l-4 border-l-emerald-600",
           ].join(" ")}
         >
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700 dark:text-emerald-400">
             {t("home.announcement.eyebrow")}
           </p>
-          <h2 className="mt-2 text-xl md:text-2xl font-bold text-slate-900 leading-snug">
+          <h2 className="mt-2 text-xl md:text-2xl font-bold text-slate-900 dark:text-slate-100 leading-snug">
             {t("home.announcement.title")}
           </h2>
-          <p className="mt-3 text-sm md:text-base text-slate-600 leading-relaxed">
+          <p className="mt-3 text-sm md:text-base text-slate-600 dark:text-slate-400 leading-relaxed">
             {t("home.announcement.body")}
           </p>
         </article>

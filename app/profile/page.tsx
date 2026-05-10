@@ -131,33 +131,33 @@ export default function ProfilePage() {
   const BackIcon = isRtl ? ArrowRight : ArrowLeft
 
   return (
-    <div className="min-h-screen bg-slate-50" dir={isRtl ? "rtl" : "ltr"}>
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950" dir={isRtl ? "rtl" : "ltr"}>
       <div className="container mx-auto px-4 py-8 max-w-5xl">
         <div className="flex flex-col md:flex-row gap-8">
 
           {/* SIDEBAR */}
           <aside className="w-full md:w-72 space-y-6">
-            <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm text-center">
-              <div className="h-24 w-24 mx-auto bg-slate-100 rounded-full flex items-center justify-center text-3xl font-bold text-slate-400 mb-4">
+            <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-gray-200 dark:border-slate-800 shadow-sm text-center">
+              <div className="h-24 w-24 mx-auto bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-3xl font-bold text-slate-400 dark:text-slate-300 mb-4">
                 {profile.full_name ? profile.full_name.charAt(0) : user.email.charAt(0)}
               </div>
-              <h2 className="text-xl font-bold text-gray-900">{profile.full_name || "User"}</h2>
-              <p className="text-sm text-gray-500 mb-6">{user.email}</p>
+              <h2 className="text-xl font-bold text-gray-900 dark:text-slate-100">{profile.full_name || "User"}</h2>
+              <p className="text-sm text-gray-500 dark:text-slate-400 mb-6">{user.email}</p>
 
               <div className="flex flex-col gap-2 text-start">
-                <button onClick={() => setActiveTab("tickets")} className={`flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === "tickets" ? "bg-indigo-50 text-indigo-700" : "text-gray-600 hover:bg-gray-50"}`}>
+                <button onClick={() => setActiveTab("tickets")} className={`flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === "tickets" ? "bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300" : "text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800"}`}>
                   <Ticket className="h-4 w-4" /> {t("profile.my_tickets")}
                 </button>
-                <button onClick={() => setActiveTab("favorites")} className={`flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === "favorites" ? "bg-indigo-50 text-indigo-700" : "text-gray-600 hover:bg-gray-50"}`}>
+                <button onClick={() => setActiveTab("favorites")} className={`flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === "favorites" ? "bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300" : "text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800"}`}>
                   <Heart className="h-4 w-4" /> {t("profile.saved_events")}
                 </button>
-                <button onClick={() => setActiveTab("settings")} className={`flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === "settings" ? "bg-indigo-50 text-indigo-700" : "text-gray-600 hover:bg-gray-50"}`}>
+                <button onClick={() => setActiveTab("settings")} className={`flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === "settings" ? "bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300" : "text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800"}`}>
                   <User className="h-4 w-4" /> {t("profile.edit_profile")}
                 </button>
               </div>
 
-              <div className="mt-6 pt-6 border-t border-gray-100">
-                <button onClick={handleSignOut} className="flex items-center justify-center gap-2 w-full text-red-600 hover:bg-red-50 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+              <div className="mt-6 pt-6 border-t border-gray-100 dark:border-slate-800">
+                <button onClick={handleSignOut} className="flex items-center justify-center gap-2 w-full text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
                   <LogOut className="h-4 w-4" /> {t("profile.sign_out")}
                 </button>
               </div>
@@ -169,7 +169,7 @@ export default function ProfilePage() {
 
             {activeTab === "tickets" && (
               <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                <h2 className="text-2xl font-bold text-gray-900">{t("profile.my_tickets")}</h2>
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-slate-100">{t("profile.my_tickets")}</h2>
                 {registrations.length === 0 ? (
                   <EmptyState title={t("profile.no_tickets")} message={t("profile.no_tickets_desc")} />
                 ) : (
@@ -184,7 +184,7 @@ export default function ProfilePage() {
 
             {activeTab === "favorites" && (
               <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                <h2 className="text-2xl font-bold text-gray-900">{t("profile.saved_events")}</h2>
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-slate-100">{t("profile.saved_events")}</h2>
                 {favorites.length === 0 ? (
                   <EmptyState title={t("profile.no_favorites")} message={t("profile.no_favorites_desc")} />
                 ) : (
@@ -199,54 +199,54 @@ export default function ProfilePage() {
 
             {activeTab === "settings" && (
               <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                <h2 className="text-2xl font-bold text-gray-900">{t("profile.profile_settings")}</h2>
-                <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-slate-100">{t("profile.profile_settings")}</h2>
+                <div className="bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-slate-800 p-6 shadow-sm">
                   <form onSubmit={handleUpdateProfile} className="space-y-4 max-w-md">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">{t("profile.full_name")}</label>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">{t("profile.full_name")}</label>
                       <div className="relative">
                         <User className="absolute top-2.5 h-4 w-4 text-gray-400" style={{ [isRtl ? "right" : "left"]: "0.75rem" }} />
                         <input type="text" value={profile.full_name || ""} onChange={e => setProfile({ ...profile, full_name: e.target.value })}
-                          className="w-full py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 outline-none"
+                          className="w-full py-2 rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-950 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500 outline-none"
                           style={{ [isRtl ? "paddingRight" : "paddingLeft"]: "2.5rem", [isRtl ? "paddingLeft" : "paddingRight"]: "1rem" }}
                         />
                       </div>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">{t("profile.job_title")}</label>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">{t("profile.job_title")}</label>
                       <div className="relative">
                         <Briefcase className="absolute top-2.5 h-4 w-4 text-gray-400" style={{ [isRtl ? "right" : "left"]: "0.75rem" }} />
                         <input type="text" value={profile.title || ""} onChange={e => setProfile({ ...profile, title: e.target.value })}
                           placeholder={t("profile.job_title_placeholder")}
-                          className="w-full py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 outline-none"
+                          className="w-full py-2 rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-950 dark:text-slate-100 dark:placeholder-slate-500 focus:ring-2 focus:ring-indigo-500 outline-none"
                           style={{ [isRtl ? "paddingRight" : "paddingLeft"]: "2.5rem", [isRtl ? "paddingLeft" : "paddingRight"]: "1rem" }}
                         />
                       </div>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">{t("profile.company")}</label>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">{t("profile.company")}</label>
                       <div className="relative">
                         <Building className="absolute top-2.5 h-4 w-4 text-gray-400" style={{ [isRtl ? "right" : "left"]: "0.75rem" }} />
                         <input type="text" value={profile.company || ""} onChange={e => setProfile({ ...profile, company: e.target.value })}
                           placeholder={t("profile.company_placeholder")}
-                          className="w-full py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 outline-none"
+                          className="w-full py-2 rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-950 dark:text-slate-100 dark:placeholder-slate-500 focus:ring-2 focus:ring-indigo-500 outline-none"
                           style={{ [isRtl ? "paddingRight" : "paddingLeft"]: "2.5rem", [isRtl ? "paddingLeft" : "paddingRight"]: "1rem" }}
                         />
                       </div>
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">{t("profile.location")}</label>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">{t("profile.location")}</label>
                       <input type="text" value={profile.location || ""} onChange={e => setProfile({ ...profile, location: e.target.value })}
                         placeholder={t("profile.location_placeholder")}
-                        className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 outline-none"
+                        className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-950 dark:text-slate-100 dark:placeholder-slate-500 focus:ring-2 focus:ring-indigo-500 outline-none"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">{t("profile.community")}</label>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">{t("profile.community")}</label>
                       <select value={profile.community || ""} onChange={e => setProfile({ ...profile, community: e.target.value })}
-                        className="w-full px-4 py-2 rounded-lg border border-gray-300 bg-white focus:ring-2 focus:ring-indigo-500 outline-none"
+                        className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-950 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500 outline-none"
                       >
                         <option value="">{t("profile.community_placeholder")}</option>
                         {COMMUNITIES.map(c => (
@@ -256,9 +256,9 @@ export default function ProfilePage() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">{t("profile.availability")}</label>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">{t("profile.availability")}</label>
                       <select value={profile.availability || "active"} onChange={e => setProfile({ ...profile, availability: e.target.value })}
-                        className="w-full px-4 py-2 rounded-lg border border-gray-300 bg-white focus:ring-2 focus:ring-indigo-500 outline-none"
+                        className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-950 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500 outline-none"
                       >
                         <option value="active">{t("members.availability.active")}</option>
                         <option value="available">{t("members.availability.available")}</option>
@@ -268,24 +268,24 @@ export default function ProfilePage() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">{t("profile.bio")}</label>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">{t("profile.bio")}</label>
                       <textarea rows={4} value={profile.bio || ""} onChange={e => setProfile({ ...profile, bio: e.target.value })}
                         placeholder={t("profile.bio_placeholder")}
-                        className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 outline-none resize-y"
+                        className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-950 dark:text-slate-100 dark:placeholder-slate-500 focus:ring-2 focus:ring-indigo-500 outline-none resize-y"
                       />
                     </div>
 
-                    <div className="flex items-start gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
+                    <div className="flex items-start gap-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 p-4">
                       <input
                         id="is_public"
                         type="checkbox"
                         checked={profile.is_public !== false}
                         onChange={e => setProfile({ ...profile, is_public: e.target.checked })}
-                        className="mt-1 h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                        className="mt-1 h-4 w-4 rounded border-slate-300 dark:border-slate-700 text-emerald-600 focus:ring-emerald-500"
                       />
                       <label htmlFor="is_public" className="flex-1 cursor-pointer">
-                        <div className="text-sm font-medium text-slate-900">{t("profile.is_public")}</div>
-                        <p className="mt-0.5 text-xs text-slate-500">{t("profile.is_public_desc")}</p>
+                        <div className="text-sm font-medium text-slate-900 dark:text-slate-100">{t("profile.is_public")}</div>
+                        <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{t("profile.is_public_desc")}</p>
                       </label>
                     </div>
 
@@ -311,12 +311,12 @@ export default function ProfilePage() {
 
 function EmptyState({ title, message }: { title: string; message: string }) {
   return (
-    <div className="text-center py-12 bg-white rounded-xl border border-dashed border-gray-200">
-      <div className="h-12 w-12 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-3">
-        <User className="h-6 w-6 text-gray-300" />
+    <div className="text-center py-12 bg-white dark:bg-slate-900 rounded-xl border border-dashed border-gray-200 dark:border-slate-700">
+      <div className="h-12 w-12 bg-gray-50 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-3">
+        <User className="h-6 w-6 text-gray-300 dark:text-slate-500" />
       </div>
-      <h3 className="text-lg font-medium text-gray-900">{title}</h3>
-      <p className="text-gray-500">{message}</p>
+      <h3 className="text-lg font-medium text-gray-900 dark:text-slate-100">{title}</h3>
+      <p className="text-gray-500 dark:text-slate-400">{message}</p>
     </div>
   )
 }
@@ -327,8 +327,8 @@ function EventRow({ event, badge, onClick }: { event: any; badge: string; onClic
   const time = dateObj.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })
 
   return (
-    <div onClick={onClick} className="group flex flex-col md:flex-row gap-4 bg-white p-4 rounded-xl border border-gray-200 hover:border-indigo-300 hover:shadow-md transition-all cursor-pointer">
-      <div className="h-32 md:h-24 w-full md:w-40 bg-slate-100 rounded-lg overflow-hidden shrink-0">
+    <div onClick={onClick} className="group flex flex-col md:flex-row gap-4 bg-white dark:bg-slate-900 p-4 rounded-xl border border-gray-200 dark:border-slate-800 hover:border-indigo-300 dark:hover:border-indigo-500 hover:shadow-md transition-all cursor-pointer">
+      <div className="h-32 md:h-24 w-full md:w-40 bg-slate-100 dark:bg-slate-800 rounded-lg overflow-hidden shrink-0">
         {event.image ? (
           <img src={event.image} className="w-full h-full object-cover" />
         ) : (
@@ -339,11 +339,11 @@ function EventRow({ event, badge, onClick }: { event: any; badge: string; onClic
       </div>
       <div className="flex-1">
         <div className="flex justify-between items-start">
-          <span className="text-xs font-semibold text-indigo-600 bg-indigo-50 px-2 py-1 rounded-full mb-2 inline-block">{badge}</span>
-          <span className="text-xs text-gray-400">{event.category}</span>
+          <span className="text-xs font-semibold text-indigo-600 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/40 px-2 py-1 rounded-full mb-2 inline-block">{badge}</span>
+          <span className="text-xs text-gray-400 dark:text-slate-500">{event.category}</span>
         </div>
-        <h3 className="font-bold text-gray-900 mb-1 group-hover:text-indigo-600 transition-colors">{event.title}</h3>
-        <div className="flex items-center gap-4 text-sm text-gray-500 flex-wrap">
+        <h3 className="font-bold text-gray-900 dark:text-slate-100 mb-1 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">{event.title}</h3>
+        <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-slate-400 flex-wrap">
           <div className="flex items-center gap-1"><Calendar className="h-3.5 w-3.5" /> {date}</div>
           <div className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" /> {time}</div>
           <div className="flex items-center gap-1"><MapPin className="h-3.5 w-3.5" /> {event.location || "Virtual"}</div>

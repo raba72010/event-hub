@@ -65,14 +65,14 @@ export function PastHighlights() {
       <section className="container mx-auto px-4 py-16 md:py-20 md:px-6">
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-10">
           <div className="max-w-2xl">
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-slate-900">
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
               {t("home.highlights.title")}
             </h2>
-            <p className="mt-3 text-base text-slate-500">{t("home.highlights.subtitle")}</p>
+            <p className="mt-3 text-base text-slate-500 dark:text-slate-400">{t("home.highlights.subtitle")}</p>
           </div>
           <Link
             href="#events"
-            className="inline-flex items-center gap-2 text-sm font-semibold text-emerald-700 hover:gap-3 transition-all whitespace-nowrap"
+            className="inline-flex items-center gap-2 text-sm font-semibold text-emerald-700 dark:text-emerald-400 hover:gap-3 transition-all whitespace-nowrap"
           >
             {t("home.highlights.view_archive")}
             <Arrow className="h-4 w-4" />
@@ -89,9 +89,9 @@ export function PastHighlights() {
                 key={i}
                 type="button"
                 onClick={() => setOpenIdx(i)}
-                className="group flex flex-col text-start overflow-hidden rounded-2xl border border-slate-200 bg-white transition-all hover:-translate-y-1 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
+                className="group flex flex-col text-start overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 transition-all hover:-translate-y-1 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 dark:focus:ring-offset-slate-950"
               >
-                <div className="relative h-56 w-full bg-slate-100 overflow-hidden">
+                <div className="relative h-56 w-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
                   <img
                     src={h.image}
                     alt={title}
@@ -100,12 +100,12 @@ export function PastHighlights() {
                   />
                 </div>
                 <div className="flex flex-1 flex-col p-6">
-                  <div className="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-700">
+                  <div className="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-700 dark:text-emerald-400">
                     <Calendar className="h-3.5 w-3.5" />
                     {date}
                   </div>
-                  <h3 className="mt-3 text-lg font-bold text-slate-900 leading-snug line-clamp-2">{title}</h3>
-                  <p className="mt-2 text-sm text-slate-500 inline-flex items-center gap-1.5">
+                  <h3 className="mt-3 text-lg font-bold text-slate-900 dark:text-slate-100 leading-snug line-clamp-2">{title}</h3>
+                  <p className="mt-2 text-sm text-slate-500 dark:text-slate-400 inline-flex items-center gap-1.5">
                     <User className="h-3.5 w-3.5" /> {speaker}
                   </p>
                 </div>

@@ -11,6 +11,7 @@ import { supabase } from "@/lib/supabase"
 import { cn } from "@/lib/utils"
 import { Globe } from "lucide-react"
 import { useTranslation } from "@/lib/i18n-context"
+import { ThemeToggle } from "@/components/theme-toggle"
 
 const NAV_PATHS = [
   { key: "home", href: "/" },
@@ -85,7 +86,7 @@ export function Navbar() {
   if (pathname === '/login') return null;
 
   return (
-    <nav className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur-md" dir={locale === "ar" ? "rtl" : "ltr"}>
+    <nav className="sticky top-0 z-50 border-b border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-slate-950/90 backdrop-blur-md transition-colors" dir={locale === "ar" ? "rtl" : "ltr"}>
       <div className="container mx-auto flex h-16 items-center justify-between px-4 md:px-6">
         
         {/* LOGO SECTION */}
@@ -97,9 +98,9 @@ export function Navbar() {
               className="h-10 w-10 object-contain rounded-full bg-white"
               onError={(e) => { e.currentTarget.style.display = 'none'; e.currentTarget.nextElementSibling?.classList.remove('hidden') }} 
             />
-            <div className="hidden h-10 w-10 items-center justify-center rounded-full bg-slate-900 text-white font-bold">SPC</div>
+            <div className="hidden h-10 w-10 items-center justify-center rounded-full bg-slate-900 dark:bg-slate-700 text-white font-bold">SPC</div>
             <div className="flex flex-col">
-              <span className="text-sm font-bold leading-none text-slate-900">نادي المحترفين السودانيين</span>
+              <span className="text-sm font-bold leading-none text-slate-900 dark:text-slate-100">نادي المحترفين السودانيين</span>
             </div>
           </Link>
         </div>
@@ -107,10 +108,13 @@ export function Navbar() {
         {/* DESKTOP LINKS */}
         <div className="hidden md:flex items-center gap-6 text-sm font-medium">
           {NAV_PATHS.map(link => (
-             <Link 
-               key={link.href} 
+             <Link
+               key={link.href}
                href={link.href}
-               className={cn("hover:text-emerald-600 transition-colors", pathname === link.href ? "text-emerald-600" : "text-slate-600")}
+               className={cn(
+                 "hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors",
+                 pathname === link.href ? "text-emerald-600 dark:text-emerald-400" : "text-slate-600 dark:text-slate-300"
+               )}
              >
                {t(`nav.${link.key}`)}
              </Link>
@@ -119,73 +123,81 @@ export function Navbar() {
 
         {/* USER CONTROLS & LANGUAGE SWITCHER */}
         <div className="hidden md:flex items-center gap-4">
-          
-          <div className="h-6 w-px bg-slate-200 mx-2" />
-          
+
+          <div className="h-6 w-px bg-slate-200 dark:bg-slate-700 mx-2" />
+
+          <ThemeToggle />
+
           <Button
             variant="ghost"
             size="sm"
             onClick={() => setLocale(locale === "ar" ? "en" : "ar")}
-            className="text-slate-600 hover:text-slate-900"
+            className="text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white"
           >
             <Globe className="h-4 w-4 me-2" />
             {locale === "ar" ? "English" : "عربي"}
           </Button>
 
-          <div className="h-6 w-px bg-slate-200 mx-2" />
+          <div className="h-6 w-px bg-slate-200 dark:bg-slate-700 mx-2" />
           {isSignedIn ? (
             <>
               {isAdmin && (
                 <Link href="/admin">
-                  <Button variant="ghost" className="text-indigo-600 font-medium gap-2">
+                  <Button variant="ghost" className="text-indigo-600 dark:text-indigo-400 font-medium gap-2">
                     <Shield className="h-4 w-4" />
                     {t('nav.admin')}
                   </Button>
                 </Link>
               )}
               <Link href="/profile">
-                <Button variant="ghost" className="text-slate-600 hover:text-slate-900 gap-2">
+                <Button variant="ghost" className="text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white gap-2">
                   <User className="h-4 w-4" />
                   {t('nav.profile')}
                 </Button>
               </Link>
-              <Button onClick={handleLogout} variant="outline" size="sm" className="border-slate-300 ms-2">{t('nav.logout')}</Button>
+              <Button onClick={handleLogout} variant="outline" size="sm" className="border-slate-300 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800 ms-2">{t('nav.logout')}</Button>
             </>
           ) : (
             <>
-              <Link href="/login"><Button variant="ghost">{t('nav.login')}</Button></Link>
-              <Link href="/login?view=sign_up"><Button className="bg-slate-900 hover:bg-slate-800 text-white ms-2">{t('nav.join')}</Button></Link>
+              <Link href="/login"><Button variant="ghost" className="dark:text-slate-300 dark:hover:text-white">{t('nav.login')}</Button></Link>
+              <Link href="/login?view=sign_up"><Button className="bg-slate-900 hover:bg-slate-800 dark:bg-emerald-600 dark:hover:bg-emerald-500 text-white ms-2">{t('nav.join')}</Button></Link>
             </>
           )}
         </div>
 
         {/* MOBILE MENU */}
         <Sheet>
-          <SheetTrigger asChild className="md:hidden"><Button variant="ghost" size="icon"><Menu className="h-5 w-5" /></Button></SheetTrigger>
-          <SheetContent side={locale === "ar" ? "left" : "right"} className="w-80 bg-white overflow-y-auto">
+          <SheetTrigger asChild className="md:hidden"><Button variant="ghost" size="icon" className="dark:text-slate-300 dark:hover:text-white"><Menu className="h-5 w-5" /></Button></SheetTrigger>
+          <SheetContent side={locale === "ar" ? "left" : "right"} className="w-80 bg-white dark:bg-slate-950 overflow-y-auto">
             <div className="flex flex-col gap-6 mt-6" dir={locale === "ar" ? "rtl" : "ltr"}>
-              <div className="flex flex-col gap-3 border-b border-slate-100 pb-6">
+              <div className="flex flex-col gap-3 border-b border-slate-100 dark:border-slate-800 pb-6">
                 {NAV_PATHS.map(link => (
                   <Link
                     key={link.href}
                     href={link.href}
-                    className={cn("text-lg font-medium", pathname === link.href ? "text-emerald-600" : "text-slate-700")}
+                    className={cn(
+                      "text-lg font-medium",
+                      pathname === link.href ? "text-emerald-600 dark:text-emerald-400" : "text-slate-700 dark:text-slate-300"
+                    )}
                   >
                     {t(`nav.${link.key}`)}
                   </Link>
                 ))}
               </div>
 
-              {/* Language switcher (mobile) */}
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setLocale(locale === "ar" ? "en" : "ar")}
-                className="self-start gap-2"
-              >
-                <Globe className="h-4 w-4" />
-                {locale === "ar" ? "English" : "عربي"}
-              </Button>
+              {/* Theme + Language switcher (mobile) */}
+              <div className="flex items-center gap-2">
+                <ThemeToggle />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setLocale(locale === "ar" ? "en" : "ar")}
+                  className="gap-2 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+                >
+                  <Globe className="h-4 w-4" />
+                  {locale === "ar" ? "English" : "عربي"}
+                </Button>
+              </div>
 
               <UserSidebar isSignedIn={isSignedIn} userEmail={userEmail} />
             </div>

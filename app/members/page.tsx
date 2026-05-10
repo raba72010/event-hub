@@ -78,28 +78,28 @@ export default function MembersDirectoryPage() {
     <div dir={isRtl ? "rtl" : "ltr"} className="container mx-auto px-4 py-12 md:px-6">
       {/* Header */}
       <div className="text-center max-w-2xl mx-auto space-y-3 mb-10">
-        <h1 className="text-4xl md:text-5xl font-bold text-slate-900">{t("members.title")}</h1>
-        <p className="text-base md:text-lg text-slate-600">{t("members.subtitle")}</p>
+        <h1 className="text-4xl md:text-5xl font-bold text-slate-900 dark:text-slate-100">{t("members.title")}</h1>
+        <p className="text-base md:text-lg text-slate-600 dark:text-slate-400">{t("members.subtitle")}</p>
       </div>
 
       {/* Filters */}
       <div className="max-w-4xl mx-auto flex flex-col md:flex-row gap-3 mb-10">
         <div className="relative flex-1">
-          <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+          <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 dark:text-slate-500" />
           <input
             type="text"
             placeholder={t("members.search_placeholder")}
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="w-full ps-10 pe-4 py-3 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            className="w-full ps-10 pe-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 dark:text-slate-100 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500"
           />
         </div>
         <div className="relative md:w-72">
-          <Filter className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
+          <Filter className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 dark:text-slate-500 pointer-events-none" />
           <select
             value={community}
             onChange={e => setCommunity(e.target.value)}
-            className="w-full ps-10 pe-4 py-3 rounded-xl border border-slate-200 bg-white appearance-none focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            className="w-full ps-10 pe-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 dark:text-slate-100 appearance-none focus:outline-none focus:ring-2 focus:ring-emerald-500"
           >
             <option value="all">{t("members.all_communities")}</option>
             {COMMUNITIES.map(c => (
@@ -113,13 +113,13 @@ export default function MembersDirectoryPage() {
       {isLoading ? (
         <MembersGridSkeleton />
       ) : filtered.length === 0 ? (
-        <div className="text-center py-20 bg-white rounded-2xl border border-dashed border-slate-200">
-          <UsersIcon className="h-10 w-10 text-slate-300 mx-auto mb-3" />
-          <h3 className="text-lg font-semibold text-slate-900">
+        <div className="text-center py-20 bg-white dark:bg-slate-900 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700">
+          <UsersIcon className="h-10 w-10 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
+          <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
             {members.length === 0 ? t("members.empty_state") : t("members.no_results")}
           </h3>
           {members.length > 0 && (
-            <button onClick={clearFilters} className="mt-4 text-sm font-medium text-emerald-700 hover:text-emerald-800">
+            <button onClick={clearFilters} className="mt-4 text-sm font-medium text-emerald-700 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-300">
               {t("members.clear_filters")}
             </button>
           )}
@@ -148,10 +148,10 @@ function MemberCard({ member, communityName, t }: { member: Member; communityNam
   return (
     <Link
       href={`/members/${member.id}`}
-      className="group flex flex-col rounded-2xl bg-white border border-slate-200 p-5 transition-all hover:-translate-y-1 hover:shadow-xl hover:border-slate-300"
+      className="group flex flex-col rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 transition-all hover:-translate-y-1 hover:shadow-xl hover:border-slate-300 dark:hover:border-slate-700"
     >
       <div className="flex items-start justify-between gap-3">
-        <div className={cn("h-14 w-14 rounded-full overflow-hidden ring-2 ring-white shadow-sm flex items-center justify-center font-bold text-white text-lg", member.avatar_url ? "" : "bg-gradient-to-br from-slate-700 to-slate-900")}>
+        <div className={cn("h-14 w-14 rounded-full overflow-hidden ring-2 ring-white dark:ring-slate-800 shadow-sm flex items-center justify-center font-bold text-white text-lg", member.avatar_url ? "" : "bg-gradient-to-br from-slate-700 to-slate-900")}>
           {member.avatar_url
             ? <img src={member.avatar_url} alt={member.full_name || ""} className="h-full w-full object-cover" />
             : initials}
@@ -161,21 +161,21 @@ function MemberCard({ member, communityName, t }: { member: Member; communityNam
         </span>
       </div>
 
-      <h3 className="mt-4 text-base font-bold text-slate-900 leading-snug group-hover:text-emerald-700 transition-colors line-clamp-1">
+      <h3 className="mt-4 text-base font-bold text-slate-900 dark:text-slate-100 leading-snug group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors line-clamp-1">
         {member.full_name || "—"}
       </h3>
       {member.title && (
-        <p className="mt-1 text-sm text-slate-600 line-clamp-1 inline-flex items-center gap-1.5">
-          <Briefcase className="h-3.5 w-3.5 text-slate-400" />{member.title}
+        <p className="mt-1 text-sm text-slate-600 dark:text-slate-400 line-clamp-1 inline-flex items-center gap-1.5">
+          <Briefcase className="h-3.5 w-3.5 text-slate-400 dark:text-slate-500" />{member.title}
         </p>
       )}
       {member.location && (
-        <p className="mt-1 text-xs text-slate-500 inline-flex items-center gap-1.5">
-          <MapPin className="h-3 w-3 text-slate-400" />{member.location}
+        <p className="mt-1 text-xs text-slate-500 dark:text-slate-400 inline-flex items-center gap-1.5">
+          <MapPin className="h-3 w-3 text-slate-400 dark:text-slate-500" />{member.location}
         </p>
       )}
       {communityName && (
-        <span className="mt-4 inline-block text-[11px] font-medium px-2 py-1 rounded-full bg-slate-100 text-slate-700 self-start">
+        <span className="mt-4 inline-block text-[11px] font-medium px-2 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 self-start">
           {communityName}
         </span>
       )}
@@ -187,7 +187,7 @@ function MembersGridSkeleton() {
   return (
     <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       {Array.from({ length: 8 }).map((_, i) => (
-        <div key={i} className="rounded-2xl bg-white border border-slate-200 p-5">
+        <div key={i} className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5">
           <div className="flex items-start justify-between">
             <div className="h-14 w-14 rounded-full skeleton" />
             <div className="h-5 w-16 rounded-full skeleton" />

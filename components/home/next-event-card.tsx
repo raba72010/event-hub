@@ -22,7 +22,7 @@ export function NextEventCard({ event, isSignedIn, isRegistered, onSelect }: Nex
   return (
     <section className="relative -mt-12 z-10 px-4 md:px-6">
       <div className="container mx-auto max-w-5xl">
-        <article className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl">
+        <article className="overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xl">
           <div className="grid md:grid-cols-[1fr_1.2fr]">
             {/* IMAGE / GRADIENT */}
             <div className="relative h-56 md:h-auto bg-gradient-to-br from-slate-800 via-slate-900 to-emerald-900 overflow-hidden">
@@ -44,31 +44,31 @@ export function NextEventCard({ event, isSignedIn, isRegistered, onSelect }: Nex
             {/* DETAILS */}
             <div className="flex flex-col justify-between p-6 md:p-8">
               <div>
-                <div className="flex flex-wrap items-center gap-3 text-xs font-semibold uppercase tracking-wider text-emerald-700">
-                  <span className="rounded-full bg-emerald-50 px-2.5 py-1">{event.category}</span>
-                  {event.level && <span className="rounded-full bg-slate-100 px-2.5 py-1 text-slate-700 normal-case font-medium">{event.level}</span>}
+                <div className="flex flex-wrap items-center gap-3 text-xs font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
+                  <span className="rounded-full bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-1">{event.category}</span>
+                  {event.level && <span className="rounded-full bg-slate-100 dark:bg-slate-800 px-2.5 py-1 text-slate-700 dark:text-slate-300 normal-case font-medium">{event.level}</span>}
                 </div>
 
-                <h2 className="mt-4 text-2xl md:text-3xl font-bold leading-tight text-slate-900">
+                <h2 className="mt-4 text-2xl md:text-3xl font-bold leading-tight text-slate-900 dark:text-slate-100">
                   {event.title}
                 </h2>
 
                 {event.summary && (
-                  <p className="mt-3 text-sm md:text-base text-slate-600 line-clamp-2">{event.summary}</p>
+                  <p className="mt-3 text-sm md:text-base text-slate-600 dark:text-slate-400 line-clamp-2">{event.summary}</p>
                 )}
 
                 <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-                  <InfoRow icon={<Calendar className="h-4 w-4 text-emerald-600" />} label={event.date} />
-                  <InfoRow icon={<Clock className="h-4 w-4 text-emerald-600" />} label={`${event.time}${event.duration ? ` · ${event.duration}` : ""}`} />
-                  <InfoRow icon={<MapPin className="h-4 w-4 text-emerald-600" />} label={event.location} />
-                  {speaker && <InfoRow icon={<User className="h-4 w-4 text-emerald-600" />} label={speaker.name} />}
+                  <InfoRow icon={<Calendar className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />} label={event.date} />
+                  <InfoRow icon={<Clock className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />} label={`${event.time}${event.duration ? ` · ${event.duration}` : ""}`} />
+                  <InfoRow icon={<MapPin className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />} label={event.location} />
+                  {speaker && <InfoRow icon={<User className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />} label={speaker.name} />}
                 </div>
               </div>
 
               <div className="mt-6 flex flex-col sm:flex-row gap-3">
                 <Button
                   size="lg"
-                  className="flex-1 bg-slate-900 hover:bg-slate-800 text-white gap-2"
+                  className="flex-1 bg-slate-900 hover:bg-slate-800 dark:bg-emerald-600 dark:hover:bg-emerald-500 text-white gap-2"
                   onClick={() => onSelect(event)}
                 >
                   {t("home.next_event.view_details")}
@@ -76,19 +76,19 @@ export function NextEventCard({ event, isSignedIn, isRegistered, onSelect }: Nex
                 </Button>
                 {!isSignedIn ? (
                   <Link href="/login" className="flex-1">
-                    <Button size="lg" variant="outline" className="w-full">
+                    <Button size="lg" variant="outline" className="w-full dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800">
                       {t("home.next_event.sign_in_to_register")}
                     </Button>
                   </Link>
                 ) : isRegistered ? (
-                  <Button size="lg" variant="outline" className="flex-1 border-emerald-300 bg-emerald-50 text-emerald-700 cursor-default" disabled>
+                  <Button size="lg" variant="outline" className="flex-1 border-emerald-300 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 cursor-default" disabled>
                     {t("home.registered")}
                   </Button>
                 ) : (
                   <Button
                     size="lg"
                     variant="outline"
-                    className="flex-1 border-emerald-300 text-emerald-700 hover:bg-emerald-50"
+                    className="flex-1 border-emerald-300 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40"
                     onClick={() => onSelect(event)}
                   >
                     {t("home.next_event.register")}
@@ -105,7 +105,7 @@ export function NextEventCard({ event, isSignedIn, isRegistered, onSelect }: Nex
 
 function InfoRow({ icon, label }: { icon: React.ReactNode; label: string }) {
   return (
-    <div className="flex items-center gap-2 text-slate-700">
+    <div className="flex items-center gap-2 text-slate-700 dark:text-slate-300">
       {icon}
       <span>{label}</span>
     </div>

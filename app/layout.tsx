@@ -40,9 +40,17 @@ export default async function RootLayout({
   const dict = await import(`@/messages/${locale}.json`).then((module) => module.default);
 
   return (
-    <html lang={locale} dir={dir}>
+    <html lang={locale} dir={dir} suppressHydrationWarning>
+      <head>
+        {/* Inline theme-init: prevents flash of light content for users with dark preference. Runs before paint. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('theme');var s=window.matchMedia('(prefers-color-scheme: dark)').matches;if(t==='dark'||(!t&&s)){document.documentElement.classList.add('dark');}}catch(e){}})();`,
+          }}
+        />
+      </head>
       <body
-        className={`${tajawal.variable} ${geistMono.variable} font-sans antialiased min-h-screen flex flex-col bg-slate-50`}
+        className={`${tajawal.variable} ${geistMono.variable} font-sans antialiased min-h-screen flex flex-col bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors`}
       >
         <I18nProvider initialLocale={locale} dictionary={dict}>
           <Navbar />

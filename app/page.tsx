@@ -195,7 +195,7 @@ export default function ProWebinarHub() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900" dir={locale === "ar" ? "rtl" : "ltr"}>
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors" dir={locale === "ar" ? "rtl" : "ltr"}>
 
       {/* ====================== SIGNED-IN: DASHBOARD ====================== */}
       {isSignedIn && (
@@ -292,34 +292,34 @@ export default function ProWebinarHub() {
       <div ref={eventsRef} id="events" className="container mx-auto px-4 py-12 md:py-16 md:px-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
           <div>
-            <h2 className="text-3xl font-bold tracking-tight text-slate-900">
+            <h2 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
               {isSignedIn ? t("home.dash.discover_title") : t("home.upcoming")}
             </h2>
-            <p className="text-slate-500 mt-1">
+            <p className="text-slate-500 dark:text-slate-400 mt-1">
               {isSignedIn ? t("home.dash.discover_desc") : t("home.upcoming_desc")}
             </p>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
             <div className="relative">
-              <Search className="absolute start-3 top-2.5 h-4 w-4 text-gray-400" />
+              <Search className="absolute start-3 top-2.5 h-4 w-4 text-gray-400 dark:text-slate-500" />
               <input
                 type="text"
                 placeholder={t("home.search_placeholder")}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="ps-10 pe-4 py-2 w-full sm:w-64 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white"
+                className="ps-10 pe-4 py-2 w-full sm:w-64 rounded-lg border border-gray-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white dark:bg-slate-900 dark:text-slate-100 dark:placeholder-slate-500"
               />
             </div>
             <div className="relative">
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
-                className="ps-4 pe-8 py-2 w-full sm:w-auto rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white appearance-none cursor-pointer"
+                className="ps-4 pe-8 py-2 w-full sm:w-auto rounded-lg border border-gray-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white dark:bg-slate-900 dark:text-slate-100 appearance-none cursor-pointer"
               >
                 {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
               </select>
-              <Filter className="absolute end-3 top-2.5 h-4 w-4 text-gray-400 pointer-events-none" />
+              <Filter className="absolute end-3 top-2.5 h-4 w-4 text-gray-400 dark:text-slate-500 pointer-events-none" />
             </div>
           </div>
         </div>
@@ -346,11 +346,11 @@ export default function ProWebinarHub() {
                 </div>
               ) : (
                 (pastEvents.length === 0 || searchQuery !== "") && (
-                  <div className="text-center py-20 bg-white rounded-2xl border border-dashed border-gray-200">
-                    <Search className="h-10 w-10 text-gray-300 mx-auto mb-3" />
-                    <h3 className="text-lg font-medium text-gray-900">{t("home.no_upcoming")}</h3>
-                    <p className="text-gray-500">{t("home.no_upcoming_desc")}</p>
-                    <Button variant="ghost" onClick={() => { setSearchQuery(""); setSelectedCategory("All") }} className="mt-2 text-emerald-600">{t("home.clear_filters")}</Button>
+                  <div className="text-center py-20 bg-white dark:bg-slate-900 rounded-2xl border border-dashed border-gray-200 dark:border-slate-800">
+                    <Search className="h-10 w-10 text-gray-300 dark:text-slate-600 mx-auto mb-3" />
+                    <h3 className="text-lg font-medium text-gray-900 dark:text-slate-100">{t("home.no_upcoming")}</h3>
+                    <p className="text-gray-500 dark:text-slate-400">{t("home.no_upcoming_desc")}</p>
+                    <Button variant="ghost" onClick={() => { setSearchQuery(""); setSelectedCategory("All") }} className="mt-2 text-emerald-600 dark:text-emerald-400">{t("home.clear_filters")}</Button>
                   </div>
                 )
               )}
@@ -360,8 +360,8 @@ export default function ProWebinarHub() {
             {isSignedIn && pastEvents.length > 0 && (
               <div className="relative">
                 <div className="flex items-center gap-4 mb-6">
-                  <h2 className="text-2xl font-bold text-slate-800">{t("home.past_events")}</h2>
-                  <div className="h-px flex-1 bg-slate-200" />
+                  <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100">{t("home.past_events")}</h2>
+                  <div className="h-px flex-1 bg-slate-200 dark:bg-slate-700" />
                 </div>
                 <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 opacity-80 hover:opacity-100 transition-opacity">
                   {pastEvents.map((event) => (
@@ -394,11 +394,11 @@ export default function ProWebinarHub() {
 
 function EventCard({ event, isAdmin, isRegistered, router, onDelete, onSelect, isPast = false, t }: any) {
   return (
-    <div 
-      onClick={onSelect} 
+    <div
+      onClick={onSelect}
       className={cn(
-        "group relative flex flex-col overflow-hidden rounded-2xl bg-white border shadow-sm transition-all cursor-pointer",
-        isPast ? "border-slate-100 grayscale-[0.3] hover:grayscale-0" : "border-slate-200 hover:shadow-xl hover:-translate-y-1"
+        "group relative flex flex-col overflow-hidden rounded-2xl bg-white dark:bg-slate-900 border shadow-sm transition-all cursor-pointer",
+        isPast ? "border-slate-100 dark:border-slate-800 grayscale-[0.3] hover:grayscale-0" : "border-slate-200 dark:border-slate-800 hover:shadow-xl hover:-translate-y-1"
       )}
     >
       {isAdmin && (
@@ -427,46 +427,49 @@ function EventCard({ event, isAdmin, isRegistered, router, onDelete, onSelect, i
         </div>
       )}
 
-      <div className="relative h-48 w-full bg-slate-100 overflow-hidden">
+      <div className="relative h-48 w-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
          {event.image ? (
            <img src={event.image} alt={event.title} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
          ) : (
            <div className="h-full w-full bg-gradient-to-br from-slate-700 to-slate-900 flex items-center justify-center text-white/50 text-4xl font-bold">{event.title.charAt(0)}</div>
          )}
-         <div className="absolute top-4 left-4 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-slate-900 shadow-sm backdrop-blur-sm">
+         <div className="absolute top-4 left-4 rounded-full bg-white/90 dark:bg-slate-950/80 px-3 py-1 text-xs font-semibold text-slate-900 dark:text-slate-100 shadow-sm backdrop-blur-sm">
            {isPast ? "Past Event" : event.category}
          </div>
       </div>
-      
+
       <div className="flex flex-1 flex-col p-6">
-        <div className="flex items-center gap-2 text-xs font-medium text-emerald-600 mb-3">
+        <div className="flex items-center gap-2 text-xs font-medium text-emerald-600 dark:text-emerald-400 mb-3">
            {isPast ? <History className="h-3.5 w-3.5" /> : <Calendar className="h-3.5 w-3.5" />}
            {event.date} • {event.time}
         </div>
-        <h3 className="text-xl font-bold text-slate-900 mb-2 line-clamp-2">{event.title}</h3>
-        <p className="text-sm text-slate-500 line-clamp-2 mb-4 flex-1">{event.description}</p>
-        
-        <div className="flex items-center gap-3 border-t border-slate-100 pt-4 mb-5">
-          <div className="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center overflow-hidden">
-             {event.speakers && event.speakers[0]?.avatarUrl ? <img src={event.speakers[0].avatarUrl} className="h-full w-full object-cover" /> : <User className="h-4 w-4 text-slate-500" />}
+        <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-2 line-clamp-2">{event.title}</h3>
+        <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-2 mb-4 flex-1">{event.description}</p>
+
+        <div className="flex items-center gap-3 border-t border-slate-100 dark:border-slate-800 pt-4 mb-5">
+          <div className="h-8 w-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center overflow-hidden">
+             {event.speakers && event.speakers[0]?.avatarUrl ? <img src={event.speakers[0].avatarUrl} className="h-full w-full object-cover" /> : <User className="h-4 w-4 text-slate-500 dark:text-slate-400" />}
           </div>
           <div className="text-sm">
-            <p className="font-medium text-slate-900">{event.speakers?.[0]?.name || t("home.guest_speaker")}</p>
+            <p className="font-medium text-slate-900 dark:text-slate-100">{event.speakers?.[0]?.name || t("home.guest_speaker")}</p>
           </div>
         </div>
-        
-        {/* 👇 UPDATED BUTTON LOGIC */}
+
         {isRegistered ? (
           <Button
             variant="outline"
-            className="w-full rounded-lg border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 cursor-default"
+            className="w-full rounded-lg border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-950/60 cursor-default"
           >
             <Check className="me-2 h-4 w-4" /> {t("home.registered")}
           </Button>
         ) : (
           <Button
             variant={isPast ? "outline" : "default"}
-            className={cn("w-full rounded-lg transition-colors", !isPast && "bg-slate-900 hover:bg-slate-800 text-white group-hover:bg-emerald-600")}
+            className={cn(
+              "w-full rounded-lg transition-colors",
+              !isPast && "bg-slate-900 hover:bg-slate-800 dark:bg-emerald-600 dark:hover:bg-emerald-500 text-white group-hover:bg-emerald-600 dark:group-hover:bg-emerald-500",
+              isPast && "dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+            )}
           >
             {isPast ? t("home.view_details") : t("home.register_now")} <ArrowRight className="ms-2 h-4 w-4" />
           </Button>
