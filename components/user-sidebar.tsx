@@ -87,26 +87,29 @@ export function UserSidebar(_props: UserSidebarProps = {}) {
   const email = user?.email || null
 
   return (
-    <div className="space-y-4 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-      <div className="flex items-center gap-3 rounded-xl border border-dashed border-gray-300 bg-gray-50 p-4">
-        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-800 text-white">
-          <User2 className="h-5 w-5" />
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-gray-900">
-            {isAuthenticated ? t("sidebar.welcome_back") : t("sidebar.join_hub")}
-          </p>
-          <p className="text-xs text-gray-600 truncate">
-            {isAuthenticated ? (email || t("sidebar.see_schedule")) : t("sidebar.sign_in_sync")}
-          </p>
+    <div className="space-y-4 rounded-2xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-sm">
+      {/* Profile header — name + email stacked, sign-out below full-width */}
+      <div className="rounded-xl border border-dashed border-gray-300 dark:border-slate-700 bg-gray-50 dark:bg-slate-800/40 p-4 space-y-3">
+        <div className="flex items-center gap-3">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-slate-800 dark:bg-slate-700 text-white">
+            <User2 className="h-5 w-5" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-gray-900 dark:text-slate-100 truncate">
+              {isAuthenticated ? t("sidebar.welcome_back") : t("sidebar.join_hub")}
+            </p>
+            <p className="text-xs text-gray-600 dark:text-slate-400 truncate">
+              {isAuthenticated ? (email || t("sidebar.see_schedule")) : t("sidebar.sign_in_sync")}
+            </p>
+          </div>
         </div>
         {isAuthenticated ? (
-          <Button variant="outline" size="sm" onClick={handleSignOut}>
+          <Button variant="outline" size="sm" onClick={handleSignOut} className="w-full dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800">
             {t("sidebar.sign_out")}
           </Button>
         ) : (
-          <Link href="/login">
-            <Button variant="outline" size="sm">{t("sidebar.sign_in")}</Button>
+          <Link href="/login" className="block">
+            <Button variant="outline" size="sm" className="w-full dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800">{t("sidebar.sign_in")}</Button>
           </Link>
         )}
       </div>
@@ -144,11 +147,11 @@ export function UserSidebar(_props: UserSidebarProps = {}) {
         {!isAuthenticated && <SidebarLink icon={<LogIn className="h-4 w-4" />} label={t("sidebar.create_account")} href="/login?view=sign_up" />}
       </div>
 
-      <div className="rounded-xl border border-gray-200 bg-gray-50 p-4 text-sm text-gray-600">
-        <p className="font-medium text-gray-900">{t("sidebar.need_help")}</p>
+      <div className="rounded-xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-800/40 p-4 text-sm text-gray-600 dark:text-slate-400">
+        <p className="font-medium text-gray-900 dark:text-slate-100">{t("sidebar.need_help")}</p>
         <p className="mt-1">{t("sidebar.chat_team")}</p>
         <Link href="/contact" className="mt-3 block">
-          <Button className="w-full" variant="ghost" size="sm">
+          <Button className="w-full dark:text-slate-200 dark:hover:bg-slate-800" variant="ghost" size="sm">
             {t("sidebar.talk_to_us")}
           </Button>
         </Link>
@@ -164,12 +167,14 @@ function SidebarLink({
 }) {
   const content = (
     <>
-      <span className="text-gray-600">{icon}</span>
+      <span className={active ? "text-gray-900 dark:text-slate-100" : "text-gray-600 dark:text-slate-400"}>{icon}</span>
       <span>{label}</span>
     </>
   )
   const className = `flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition active:scale-95 ${
-    active ? "bg-gray-100 font-semibold text-gray-900" : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+    active
+      ? "bg-gray-100 dark:bg-slate-800 font-semibold text-gray-900 dark:text-slate-100"
+      : "text-gray-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-800 hover:text-gray-900 dark:hover:text-slate-100"
   }`
   if (href) return <Link href={href} className={className}>{content}</Link>
   return <button type="button" className={className}>{content}</button>
