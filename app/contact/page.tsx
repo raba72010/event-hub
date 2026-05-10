@@ -11,26 +11,26 @@ export default function ContactPage() {
   return (
     <div className="container mx-auto px-4 py-12 md:px-6" dir={isRtl ? "rtl" : "ltr"}>
       <div className="text-center max-w-2xl mx-auto space-y-4 mb-12">
-        <h1 className="text-4xl font-bold text-slate-900">{t("contact.title")}</h1>
-        <p className="text-lg text-slate-600">{t("contact.subtitle")}</p>
+        <h1 className="text-4xl font-bold text-slate-900 dark:text-slate-100">{t("contact.title")}</h1>
+        <p className="text-lg text-slate-600 dark:text-slate-400">{t("contact.subtitle")}</p>
       </div>
 
       <div className="grid md:grid-cols-2 gap-12 max-w-4xl mx-auto">
         {/* Contact Form */}
-        <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 space-y-6">
-          <h2 className="text-2xl font-bold text-slate-900">{t("contact.send_message")}</h2>
+        <div className="bg-white dark:bg-slate-900 p-8 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 space-y-6">
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">{t("contact.send_message")}</h2>
           <form className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">{t("contact.full_name")}</label>
-              <input type="text" className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none" />
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">{t("contact.full_name")}</label>
+              <input type="text" className="w-full px-4 py-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">{t("contact.email")}</label>
-              <input type="email" className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none" />
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">{t("contact.email")}</label>
+              <input type="email" className="w-full px-4 py-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">{t("contact.message")}</label>
-              <textarea rows={4} className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none" />
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">{t("contact.message")}</label>
+              <textarea rows={4} className="w-full px-4 py-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none" />
             </div>
             <Button className="w-full bg-emerald-600 hover:bg-emerald-700">{t("contact.send_btn")}</Button>
           </form>
@@ -38,27 +38,27 @@ export default function ContactPage() {
 
         {/* Contact Info */}
         <div className="space-y-8">
-          <h2 className="text-2xl font-bold text-slate-900">{t("contact.info_title")}</h2>
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">{t("contact.info_title")}</h2>
           <div className="space-y-6">
             <div className="flex items-start gap-4">
-              <div className="bg-emerald-50 p-3 rounded-full text-emerald-600"><Mail className="h-6 w-6" /></div>
+              <div className="bg-emerald-50 dark:bg-emerald-950/40 p-3 rounded-full text-emerald-600 dark:text-emerald-400"><Mail className="h-6 w-6" /></div>
               <div>
-                <h4 className="font-bold text-slate-900">{t("contact.email_label")}</h4>
-                <p className="text-slate-600">info@spc.org.sd</p>
+                <h4 className="font-bold text-slate-900 dark:text-slate-100">{t("contact.email_label")}</h4>
+                <p className="text-slate-600 dark:text-slate-400">info@spc.org.sd</p>
               </div>
             </div>
             <div className="flex items-start gap-4">
-              <div className="bg-blue-50 p-3 rounded-full text-blue-600"><Phone className="h-6 w-6" /></div>
+              <div className="bg-blue-50 dark:bg-blue-950/40 p-3 rounded-full text-blue-600 dark:text-blue-400"><Phone className="h-6 w-6" /></div>
               <div>
-                <h4 className="font-bold text-slate-900">{t("contact.phone_label")}</h4>
-                <p className="text-slate-600">+249 123 456 789</p>
+                <h4 className="font-bold text-slate-900 dark:text-slate-100">{t("contact.phone_label")}</h4>
+                <p className="text-slate-600 dark:text-slate-400">+249 123 456 789</p>
               </div>
             </div>
             <div className="flex items-start gap-4">
-              <div className="bg-rose-50 p-3 rounded-full text-rose-600"><MapPin className="h-6 w-6" /></div>
+              <div className="bg-rose-50 dark:bg-rose-950/40 p-3 rounded-full text-rose-600 dark:text-rose-400"><MapPin className="h-6 w-6" /></div>
               <div>
-                <h4 className="font-bold text-slate-900">{t("contact.address_label")}</h4>
-                <p className="text-slate-600">{t("contact.address_value")}</p>
+                <h4 className="font-bold text-slate-900 dark:text-slate-100">{t("contact.address_label")}</h4>
+                <p className="text-slate-600 dark:text-slate-400">{t("contact.address_value")}</p>
               </div>
             </div>
           </div>

@@ -105,7 +105,7 @@ export function EventDetailModal({ event, isOpen, isSignedIn, onClose }: EventDe
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-slate-900/60 backdrop-blur-sm p-0 md:p-6" onClick={onClose}>
       <div
-        className="relative w-full max-w-4xl max-h-[90vh] overflow-hidden rounded-t-2xl md:rounded-2xl bg-white shadow-2xl flex flex-col animate-in slide-in-from-bottom-10 md:fade-in md:zoom-in-95 duration-300"
+        className="relative w-full max-w-4xl max-h-[90vh] overflow-hidden rounded-t-2xl md:rounded-2xl bg-white dark:bg-slate-900 shadow-2xl flex flex-col animate-in slide-in-from-bottom-10 md:fade-in md:zoom-in-95 duration-300"
         onClick={(event) => event.stopPropagation()}
       >
         <button
@@ -117,7 +117,7 @@ export function EventDetailModal({ event, isOpen, isSignedIn, onClose }: EventDe
         </button>
 
         {/* HERO IMAGE */}
-        <div className="relative h-48 md:h-64 w-full bg-slate-100 shrink-0">
+        <div className="relative h-48 md:h-64 w-full bg-slate-100 dark:bg-slate-800 shrink-0">
           {event.image ? (
             <img src={event.image} alt={event.title} className="h-full w-full object-cover" />
           ) : (
@@ -140,48 +140,47 @@ export function EventDetailModal({ event, isOpen, isSignedIn, onClose }: EventDe
             
             {/* LEFT: Info */}
             <div className="flex-1 p-6 md:p-8 space-y-8">
-              <div className="flex flex-wrap gap-4 pb-6 border-b border-gray-100">
-                 <div className="flex items-center gap-2 text-gray-700">
-                    <div className="p-2 rounded-lg bg-emerald-50 text-emerald-600"><Calendar className="h-5 w-5" /></div>
-                    <div><p className="text-xs text-gray-500 font-semibold uppercase">Date</p><p className="text-sm font-medium">{event.date}</p></div>
+              <div className="flex flex-wrap gap-4 pb-6 border-b border-gray-100 dark:border-slate-800">
+                 <div className="flex items-center gap-2 text-gray-700 dark:text-slate-300">
+                    <div className="p-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400"><Calendar className="h-5 w-5" /></div>
+                    <div><p className="text-xs text-gray-500 dark:text-slate-400 font-semibold uppercase">Date</p><p className="text-sm font-medium">{event.date}</p></div>
                  </div>
-                 <div className="flex items-center gap-2 text-gray-700">
-                    <div className="p-2 rounded-lg bg-emerald-50 text-emerald-600"><Clock className="h-5 w-5" /></div>
-                    <div><p className="text-xs text-gray-500 font-semibold uppercase">Time</p><p className="text-sm font-medium">{event.time} ({event.duration})</p></div>
+                 <div className="flex items-center gap-2 text-gray-700 dark:text-slate-300">
+                    <div className="p-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400"><Clock className="h-5 w-5" /></div>
+                    <div><p className="text-xs text-gray-500 dark:text-slate-400 font-semibold uppercase">Time</p><p className="text-sm font-medium">{event.time} ({event.duration})</p></div>
                  </div>
-                 <div className="flex items-center gap-2 text-gray-700">
-                    <div className="p-2 rounded-lg bg-emerald-50 text-emerald-600"><MapPin className="h-5 w-5" /></div>
-                    <div><p className="text-xs text-gray-500 font-semibold uppercase">Location</p><p className="text-sm font-medium">{event.location}</p></div>
+                 <div className="flex items-center gap-2 text-gray-700 dark:text-slate-300">
+                    <div className="p-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400"><MapPin className="h-5 w-5" /></div>
+                    <div><p className="text-xs text-gray-500 dark:text-slate-400 font-semibold uppercase">Location</p><p className="text-sm font-medium">{event.location}</p></div>
                  </div>
               </div>
 
-              <div className="prose prose-slate max-w-none">
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">About this activity</h3>
-                <p className="text-gray-600 leading-relaxed whitespace-pre-wrap">{event.description}</p>
+              <div className="prose prose-slate dark:prose-invert max-w-none">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-slate-100 mb-2">About this activity</h3>
+                <p className="text-gray-600 dark:text-slate-300 leading-relaxed whitespace-pre-wrap">{event.description}</p>
               </div>
-              
-              {/* 👇 NEW: RESOURCES SECTION */}
+
               {event.resources && event.resources.length > 0 && (
-                <div className="bg-slate-50 rounded-xl p-5 border border-slate-200">
-                   <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
-                     <Download className="h-4 w-4 text-emerald-600" /> Event Resources
+                <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-5 border border-slate-200 dark:border-slate-700">
+                   <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-3 flex items-center gap-2">
+                     <Download className="h-4 w-4 text-emerald-600 dark:text-emerald-400" /> Event Resources
                    </h3>
                    <div className="grid gap-2">
                      {event.resources.map((res, i) => (
-                       <a 
-                         key={i} 
-                         href={res.url} 
-                         target="_blank" 
+                       <a
+                         key={i}
+                         href={res.url}
+                         target="_blank"
                          rel="noopener noreferrer"
-                         className="flex items-center justify-between p-3 bg-white border border-slate-200 rounded-lg hover:border-emerald-300 hover:shadow-sm transition-all group"
+                         className="flex items-center justify-between p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg hover:border-emerald-300 dark:hover:border-emerald-700 hover:shadow-sm transition-all group"
                        >
                          <div className="flex items-center gap-3">
-                            <div className="h-8 w-8 bg-emerald-50 text-emerald-600 rounded flex items-center justify-center group-hover:bg-emerald-100 transition-colors">
+                            <div className="h-8 w-8 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 rounded flex items-center justify-center group-hover:bg-emerald-100 dark:group-hover:bg-emerald-950/60 transition-colors">
                               <LinkIcon className="h-4 w-4" />
                             </div>
-                            <span className="text-sm font-medium text-slate-700 group-hover:text-slate-900">{res.title}</span>
+                            <span className="text-sm font-medium text-slate-700 dark:text-slate-200 group-hover:text-slate-900 dark:group-hover:text-slate-50">{res.title}</span>
                          </div>
-                         <ExternalLink className="h-4 w-4 text-slate-400 group-hover:text-emerald-500" />
+                         <ExternalLink className="h-4 w-4 text-slate-400 dark:text-slate-500 group-hover:text-emerald-500" />
                        </a>
                      ))}
                    </div>
@@ -190,44 +189,46 @@ export function EventDetailModal({ event, isOpen, isSignedIn, onClose }: EventDe
 
               <div className="flex flex-wrap gap-2">
                 {event.tags.map((tag) => (
-                  <span key={tag} className="px-3 py-1 rounded-full border border-gray-200 bg-gray-50 text-xs font-medium text-gray-600">#{tag}</span>
+                  <span key={tag} className="px-3 py-1 rounded-full border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 text-xs font-medium text-gray-600 dark:text-slate-300">#{tag}</span>
                 ))}
               </div>
             </div>
 
             {/* RIGHT: Sidebar */}
-            <div className="w-full md:w-80 bg-gray-50/80 p-6 md:p-8 border-t md:border-t-0 md:border-l border-gray-100 flex flex-col gap-6">
-               <div className="rounded-xl bg-white p-5 shadow-sm border border-gray-200 text-center">
-                  <p className="text-sm text-gray-500 mb-4">Registration is open to all members.</p>
-                  <Button 
+            <div className="w-full md:w-80 bg-gray-50/80 dark:bg-slate-950/50 p-6 md:p-8 border-t md:border-t-0 md:border-l border-gray-100 dark:border-slate-800 flex flex-col gap-6">
+               <div className="rounded-xl bg-white dark:bg-slate-900 p-5 shadow-sm border border-gray-200 dark:border-slate-700 text-center">
+                  <p className="text-sm text-gray-500 dark:text-slate-400 mb-4">Registration is open to all members.</p>
+                  <Button
                     className={cn(
-                      "w-full h-12 text-base shadow-md transition-all", 
-                      isRegistered ? "bg-white border-2 border-emerald-500 text-emerald-700 hover:bg-emerald-50" : "bg-slate-900 hover:bg-slate-800 text-white"
+                      "w-full h-12 text-base shadow-md transition-all",
+                      isRegistered
+                        ? "bg-white dark:bg-slate-800 border-2 border-emerald-500 dark:border-emerald-600 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-950/40"
+                        : "bg-slate-900 hover:bg-slate-800 dark:bg-emerald-600 dark:hover:bg-emerald-500 text-white"
                     )}
-                    onClick={handleRegister} 
+                    onClick={handleRegister}
                     disabled={isLoading || isSubmitting}
                   >
                     {isSubmitting ? "Processing..." : isRegistered ? "Cancel Registration" : "Join Event"}
                   </Button>
-                  {isRegistered && <p className="mt-3 text-xs font-medium text-emerald-600">✓ You are going!</p>}
+                  {isRegistered && <p className="mt-3 text-xs font-medium text-emerald-600 dark:text-emerald-400">✓ You are going!</p>}
                </div>
 
                <div>
-                 <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">Hosted By</h4>
+                 <h4 className="text-xs font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wider mb-4">Hosted By</h4>
                  <div className="space-y-4">
                    {event.speakers.map((speaker) => (
                      <div key={speaker.name} className="flex items-center gap-3">
-                       <div className="h-12 w-12 rounded-full bg-slate-200 overflow-hidden ring-2 ring-white shadow-sm">
+                       <div className="h-12 w-12 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden ring-2 ring-white dark:ring-slate-800 shadow-sm">
                           {speaker.avatarUrl ? (
                             <img src={speaker.avatarUrl} alt={speaker.name} className="h-full w-full object-cover" />
                           ) : (
-                            <div className="h-full w-full flex items-center justify-center bg-slate-800 text-white font-bold">{speaker.name.charAt(0)}</div>
+                            <div className="h-full w-full flex items-center justify-center bg-slate-800 dark:bg-slate-700 text-white font-bold">{speaker.name.charAt(0)}</div>
                           )}
                        </div>
                        <div>
-                         <p className="text-sm font-bold text-gray-900">{speaker.name}</p>
-                         <p className="text-xs text-gray-500">{speaker.title}</p>
-                         {speaker.company && <p className="text-xs text-emerald-600 font-medium">{speaker.company}</p>}
+                         <p className="text-sm font-bold text-gray-900 dark:text-slate-100">{speaker.name}</p>
+                         <p className="text-xs text-gray-500 dark:text-slate-400">{speaker.title}</p>
+                         {speaker.company && <p className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">{speaker.company}</p>}
                        </div>
                      </div>
                    ))}
@@ -235,10 +236,15 @@ export function EventDetailModal({ event, isOpen, isSignedIn, onClose }: EventDe
                </div>
 
                <div className="mt-auto flex gap-2 justify-center">
-                 <button onClick={handleFavorite} className={cn("flex h-10 w-10 items-center justify-center rounded-full border transition-all hover:scale-110", isFavorited ? "border-red-200 bg-red-50 text-red-500" : "border-gray-200 bg-white text-gray-400 hover:text-gray-600")}>
+                 <button onClick={handleFavorite} className={cn(
+                   "flex h-10 w-10 items-center justify-center rounded-full border transition-all hover:scale-110",
+                   isFavorited
+                     ? "border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/40 text-red-500"
+                     : "border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300"
+                 )}>
                     <Heart className={cn("h-5 w-5", isFavorited && "fill-current")} />
                  </button>
-                 <button className="flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-400 hover:text-emerald-600 transition-all hover:scale-110">
+                 <button className="flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-gray-400 dark:text-slate-500 hover:text-emerald-600 dark:hover:text-emerald-400 transition-all hover:scale-110">
                     <Share2 className="h-5 w-5" />
                  </button>
                </div>

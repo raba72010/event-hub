@@ -45,17 +45,17 @@ export function EventCard({ event, onSelectEvent, showFavorite = true }: EventCa
   }
 
   return (
-    <article className="group relative overflow-hidden rounded-xl border border-gray-200 bg-white p-5 transition hover:-translate-y-1 hover:shadow-lg">
+    <article className="group relative overflow-hidden rounded-xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 transition hover:-translate-y-1 hover:shadow-lg">
       <div className="flex items-center justify-between gap-3">
         <div className="space-y-1 flex-1">
-          <p className="text-xs uppercase tracking-[0.15em] text-slate-700">{event.category}</p>
-          <h4 className="text-lg font-semibold text-gray-900">{event.title}</h4>
+          <p className="text-xs uppercase tracking-[0.15em] text-slate-700 dark:text-slate-300">{event.category}</p>
+          <h4 className="text-lg font-semibold text-gray-900 dark:text-slate-100">{event.title}</h4>
         </div>
         <div className="flex items-center gap-2">
           {showFavorite && (
             <button
               onClick={handleFavorite}
-              className="inline-flex items-center justify-center rounded-full p-1.5 text-gray-600 hover:bg-gray-100 active:scale-95 transition-all"
+              className="inline-flex items-center justify-center rounded-full p-1.5 text-gray-600 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800 active:scale-95 transition-all"
               aria-label={isFavorited ? "Remove from favorites" : "Add to favorites"}
             >
               <Heart
@@ -63,15 +63,15 @@ export function EventCard({ event, onSelectEvent, showFavorite = true }: EventCa
               />
             </button>
           )}
-          <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700">
+          <span className="rounded-full bg-gray-100 dark:bg-slate-800 px-3 py-1 text-xs font-medium text-gray-700 dark:text-slate-300">
             {event.level ?? "All levels"}
           </span>
         </div>
       </div>
 
-      <p className="mt-2 text-sm text-gray-600 line-clamp-2">{event.summary ?? event.description}</p>
+      <p className="mt-2 text-sm text-gray-600 dark:text-slate-400 line-clamp-2">{event.summary ?? event.description}</p>
 
-      <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-gray-600">
+      <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-gray-600 dark:text-slate-400">
         <Info icon={<CalendarClock className="h-4 w-4" />} label={`${event.date} · ${event.time}`} />
         <Info icon={<Clock className="h-4 w-4" />} label={event.duration} />
         <Info icon={<Play className="h-4 w-4" />} label={event.status === "on-demand" ? "Recording" : "Live"} />
@@ -81,7 +81,7 @@ export function EventCard({ event, onSelectEvent, showFavorite = true }: EventCa
         {event.tags.map((tag) => (
           <span
             key={tag}
-            className="rounded-full border border-gray-200 bg-gray-50 px-2.5 py-1 text-[11px] font-medium text-gray-700"
+            className="rounded-full border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 px-2.5 py-1 text-[11px] font-medium text-gray-700 dark:text-slate-300"
           >
             {tag}
           </span>
@@ -89,7 +89,7 @@ export function EventCard({ event, onSelectEvent, showFavorite = true }: EventCa
       </div>
 
       <div className="mt-5 flex items-center justify-between">
-        <div className="text-sm text-gray-600">
+        <div className="text-sm text-gray-600 dark:text-slate-400">
           {event.speakers.map((speaker, index) => (
             <span key={speaker.name}>
               {speaker.name}
@@ -107,10 +107,9 @@ export function EventCard({ event, onSelectEvent, showFavorite = true }: EventCa
 
 function Info({ icon, label }: { icon: ReactNode; label: string }) {
   return (
-    <span className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-2.5 py-1 text-[11px] font-medium text-gray-700">
+    <span className="inline-flex items-center gap-2 rounded-full border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-2.5 py-1 text-[11px] font-medium text-gray-700 dark:text-slate-300">
       {icon}
       <span>{label}</span>
     </span>
   )
 }
-

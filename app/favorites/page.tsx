@@ -85,18 +85,18 @@ export default function FavoritesPage() {
   }, [userId])
 
   return (
-    <div className="min-h-screen bg-slate-50" dir={isRtl ? "rtl" : "ltr"}>
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950" dir={isRtl ? "rtl" : "ltr"}>
       <div className="container mx-auto px-4 py-8 md:px-6">
         <div className="mb-6">
-          <h2 className="text-2xl font-semibold text-gray-900">{t("favorites.title")}</h2>
-          <p className="text-sm text-gray-600 mt-1">{t("favorites.subtitle")}</p>
+          <h2 className="text-2xl font-semibold text-gray-900 dark:text-slate-100">{t("favorites.title")}</h2>
+          <p className="text-sm text-gray-600 dark:text-slate-400 mt-1">{t("favorites.subtitle")}</p>
         </div>
 
         {isLoading ? (
           <EventCardSkeletonGrid count={4} />
         ) : events.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-12 rounded-2xl border border-gray-200 bg-white">
-            <p className="text-gray-600 text-center">{t("favorites.empty")}</p>
+          <div className="flex flex-col items-center justify-center py-12 rounded-2xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+            <p className="text-gray-600 dark:text-slate-400 text-center">{t("favorites.empty")}</p>
             <Button className="mt-4" onClick={() => router.push("/")}>{t("favorites.browse")}</Button>
           </div>
         ) : (
