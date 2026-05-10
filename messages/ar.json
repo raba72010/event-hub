@@ -2,6 +2,7 @@
   "nav": {
     "home": "الرئيسية",
     "about": "عن النادي",
+    "members": "دليل الأعضاء",
     "communities": "مجتمعات النادي",
     "media": "المركز الإعلامي",
     "library": "المكتبة الرقمية",
@@ -11,6 +12,34 @@
     "admin": "بوابة الإدارة",
     "profile": "حسابي",
     "logout": "تسجيل الخروج"
+  },
+  "members": {
+    "title": "دليل الأعضاء",
+    "subtitle": "تواصل مع المحترفين السودانيين في مختلف المجالات والمواقع.",
+    "search_placeholder": "ابحث بالاسم أو الشركة أو الدور…",
+    "all_communities": "جميع المجتمعات",
+    "no_results": "لا يوجد أعضاء يطابقون الفلاتر.",
+    "clear_filters": "مسح الفلاتر",
+    "loading": "جارٍ تحميل الأعضاء…",
+    "empty_state": "لم ينضم أي عضو إلى الدليل بعد.",
+    "view_profile": "عرض الملف",
+    "back_to_directory": "العودة للدليل",
+    "sign_in_required": "سجّل الدخول لعرض الملفات الكاملة",
+    "private_profile": "هذا الملف خاص.",
+    "availability": {
+      "active": "مفعّل",
+      "available": "متاح",
+      "busy": "مشغول",
+      "inactive": "معطّل"
+    },
+    "fields": {
+      "bio": "نبذة",
+      "location": "الموقع",
+      "company": "الشركة",
+      "title": "المسمى الوظيفي",
+      "community": "المجتمع",
+      "joined": "عضو منذ"
+    }
   },
   "home": {
     "welcome": "نادي المحترفين السودانيين",
@@ -163,6 +192,15 @@
     "job_title_placeholder": "مثال: مصمم منتجات",
     "company": "الشركة",
     "company_placeholder": "مثال: شركة سبأ",
+    "bio": "نبذة عنك",
+    "bio_placeholder": "أخبر الأعضاء الآخرين عن خلفيتك واهتماماتك وما تعمل عليه…",
+    "location": "الموقع",
+    "location_placeholder": "مثال: الخرطوم، السودان",
+    "community": "مجتمعك",
+    "community_placeholder": "اختر مجتمعاً",
+    "availability": "الحالة",
+    "is_public": "إظهار في دليل الأعضاء",
+    "is_public_desc": "يمكن للأعضاء الآخرين العثور على ملفك الشخصي من الدليل العام.",
     "saving": "جارٍ الحفظ...",
     "save_changes": "حفظ التغييرات",
     "profile_updated": "تم تحديث الملف الشخصي!",

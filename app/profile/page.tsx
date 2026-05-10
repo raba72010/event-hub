@@ -12,6 +12,7 @@ import { supabase } from "@/lib/supabase"
 import Link from "next/link"
 import { EventDetailModal } from "@/components/event-detail-modal"
 import { useTranslation } from "@/lib/i18n-context"
+import { COMMUNITIES } from "@/lib/communities"
 
 function cleanEventData(row: any) {
   if (!row) return null
@@ -68,7 +69,7 @@ export default function ProfilePage() {
     async function init() {
       if (typeof window !== "undefined" && localStorage.getItem("mock_admin_session") === "true") {
         setUser({ id: "mock-admin-id", email: "admin@spc.sd" })
-        setProfile({ full_name: "Admin", company: "SPC", title: "Administrator" })
+        setProfile({ full_name: "Admin", company: "SPC", title: "Administrator", availability: "active", is_public: true })
         setIsLoading(false)
         return
       }
@@ -100,6 +101,11 @@ export default function ProfilePage() {
         full_name: profile.full_name,
         company: profile.company,
         title: profile.title,
+        bio: profile.bio,
+        location: profile.location,
+        community: profile.community,
+        availability: profile.availability || "active",
+        is_public: profile.is_public !== false,
         updated_at: new Date().toISOString(),
       })
       if (error) throw error
@@ -229,6 +235,61 @@ export default function ProfilePage() {
                         />
                       </div>
                     </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">{t("profile.location")}</label>
+                      <input type="text" value={profile.location || ""} onChange={e => setProfile({ ...profile, location: e.target.value })}
+                        placeholder={t("profile.location_placeholder")}
+                        className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 outline-none"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">{t("profile.community")}</label>
+                      <select value={profile.community || ""} onChange={e => setProfile({ ...profile, community: e.target.value })}
+                        className="w-full px-4 py-2 rounded-lg border border-gray-300 bg-white focus:ring-2 focus:ring-indigo-500 outline-none"
+                      >
+                        <option value="">{t("profile.community_placeholder")}</option>
+                        {COMMUNITIES.map(c => (
+                          <option key={c.slug} value={c.slug}>{isRtl ? c.nameAr : c.nameEn}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">{t("profile.availability")}</label>
+                      <select value={profile.availability || "active"} onChange={e => setProfile({ ...profile, availability: e.target.value })}
+                        className="w-full px-4 py-2 rounded-lg border border-gray-300 bg-white focus:ring-2 focus:ring-indigo-500 outline-none"
+                      >
+                        <option value="active">{t("members.availability.active")}</option>
+                        <option value="available">{t("members.availability.available")}</option>
+                        <option value="busy">{t("members.availability.busy")}</option>
+                        <option value="inactive">{t("members.availability.inactive")}</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">{t("profile.bio")}</label>
+                      <textarea rows={4} value={profile.bio || ""} onChange={e => setProfile({ ...profile, bio: e.target.value })}
+                        placeholder={t("profile.bio_placeholder")}
+                        className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 outline-none resize-y"
+                      />
+                    </div>
+
+                    <div className="flex items-start gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
+                      <input
+                        id="is_public"
+                        type="checkbox"
+                        checked={profile.is_public !== false}
+                        onChange={e => setProfile({ ...profile, is_public: e.target.checked })}
+                        className="mt-1 h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                      />
+                      <label htmlFor="is_public" className="flex-1 cursor-pointer">
+                        <div className="text-sm font-medium text-slate-900">{t("profile.is_public")}</div>
+                        <p className="mt-0.5 text-xs text-slate-500">{t("profile.is_public_desc")}</p>
+                      </label>
+                    </div>
+
                     <div className="pt-4">
                       <Button type="submit" disabled={isSaving} className="gap-2">
                         {isSaving ? t("profile.saving") : <><Save className="h-4 w-4" /> {t("profile.save_changes")}</>}

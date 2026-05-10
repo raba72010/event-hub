@@ -15,6 +15,7 @@ import { useTranslation } from "@/lib/i18n-context"
 const NAV_PATHS = [
   { key: "home", href: "/" },
   { key: "about", href: "/about" },
+  { key: "members", href: "/members" },
   { key: "communities", href: "/communities" },
   { key: "media", href: "/media" },
   { key: "library", href: "/library" },

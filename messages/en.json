@@ -2,6 +2,7 @@
   "nav": {
     "home": "Home",
     "about": "About Us",
+    "members": "Members",
     "communities": "Communities",
     "media": "Media Center",
     "library": "Digital Library",
@@ -11,6 +12,34 @@
     "admin": "Admin Dashboard",
     "profile": "My Profile",
     "logout": "Sign Out"
+  },
+  "members": {
+    "title": "Member Directory",
+    "subtitle": "Connect with Sudanese professionals across fields and locations.",
+    "search_placeholder": "Search by name, company, or role…",
+    "all_communities": "All Communities",
+    "no_results": "No members match your filters.",
+    "clear_filters": "Clear filters",
+    "loading": "Loading members…",
+    "empty_state": "No members have joined the directory yet.",
+    "view_profile": "View profile",
+    "back_to_directory": "Back to directory",
+    "sign_in_required": "Sign in to view full profiles",
+    "private_profile": "This profile is private.",
+    "availability": {
+      "active": "Active",
+      "available": "Available",
+      "busy": "Busy",
+      "inactive": "Inactive"
+    },
+    "fields": {
+      "bio": "About",
+      "location": "Location",
+      "company": "Company",
+      "title": "Role",
+      "community": "Community",
+      "joined": "Member since"
+    }
   },
   "home": {
     "welcome": "Sudanese Professionals Club",
@@ -163,6 +192,15 @@
     "job_title_placeholder": "e.g. Product Designer",
     "company": "Company",
     "company_placeholder": "e.g. Acme Corp",
+    "bio": "About you",
+    "bio_placeholder": "Tell other members about your background, interests, and what you're working on…",
+    "location": "Location",
+    "location_placeholder": "e.g. Khartoum, Sudan",
+    "community": "Your Community",
+    "community_placeholder": "Select a community",
+    "availability": "Availability",
+    "is_public": "Show in member directory",
+    "is_public_desc": "Other members can find your profile from the public directory.",
     "saving": "Saving...",
     "save_changes": "Save Changes",
     "profile_updated": "Profile updated!",
