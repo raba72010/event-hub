@@ -106,7 +106,6 @@ export default function ProfilePage() {
         community: profile.community,
         availability: profile.availability || "active",
         is_public: profile.is_public !== false,
-        updated_at: new Date().toISOString(),
       })
       if (error) throw error
       alert(t("profile.profile_updated"))

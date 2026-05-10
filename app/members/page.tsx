@@ -43,7 +43,7 @@ export default function MembersDirectoryPage() {
           .from("profiles")
           .select("id, full_name, title, company, bio, location, community, availability, avatar_url")
           .eq("is_public", true)
-          .order("updated_at", { ascending: false })
+          .order("full_name", { ascending: true })
 
         if (error) throw error
         setMembers(data || [])
