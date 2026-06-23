@@ -208,47 +208,47 @@ export default function ProWebinarHub() {
         />
       )}
 
-      {/* ====================== SIGNED-OUT: HERO ====================== */}
-      {!isSignedIn && (
-        <section className="relative overflow-hidden bg-slate-950 py-24 md:py-40 min-h-[600px] flex items-center">
-          <img
-            src="/spc/ana-sudan-panel.jpg"
-            alt=""
-            aria-hidden="true"
-            className="absolute inset-0 w-full h-full object-cover object-center"
-          />
-          <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-b from-slate-950/70 via-slate-950/55 to-slate-950/90" />
-          <div aria-hidden="true" className="absolute inset-0 pointer-events-none">
-            <div className="absolute top-1/4 left-1/2 -translate-x-1/2 h-[500px] w-[500px] rounded-full bg-emerald-500/12 blur-[140px] animate-mesh-1" />
-            <div className="absolute bottom-0 right-1/4 h-[400px] w-[400px] rounded-full bg-cyan-500/10 blur-[120px] animate-mesh-2" />
-          </div>
+      {/* ====================== HERO ====================== */}
+      <section className="relative overflow-hidden bg-slate-950 py-24 md:py-40 min-h-[600px] flex items-center">
+        <img
+          src="/spc/ana-sudan-panel.jpg"
+          alt=""
+          aria-hidden="true"
+          className="absolute inset-0 w-full h-full object-cover object-center"
+        />
+        <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-b from-slate-950/70 via-slate-950/55 to-slate-950/90" />
+        <div aria-hidden="true" className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-1/4 left-1/2 -translate-x-1/2 h-[500px] w-[500px] rounded-full bg-emerald-500/12 blur-[140px] animate-mesh-1" />
+          <div className="absolute bottom-0 right-1/4 h-[400px] w-[400px] rounded-full bg-cyan-500/10 blur-[120px] animate-mesh-2" />
+        </div>
 
-          <div className="container relative mx-auto px-4 text-center md:px-6">
-            <div className="inline-flex items-center rounded-full border border-white/15 bg-white/5 backdrop-blur-md px-4 py-1.5 text-sm font-medium text-slate-200 mb-6 shadow-lg">
-              <Star className="me-2 h-3.5 w-3.5 text-yellow-400" /> {t("home.badge")}
-            </div>
-            <h1 className="mx-auto max-w-5xl text-4xl font-bold tracking-tight text-white md:text-6xl lg:text-7xl leading-tight drop-shadow-2xl">
-              {t("home.hero_title_ar")} <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-white to-red-400">
-                {t("home.hero_subtitle")}
-              </span>
-            </h1>
-            <p className="mx-auto mt-6 max-w-2xl text-lg text-slate-200/90 drop-shadow-lg">
-              {t("home.hero_desc")}
-            </p>
-            <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-              <Button size="lg" className="h-12 px-8 bg-white text-slate-900 hover:bg-slate-100 font-semibold rounded-full" onClick={scrollToEvents}>
-                {t("home.explore")}
-              </Button>
+        <div className="container relative mx-auto px-4 text-center md:px-6">
+          <div className="inline-flex items-center rounded-full border border-white/15 bg-white/5 backdrop-blur-md px-4 py-1.5 text-sm font-medium text-slate-200 mb-6 shadow-lg">
+            <Star className="me-2 h-3.5 w-3.5 text-yellow-400" /> {t("home.badge")}
+          </div>
+          <h1 className="mx-auto max-w-5xl text-4xl font-bold tracking-tight text-white md:text-6xl lg:text-7xl leading-tight drop-shadow-2xl">
+            {t("home.hero_title_ar")} <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-white to-red-400">
+              {t("home.hero_subtitle")}
+            </span>
+          </h1>
+          <p className="mx-auto mt-6 max-w-2xl text-lg text-slate-200/90 drop-shadow-lg">
+            {t("home.hero_desc")}
+          </p>
+          <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
+            <Button size="lg" className="h-12 px-8 bg-white text-slate-900 hover:bg-slate-100 font-semibold rounded-full" onClick={scrollToEvents}>
+              {t("home.explore")}
+            </Button>
+            {!isSignedIn && (
               <Link href="/about">
                 <Button size="lg" variant="outline" className="h-12 px-8 border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white rounded-full">
                   {t("home.about_club")}
                 </Button>
               </Link>
-            </div>
+            )}
           </div>
-        </section>
-      )}
+        </div>
+      </section>
 
       {/* ====================== SIGNED-OUT: NEXT SESSION (or fallback announcement) ====================== */}
       {!isSignedIn && nextEvent && (
