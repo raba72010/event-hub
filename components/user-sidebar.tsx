@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { usePathname } from "next/navigation"
-import { Bookmark, CalendarCheck, LogIn, Settings, User2, Shield } from "lucide-react"
+import { Bookmark, CalendarCheck, LogIn, Settings, User2, Shield, MessageSquare } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { supabase } from "@/lib/supabase"
@@ -116,12 +116,20 @@ export function UserSidebar(_props: UserSidebarProps = {}) {
 
       <div className="space-y-2">
         {isAuthenticated && (
-          <SidebarLink
-            icon={<User2 className="h-4 w-4" />}
-            label={t("sidebar.my_profile")}
-            href="/profile"
-            active={pathname === "/profile"}
-          />
+          <>
+            <SidebarLink
+              icon={<User2 className="h-4 w-4" />}
+              label={t("sidebar.my_profile")}
+              href="/profile"
+              active={pathname === "/profile"}
+            />
+            <SidebarLink
+              icon={<MessageSquare className="h-4 w-4" />}
+              label={t("nav.messages")}
+              href="/messages"
+              active={pathname === "/messages"}
+            />
+          </>
         )}
         <SidebarLink
           icon={<CalendarCheck className="h-4 w-4" />}

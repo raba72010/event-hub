@@ -11,7 +11,16 @@
     "join": "Join Now",
     "admin": "Admin Dashboard",
     "profile": "My Profile",
+    "messages": "Messages",
     "logout": "Sign Out"
+  },
+  "messages_center": {
+    "title": "Messages Center",
+    "subtitle": "Your active conversations with community members",
+    "empty": "No messages yet",
+    "empty_sub": "When you message other members from their profiles, the conversations will appear here.",
+    "search": "Search conversations...",
+    "you": "You"
   },
   "members": {
     "badge": "Our Community",

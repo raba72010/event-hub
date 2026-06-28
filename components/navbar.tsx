@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Menu, User, Shield } from "lucide-react"
+import { Menu, User, Shield, MessageSquare } from "lucide-react"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { UserSidebar } from "@/components/user-sidebar"
 import { supabase } from "@/lib/supabase"
@@ -149,10 +149,16 @@ export function Navbar() {
                   </Button>
                 </Link>
               )}
+              <Link href="/messages">
+                <Button variant="ghost" className="text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white gap-2">
+                  <MessageSquare className="h-4 w-4" />
+                  <span className="hidden lg:inline">{t('nav.messages')}</span>
+                </Button>
+              </Link>
               <Link href="/profile">
                 <Button variant="ghost" className="text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white gap-2">
                   <User className="h-4 w-4" />
-                  {t('nav.profile')}
+                  <span className="hidden lg:inline">{t('nav.profile')}</span>
                 </Button>
               </Link>
               <Button onClick={handleLogout} variant="outline" size="sm" className="border-slate-300 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800 ms-2">{t('nav.logout')}</Button>
