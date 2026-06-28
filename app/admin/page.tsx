@@ -15,21 +15,32 @@ export default function AdminDashboardOverview() {
   const { t, locale } = useTranslation()
   const [stats, setStats] = useState({
     events: 0,
-    members: 1520,
+    members: 0,
     communities: 8,
   })
   const [recentEvents, setRecentEvents] = useState<any[]>([])
 
   useEffect(() => {
     async function fetchStats() {
-      const { count } = await supabase.from("events").select("*", { count: "exact", head: true })
-      const { data } = await supabase
-        .from("events")
-        .select("*")
-        .order("created_at", { ascending: false })
-        .limit(5)
-      setStats(prev => ({ ...prev, events: count || 0 }))
-      if (data) setRecentEvents(data)
+      try {
+        const { count: eventsCount } = await supabase.from("events").select("*", { count: "exact", head: true })
+        const { count: membersCount } = await supabase.from("profiles").select("*", { count: "exact", head: true })
+        
+        const { data: eventsData } = await supabase
+          .from("events")
+          .select("*")
+          .order("created_at", { ascending: false })
+          .limit(5)
+        
+        setStats({
+          events: eventsCount || 0,
+          members: membersCount || 0,
+          communities: 8,
+        })
+        if (eventsData) setRecentEvents(eventsData)
+      } catch (err) {
+        console.error("Error fetching admin stats:", err)
+      }
     }
     fetchStats()
   }, [])
