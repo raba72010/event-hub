@@ -115,7 +115,7 @@ export default function AdminLibraryPage() {
           <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">
             {isRtl ? "إدارة المكتبة الرقمية" : "Manage Digital Library"}
           </h1>
-          <p className="text-slate-500 mt-1">
+          <p className="text-slate-500 dark:text-slate-400 mt-1">
             {isRtl ? "إضافة وحذف ملفات البحوث والكتب التعليمية للمكتبة" : "Add and delete research resources and books"}
           </p>
         </div>
@@ -246,7 +246,7 @@ export default function AdminLibraryPage() {
         <div className="lg:col-span-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden">
           <div className="p-5 border-b border-slate-100 dark:border-slate-800">
             <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-              <BookOpen className="h-5 w-5 text-slate-500" />
+              <BookOpen className="h-5 w-5 text-slate-500 dark:text-slate-400" />
               {isRtl ? "المستندات الحالية" : "Current Documents"}
             </h3>
           </div>
@@ -254,7 +254,7 @@ export default function AdminLibraryPage() {
           {isLoading ? (
             <div className="p-12 flex justify-center"><Loader2 className="animate-spin text-emerald-600 h-8 w-8" /></div>
           ) : documents.length === 0 ? (
-            <div className="p-12 text-center text-slate-500">
+            <div className="p-12 text-center text-slate-500 dark:text-slate-400">
               {isRtl ? "لا توجد مستندات بعد." : "No documents added yet."}
             </div>
           ) : (
@@ -270,7 +270,7 @@ export default function AdminLibraryPage() {
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                   {documents.map((doc) => (
-                    <tr key={doc.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/30 text-slate-700 dark:text-slate-300">
+                    <tr key={doc.id} className="hover:bg-slate-50 dark:bg-slate-900/50 dark:hover:bg-slate-800/30 text-slate-700 dark:text-slate-300">
                       <td className="px-5 py-3">
                         <div className="font-semibold text-slate-900 dark:text-slate-100">
                           {isRtl ? doc.title_ar : doc.title_en}

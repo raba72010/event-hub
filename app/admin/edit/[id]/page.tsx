@@ -152,8 +152,8 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
   if (success) return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] text-center" dir="rtl">
       <CheckCircle2 className="h-16 w-16 text-emerald-500 mb-4" />
-      <h2 className="text-2xl font-bold text-slate-900">تم حفظ التعديلات بنجاح!</h2>
-      <p className="text-slate-500 mt-2">جارٍ التحويل...</p>
+      <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">تم حفظ التعديلات بنجاح!</h2>
+      <p className="text-slate-500 dark:text-slate-400 mt-2">جارٍ التحويل...</p>
     </div>
   )
 
@@ -161,8 +161,8 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
     <div dir="rtl">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">تعديل الفعالية</h1>
-          <p className="text-slate-500 text-sm mt-1">قم بتعديل تفاصيل هذه الفعالية.</p>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">تعديل الفعالية</h1>
+          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">قم بتعديل تفاصيل هذه الفعالية.</p>
         </div>
         <Link href="/admin/events">
           <Button variant="outline" size="sm"><ArrowRight className="h-4 w-4 ml-2" />العودة</Button>
@@ -173,42 +173,42 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
         {/* LEFT 2/3 */}
         <div className="lg:col-span-2 space-y-6">
           {/* تفاصيل الفعالية */}
-          <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-            <div className="flex items-center gap-2 mb-5 text-amber-500"><Type className="h-5 w-5" /><h3 className="font-semibold text-slate-900">تفاصيل الفعالية</h3></div>
+          <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+            <div className="flex items-center gap-2 mb-5 text-amber-500"><Type className="h-5 w-5" /><h3 className="font-semibold text-slate-900 dark:text-slate-100">تفاصيل الفعالية</h3></div>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">عنوان الفعالية *</label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">عنوان الفعالية *</label>
                 <input required type="text" value={formData.title} onChange={e => setFormData({ ...formData, title: e.target.value })}
-                  className="w-full rounded-lg border border-slate-300 px-4 py-2.5 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-100 text-right" />
+                  className="w-full rounded-lg border border-slate-300 dark:border-slate-700 px-4 py-2.5 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-100 text-right" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">الوصف *</label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">الوصف *</label>
                 <textarea required rows={4} value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })}
-                  className="w-full rounded-lg border border-slate-300 px-4 py-2.5 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-100 text-right" />
+                  className="w-full rounded-lg border border-slate-300 dark:border-slate-700 px-4 py-2.5 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-100 text-right" />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">القسم</label>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">القسم</label>
                   {!isCustomCategory ? (
                     <select value={PREDEFINED_CATEGORIES.includes(formData.category) ? formData.category : "custom"}
-                      onChange={handleCategoryChange} className="w-full rounded-lg border border-slate-300 px-4 py-2.5 outline-none bg-white text-right">
+                      onChange={handleCategoryChange} className="w-full rounded-lg border border-slate-300 dark:border-slate-700 px-4 py-2.5 outline-none bg-white dark:bg-slate-900 text-right">
                       {PREDEFINED_CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
                       <option value="custom">+ إضافة قسم جديد...</option>
                     </select>
                   ) : (
                     <div className="flex gap-2">
                       <input required type="text" value={formData.category} onChange={e => setFormData({ ...formData, category: e.target.value })}
-                        className="w-full rounded-lg border border-slate-300 px-4 py-2.5 outline-none focus:border-amber-500 text-right" placeholder="اسم القسم" />
+                        className="w-full rounded-lg border border-slate-300 dark:border-slate-700 px-4 py-2.5 outline-none focus:border-amber-500 text-right" placeholder="اسم القسم" />
                       <Button type="button" variant="outline" onClick={() => { setIsCustomCategory(false); setFormData({ ...formData, category: PREDEFINED_CATEGORIES[0] }) }}>إلغاء</Button>
                     </div>
                   )}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">الوسوم (مفصولة بفاصلة)</label>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">الوسوم (مفصولة بفاصلة)</label>
                   <div className="relative">
                     <Tag className="absolute right-3 top-3 h-4 w-4 text-slate-400" />
                     <input type="text" value={formData.tags} onChange={e => setFormData({ ...formData, tags: e.target.value })}
-                      className="w-full rounded-lg border border-slate-300 pr-10 pl-4 py-2.5 outline-none focus:border-amber-500 text-right" />
+                      className="w-full rounded-lg border border-slate-300 dark:border-slate-700 pr-10 pl-4 py-2.5 outline-none focus:border-amber-500 text-right" />
                   </div>
                 </div>
               </div>
@@ -216,9 +216,9 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
           </div>
 
           {/* الموارد والروابط */}
-          <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
             <div className="flex items-center justify-between mb-5">
-              <div className="flex items-center gap-2 text-amber-500"><LinkIcon className="h-5 w-5" /><h3 className="font-semibold text-slate-900">الموارد والروابط</h3></div>
+              <div className="flex items-center gap-2 text-amber-500"><LinkIcon className="h-5 w-5" /><h3 className="font-semibold text-slate-900 dark:text-slate-100">الموارد والروابط</h3></div>
               <Button type="button" size="sm" variant="outline" onClick={() => setResources([...resources, { title: "", url: "" }])}>
                 <Plus className="h-4 w-4 ml-1" />إضافة رابط
               </Button>
@@ -231,10 +231,10 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                   <div className="flex-1 space-y-2">
                     <input type="text" placeholder="العنوان (مثال: الشرائح)" value={res.title}
                       onChange={e => { const n = [...resources]; n[i].title = e.target.value; setResources(n) }}
-                      className="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 outline-none text-right" />
+                      className="w-full text-sm border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 outline-none text-right" />
                     <input type="text" placeholder="الرابط (https://...)" value={res.url}
                       onChange={e => { const n = [...resources]; n[i].url = e.target.value; setResources(n) }}
-                      className="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 outline-none bg-slate-50 text-right" />
+                      className="w-full text-sm border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 outline-none bg-slate-50 dark:bg-slate-900/50 text-right" />
                   </div>
                   <Button type="button" size="icon" variant="ghost" className="text-red-500 hover:text-red-700"
                     onClick={() => { const n = [...resources]; n.splice(i, 1); setResources(n) }}>
@@ -246,39 +246,39 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
           </div>
 
           {/* الوقت والمكان */}
-          <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-            <div className="flex items-center gap-2 mb-5 text-amber-500"><Calendar className="h-5 w-5" /><h3 className="font-semibold text-slate-900">الوقت والمكان</h3></div>
+          <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+            <div className="flex items-center gap-2 mb-5 text-amber-500"><Calendar className="h-5 w-5" /><h3 className="font-semibold text-slate-900 dark:text-slate-100">الوقت والمكان</h3></div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div><label className="block text-sm font-medium text-slate-700 mb-1">تاريخ البداية *</label>
+              <div><label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">تاريخ البداية *</label>
                 <input required type="date" value={formData.startDate} onChange={e => setFormData({ ...formData, startDate: e.target.value })}
-                  className="w-full rounded-lg border border-slate-300 px-4 py-2.5 outline-none focus:border-amber-500" /></div>
-              <div><label className="block text-sm font-medium text-slate-700 mb-1">وقت البداية *</label>
+                  className="w-full rounded-lg border border-slate-300 dark:border-slate-700 px-4 py-2.5 outline-none focus:border-amber-500" /></div>
+              <div><label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">وقت البداية *</label>
                 <input required type="time" value={formData.startTime} onChange={e => setFormData({ ...formData, startTime: e.target.value })}
-                  className="w-full rounded-lg border border-slate-300 px-4 py-2.5 outline-none focus:border-amber-500" /></div>
-              <div><label className="block text-sm font-medium text-slate-700 mb-1">المدة (بالدقائق) *</label>
+                  className="w-full rounded-lg border border-slate-300 dark:border-slate-700 px-4 py-2.5 outline-none focus:border-amber-500" /></div>
+              <div><label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">المدة (بالدقائق) *</label>
                 <input required type="number" value={formData.duration} onChange={e => setFormData({ ...formData, duration: e.target.value })}
-                  className="w-full rounded-lg border border-slate-300 px-4 py-2.5 outline-none focus:border-amber-500" placeholder="60" /></div>
-              <div><label className="block text-sm font-medium text-slate-700 mb-1">الموقع</label>
+                  className="w-full rounded-lg border border-slate-300 dark:border-slate-700 px-4 py-2.5 outline-none focus:border-amber-500" placeholder="60" /></div>
+              <div><label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">الموقع</label>
                 <div className="relative"><MapPin className="absolute right-3 top-3 h-4 w-4 text-slate-400" />
                   <input type="text" value={formData.location} onChange={e => setFormData({ ...formData, location: e.target.value })}
-                    className="w-full rounded-lg border border-slate-300 pr-10 pl-4 py-2.5 outline-none focus:border-amber-500 text-right" /></div></div>
+                    className="w-full rounded-lg border border-slate-300 dark:border-slate-700 pr-10 pl-4 py-2.5 outline-none focus:border-amber-500 text-right" /></div></div>
             </div>
           </div>
 
           {/* المتحدث */}
-          <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-            <div className="flex items-center gap-2 mb-5 text-amber-500"><User className="h-5 w-5" /><h3 className="font-semibold text-slate-900">بيانات المتحدث</h3></div>
+          <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+            <div className="flex items-center gap-2 mb-5 text-amber-500"><User className="h-5 w-5" /><h3 className="font-semibold text-slate-900 dark:text-slate-100">بيانات المتحدث</h3></div>
             <div className="space-y-4">
-              <div><label className="block text-sm font-medium text-slate-700 mb-1">الاسم الكامل *</label>
+              <div><label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">الاسم الكامل *</label>
                 <input required type="text" value={formData.speakerName} onChange={e => setFormData({ ...formData, speakerName: e.target.value })}
-                  className="w-full rounded-lg border border-slate-300 px-4 py-2.5 outline-none focus:border-amber-500 text-right" /></div>
+                  className="w-full rounded-lg border border-slate-300 dark:border-slate-700 px-4 py-2.5 outline-none focus:border-amber-500 text-right" /></div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div><label className="block text-sm font-medium text-slate-700 mb-1">المسمى الوظيفي *</label>
+                <div><label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">المسمى الوظيفي *</label>
                   <input required type="text" value={formData.speakerTitle} onChange={e => setFormData({ ...formData, speakerTitle: e.target.value })}
-                    className="w-full rounded-lg border border-slate-300 px-4 py-2.5 outline-none focus:border-amber-500 text-right" /></div>
-                <div><label className="block text-sm font-medium text-slate-700 mb-1">الشركة</label>
+                    className="w-full rounded-lg border border-slate-300 dark:border-slate-700 px-4 py-2.5 outline-none focus:border-amber-500 text-right" /></div>
+                <div><label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">الشركة</label>
                   <input type="text" value={formData.speakerCompany} onChange={e => setFormData({ ...formData, speakerCompany: e.target.value })}
-                    className="w-full rounded-lg border border-slate-300 px-4 py-2.5 outline-none focus:border-amber-500 text-right" /></div>
+                    className="w-full rounded-lg border border-slate-300 dark:border-slate-700 px-4 py-2.5 outline-none focus:border-amber-500 text-right" /></div>
               </div>
             </div>
           </div>
@@ -287,18 +287,18 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
         {/* RIGHT 1/3 */}
         <div className="space-y-6">
           {/* صورة الفعالية */}
-          <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
             <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2 text-amber-500"><ImageIcon className="h-5 w-5" /><h3 className="font-semibold text-slate-900">صورة الفعالية</h3></div>
+              <div className="flex items-center gap-2 text-amber-500"><ImageIcon className="h-5 w-5" /><h3 className="font-semibold text-slate-900 dark:text-slate-100">صورة الفعالية</h3></div>
               <div className="flex bg-slate-100 rounded-lg p-1">
                 <button type="button" onClick={() => setImageMode("upload")}
-                  className={cn("px-3 py-1 text-xs font-medium rounded-md transition-all", imageMode === "upload" ? "bg-white shadow text-slate-900" : "text-slate-500")}>رفع</button>
+                  className={cn("px-3 py-1 text-xs font-medium rounded-md transition-all", imageMode === "upload" ? "bg-white dark:bg-slate-900 shadow text-slate-900 dark:text-slate-100" : "text-slate-500 dark:text-slate-400")}>رفع</button>
                 <button type="button" onClick={() => setImageMode("stock")}
-                  className={cn("px-3 py-1 text-xs font-medium rounded-md transition-all", imageMode === "stock" ? "bg-white shadow text-slate-900" : "text-slate-500")}>مكتبة</button>
+                  className={cn("px-3 py-1 text-xs font-medium rounded-md transition-all", imageMode === "stock" ? "bg-white dark:bg-slate-900 shadow text-slate-900 dark:text-slate-100" : "text-slate-500 dark:text-slate-400")}>مكتبة</button>
               </div>
             </div>
             <div className="space-y-3">
-              <div className="relative h-44 rounded-xl border-2 border-dashed border-slate-200 flex items-center justify-center overflow-hidden bg-slate-50">
+              <div className="relative h-44 rounded-xl border-2 border-dashed border-slate-200 dark:border-slate-800 flex items-center justify-center overflow-hidden bg-slate-50 dark:bg-slate-900/50">
                 {imagePreview ? <img src={imagePreview} className="w-full h-full object-cover" alt="معاينة" /> : <p className="text-slate-400 text-sm">لا توجد صورة</p>}
                 {imageMode === "upload" && <input type="file" accept="image/*" onChange={handleImageChange} className="absolute inset-0 opacity-0 cursor-pointer" />}
               </div>
@@ -319,22 +319,22 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
           </div>
 
           {/* الإعدادات */}
-          <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-            <h3 className="font-semibold text-slate-900 mb-4">الإعدادات</h3>
+          <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+            <h3 className="font-semibold text-slate-900 dark:text-slate-100 mb-4">الإعدادات</h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">مستوى الصعوبة</label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">مستوى الصعوبة</label>
                 <select value={formData.level} onChange={e => setFormData({ ...formData, level: e.target.value })}
-                  className="w-full rounded-lg border border-slate-300 px-4 py-2.5 outline-none bg-white text-right focus:border-amber-500">
+                  className="w-full rounded-lg border border-slate-300 dark:border-slate-700 px-4 py-2.5 outline-none bg-white dark:bg-slate-900 text-right focus:border-amber-500">
                   <option value="مبتدئ">مبتدئ</option>
                   <option value="متوسط">متوسط</option>
                   <option value="متقدم">متقدم</option>
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">الحالة</label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">الحالة</label>
                 <select value={formData.status} onChange={e => setFormData({ ...formData, status: e.target.value })}
-                  className="w-full rounded-lg border border-slate-300 px-4 py-2.5 outline-none bg-white text-right focus:border-amber-500">
+                  className="w-full rounded-lg border border-slate-300 dark:border-slate-700 px-4 py-2.5 outline-none bg-white dark:bg-slate-900 text-right focus:border-amber-500">
                   <option value="upcoming">قادمة</option>
                   <option value="past">سابقة (متاح للمشاهدة)</option>
                 </select>

@@ -102,17 +102,17 @@ export default function AttendeeListPage({ params }: { params: Promise<{ id: str
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900/50">
       {/* Header */}
-      <header className="sticky top-0 z-40 w-full border-b border-gray-200 bg-white/80 backdrop-blur-md">
+      <header className="sticky top-0 z-40 w-full border-b border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900/80 backdrop-blur-md">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           <div className="flex items-center gap-2">
              <div className="flex h-8 w-8 items-center justify-center rounded bg-slate-900 text-white">
                 <User className="h-4 w-4" />
              </div>
              <div className="flex flex-col">
-               <h1 className="text-sm font-bold text-slate-900">Attendee List</h1>
-               <span className="text-[10px] text-slate-500 truncate max-w-[200px]">{eventTitle}</span>
+               <h1 className="text-sm font-bold text-slate-900 dark:text-slate-100">Attendee List</h1>
+               <span className="text-[10px] text-slate-500 dark:text-slate-400 truncate max-w-[200px]">{eventTitle}</span>
              </div>
           </div>
           <Button variant="ghost" size="sm" onClick={() => router.push("/")}>
@@ -130,7 +130,7 @@ export default function AttendeeListPage({ params }: { params: Promise<{ id: str
                 placeholder="Search by name, email, or company..." 
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 pr-4 py-2 w-full rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="pl-10 pr-4 py-2 w-full rounded-lg border border-gray-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
            </div>
            
@@ -139,10 +139,10 @@ export default function AttendeeListPage({ params }: { params: Promise<{ id: str
            </Button>
         </div>
 
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+        <div className="bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-slate-800 shadow-sm overflow-hidden">
            <div className="overflow-x-auto">
              <table className="w-full text-sm text-left">
-               <thead className="bg-gray-50 text-gray-500 font-medium border-b border-gray-200">
+               <thead className="bg-gray-50 text-gray-500 font-medium border-b border-gray-200 dark:border-slate-800">
                  <tr>
                    <th className="px-6 py-3">Name</th>
                    <th className="px-6 py-3">Email</th>
@@ -178,7 +178,7 @@ export default function AttendeeListPage({ params }: { params: Promise<{ id: str
                </tbody>
              </table>
            </div>
-           <div className="bg-gray-50 px-6 py-3 border-t border-gray-200 text-xs text-gray-500">
+           <div className="bg-gray-50 px-6 py-3 border-t border-gray-200 dark:border-slate-800 text-xs text-gray-500">
              Total Attendees: {filteredAttendees.length}
            </div>
         </div>

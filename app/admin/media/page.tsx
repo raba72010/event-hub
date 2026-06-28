@@ -124,7 +124,7 @@ export default function AdminMediaPage() {
           <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">
             {isRtl ? "إدارة المركز الإعلامي" : "Manage Media Center"}
           </h1>
-          <p className="text-slate-500 mt-1">
+          <p className="text-slate-500 dark:text-slate-400 mt-1">
             {isRtl ? "إضافة وحذف الأخبار، التغطيات المصورة والندوات المسجلة" : "Create and manage news statements, galleries, and recorded webinars"}
           </p>
         </div>
@@ -266,7 +266,7 @@ export default function AdminMediaPage() {
         <div className="lg:col-span-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden">
           <div className="p-5 border-b border-slate-100 dark:border-slate-800">
             <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-              <Newspaper className="h-5 w-5 text-slate-500" />
+              <Newspaper className="h-5 w-5 text-slate-500 dark:text-slate-400" />
               {isRtl ? "المنشورات الحالية" : "Current Publications"}
             </h3>
           </div>
@@ -274,7 +274,7 @@ export default function AdminMediaPage() {
           {isLoading ? (
             <div className="p-12 flex justify-center"><Loader2 className="animate-spin text-emerald-600 h-8 w-8" /></div>
           ) : articles.length === 0 ? (
-            <div className="p-12 text-center text-slate-500">
+            <div className="p-12 text-center text-slate-500 dark:text-slate-400">
               {isRtl ? "لا توجد منشورات بعد." : "No publications added yet."}
             </div>
           ) : (
@@ -289,7 +289,7 @@ export default function AdminMediaPage() {
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                   {articles.map((art) => (
-                    <tr key={art.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/30 text-slate-700 dark:text-slate-300">
+                    <tr key={art.id} className="hover:bg-slate-50 dark:bg-slate-900/50 dark:hover:bg-slate-800/30 text-slate-700 dark:text-slate-300">
                       <td className="px-5 py-3">
                         <div className="font-semibold text-slate-900 dark:text-slate-100">
                           {isRtl ? art.title_ar : art.title_en}

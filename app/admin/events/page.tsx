@@ -30,8 +30,8 @@ export default function AdminEventsPage() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">{t("admin.events_title")}</h1>
-          <p className="text-slate-500 text-sm mt-1">{t("admin.events_subtitle")}</p>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">{t("admin.events_title")}</h1>
+          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">{t("admin.events_subtitle")}</p>
         </div>
         <Link href="/admin/events/new">
           <Button className="bg-emerald-600 hover:bg-emerald-700 text-white flex items-center gap-2">
@@ -46,11 +46,11 @@ export default function AdminEventsPage() {
           <Loader2 className="h-8 w-8 animate-spin text-emerald-600" />
         </div>
       ) : (
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
           {events.length === 0 ? (
-            <div className="text-center py-20 text-slate-500">
+            <div className="text-center py-20 text-slate-500 dark:text-slate-400">
               <CalendarDays className="h-12 w-12 mx-auto mb-3 text-slate-300" />
-              <h3 className="text-lg font-semibold text-slate-700">{t("admin.events_none")}</h3>
+              <h3 className="text-lg font-semibold text-slate-700 dark:text-slate-300">{t("admin.events_none")}</h3>
               <p className="text-sm mt-1">{t("admin.events_none_desc")}</p>
               <Link href="/admin/events/new" className="mt-4 inline-block">
                 <Button className="bg-emerald-600 hover:bg-emerald-700 text-white mt-3">
@@ -76,7 +76,7 @@ export default function AdminEventsPage() {
                     const dateObj = event.start_time ? new Date(event.start_time) : null
                     const dateStr = dateObj ? dateObj.toLocaleDateString(dateLocale) : "—"
                     return (
-                      <tr key={event.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+                      <tr key={event.id} className="hover:bg-slate-50 dark:bg-slate-900/50 dark:hover:bg-slate-800/30 transition-colors">
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
                             {event.image ? (
@@ -103,7 +103,7 @@ export default function AdminEventsPage() {
                         </td>
                         <td className="px-6 py-4" style={{ textAlign: locale === "ar" ? "left" : "right" }}>
                           <div className="flex items-center gap-3 justify-end">
-                            <Link href={`/admin/attendees/${event.id}`} className="text-slate-500 hover:text-slate-800 text-xs flex items-center gap-1">
+                            <Link href={`/admin/attendees/${event.id}`} className="text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:text-slate-200 text-xs flex items-center gap-1">
                               <Users className="h-3.5 w-3.5" /> {t("admin.events_attendees")}
                             </Link>
                             <Link href={`/admin/edit/${event.id}`} className="text-indigo-600 hover:text-indigo-900 font-medium text-xs flex items-center gap-1">

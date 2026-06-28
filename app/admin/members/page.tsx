@@ -96,7 +96,7 @@ export default function AdminMembersPage() {
       <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-900 dark:text-white">{t("admin.members_title")}</h1>
-          <p className="text-slate-500 text-sm mt-1">{t("admin.members_subtitle")}</p>
+          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">{t("admin.members_subtitle")}</p>
         </div>
         <div className="relative max-w-sm w-full">
           <Search className={`absolute top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 ${isRtl ? 'right-3' : 'left-3'}`} />
@@ -114,7 +114,7 @@ export default function AdminMembersPage() {
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-left dark:text-slate-300">
-            <thead className={`text-xs text-slate-500 bg-slate-50 dark:bg-slate-800/50 uppercase border-b border-slate-200 dark:border-slate-800 ${isRtl ? 'text-right' : 'text-left'}`}>
+            <thead className={`text-xs text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/50 uppercase border-b border-slate-200 dark:border-slate-800 ${isRtl ? 'text-right' : 'text-left'}`}>
               <tr>
                 <th className="px-6 py-4 font-semibold">{isRtl ? "العضو" : "Member"}</th>
                 <th className="px-6 py-4 font-semibold">{isRtl ? "المنصب" : "Title"}</th>
@@ -126,13 +126,13 @@ export default function AdminMembersPage() {
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
               {loading ? (
                 <tr>
-                  <td colSpan={canManageRoles ? 5 : 4} className="px-6 py-12 text-center text-slate-500">
+                  <td colSpan={canManageRoles ? 5 : 4} className="px-6 py-12 text-center text-slate-500 dark:text-slate-400">
                     <Loader2 className="animate-spin h-6 w-6 text-emerald-500 mx-auto mb-4" />
                     {isRtl ? "جاري تحميل الأعضاء..." : "Loading members..."}
                   </td>
                 </tr>
               ) : filteredMembers.map((member) => (
-                  <tr key={member.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                  <tr key={member.id} className="hover:bg-slate-50 dark:bg-slate-900/50 dark:hover:bg-slate-800/50 transition-colors">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         <Avatar className="h-10 w-10 border border-slate-200 dark:border-slate-700">
@@ -143,22 +143,22 @@ export default function AdminMembersPage() {
                         </Avatar>
                         <div>
                           <div className="font-semibold text-slate-900 dark:text-white">{member.full_name || "Unknown"}</div>
-                          <div className="text-xs text-slate-500 mt-0.5">{member.email || ""}</div>
+                          <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{member.email || ""}</div>
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4">
                       <div className="text-slate-900 dark:text-slate-200 font-medium">{member.title || "-"}</div>
-                      <div className="text-xs text-slate-500">{member.company || "-"}</div>
+                      <div className="text-xs text-slate-500 dark:text-slate-400">{member.company || "-"}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center gap-1.5 text-slate-500">
+                      <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400">
                         <Calendar className="h-4 w-4" />
                         {new Date(member.created_at).toLocaleDateString()}
                       </div>
                     </td>
                     <td className="px-6 py-4 text-center">
-                      <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200">
+                      <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-slate-100 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800">
                         {member.role || 'user'}
                       </span>
                     </td>
@@ -187,7 +187,7 @@ export default function AdminMembersPage() {
               <h3 className="font-bold text-lg text-slate-900 dark:text-white">
                 {isRtl ? "إدارة الصلاحيات" : "Manage Role"}
               </h3>
-              <button onClick={() => setSelectedMember(null)} className="text-slate-400 hover:text-slate-600">
+              <button onClick={() => setSelectedMember(null)} className="text-slate-400 hover:text-slate-600 dark:text-slate-400">
                 <X className="h-5 w-5" />
               </button>
             </div>
@@ -200,7 +200,7 @@ export default function AdminMembersPage() {
                 </Avatar>
                 <div>
                   <div className="font-semibold text-slate-900 dark:text-white">{selectedMember.full_name}</div>
-                  <div className="text-sm text-slate-500">{selectedMember.email}</div>
+                  <div className="text-sm text-slate-500 dark:text-slate-400">{selectedMember.email}</div>
                 </div>
               </div>
 
@@ -229,12 +229,12 @@ export default function AdminMembersPage() {
                   </label>
                   <div className="space-y-2">
                     {['users', 'events', 'media'].map(perm => (
-                      <label key={perm} className="flex items-center gap-3 cursor-pointer p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-md">
+                      <label key={perm} className="flex items-center gap-3 cursor-pointer p-2 hover:bg-slate-50 dark:bg-slate-900/50 dark:hover:bg-slate-800 rounded-md">
                         <input
                           type="checkbox"
                           checked={roleForm.permissions.includes(perm)}
                           onChange={() => handleTogglePerm(perm)}
-                          className="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-600"
+                          className="h-4 w-4 rounded border-slate-300 dark:border-slate-700 text-emerald-600 focus:ring-emerald-600"
                         />
                         <span className="text-sm text-slate-700 dark:text-slate-300 capitalize">{perm}</span>
                       </label>
@@ -247,7 +247,7 @@ export default function AdminMembersPage() {
             <div className="p-5 border-t border-slate-100 dark:border-slate-800 flex justify-end gap-3 bg-slate-50 dark:bg-slate-800/50">
               <button
                 onClick={() => setSelectedMember(null)}
-                className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900"
+                className="px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:text-slate-100"
               >
                 {isRtl ? "إلغاء" : "Cancel"}
               </button>
