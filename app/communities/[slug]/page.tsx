@@ -15,11 +15,16 @@ import {
   BookOpen,
   Calendar,
   MessageSquare,
-  Sparkles,
   Loader2,
   MapPin,
-  Briefcase
+  Briefcase,
+  Lock,
+  Activity,
+  Heart,
+  MessageCircle,
+  Share
 } from "lucide-react"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 export default function CommunityDetailPage() {
   const { slug } = useParams<{ slug: string }>()
@@ -29,7 +34,12 @@ export default function CommunityDetailPage() {
 
   const [members, setMembers] = useState<any[]>([])
   const [events, setEvents] = useState<any[]>([])
+  const [activities, setActivities] = useState<any[]>([])
+  const [discussions, setDiscussions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [activeTab, setActiveTab] = useState("events") // 'events' | 'discussions' | 'activity'
+  const [isMember, setIsMember] = useState(false)
+  const [sessionUser, setSessionUser] = useState<any>(null)
 
   const communityObj = COMMUNITIES.find(c => c.slug === slug)
   const isValid = !!communityObj
@@ -40,6 +50,16 @@ export default function CommunityDetailPage() {
     async function fetchCommunityData() {
       setIsLoading(true)
       try {
+        // 0. Check current user profile
+        const { data: { user } } = await supabase.auth.getUser()
+        if (user) {
+          setSessionUser(user)
+          const { data: profile } = await supabase.from("profiles").select("community").eq("id", user.id).single()
+          if (profile && profile.community === slug) {
+            setIsMember(true)
+          }
+        }
+
         // 1. Fetch profiles in this community
         const { data: profileData } = await supabase
           .from("profiles")
@@ -51,27 +71,38 @@ export default function CommunityDetailPage() {
 
         // 2. Fetch events matching this community
         const communityName = communityObj ? (isRtl ? communityObj.nameAr : communityObj.nameEn).toLowerCase() : ""
-        const { data: eventData } = await supabase
-          .from("events")
-          .select("*")
+        const { data: eventData } = await supabase.from("events").select("*")
 
         if (eventData) {
-          // Filter events whose category matches the slug or localized name
           const matched = eventData.filter(e => {
             const cat = (e.category || "").toLowerCase()
             return cat.includes(slug) || cat.includes(communityName) || slug.replace("-", " ").includes(cat)
           })
           setEvents(matched)
         }
+
+        // 3. Fetch activities
+        const { data: activityData } = await supabase
+          .from("community_activities")
+          .select("*, profiles(full_name, avatar_url, title)")
+          .eq("community_slug", slug)
+          .order("created_at", { ascending: false })
+          .limit(10)
+        
+        if (activityData) setActivities(activityData)
+
+        // 4. Fetch discussions
+        const { data: discussionData } = await supabase
+          .from("community_discussions")
+          .select("*, profiles(full_name, avatar_url, title)")
+          .eq("community_slug", slug)
+          .order("created_at", { ascending: false })
+          .limit(10)
+          
+        if (discussionData) setDiscussions(discussionData)
+
       } catch (err) {
         console.error("Error fetching community data:", err)
-        const allMock = [
-          { id: "cfc233e2-e1bc-48e7-a5b0-bf4d8694b526", full_name: isRtl ? "م. محمد عكود" : "Eng. Mohamed Akoud", title: isRtl ? "مدير منتجات تقنية" : "Tech Product Manager", company: "Verizon", location: isRtl ? "نيويورك" : "New York", community: "ai", avatar_url: null },
-          { id: "8784d544-0f1a-40ad-b63f-e1ebffdb0d4f", full_name: isRtl ? "د. أحمد كمال" : "Dr. Ahmed Kamal", title: isRtl ? "مدرب مهني | استشارات موارد بشرية" : "Career Coach | HR Consultant", company: isRtl ? "استشارات مستقلة" : "Independent Consulting", location: isRtl ? "الرياض" : "Riyadh", community: "strategic-planning", avatar_url: null },
-          { id: "680b3240-16a0-419b-b769-ac18ba1990ea", full_name: isRtl ? "م. سارة إدريس" : "Eng. Sara Idris", title: isRtl ? "مهندسة نظم معلومات" : "Information Systems Engineer", company: "Aramco Digital", location: isRtl ? "جدة" : "Jeddah", community: "data-science", avatar_url: null },
-          { id: "d880a631-060f-44ad-8f31-dd813cb73f9c", full_name: isRtl ? "د. منى عبدالله" : "Dr. Mona Abdullah", title: isRtl ? "طبيبة أطفال — استشارية" : "Consultant Pediatrician", company: isRtl ? "مستشفى الملك فهد" : "King Fahd Hospital", location: isRtl ? "الخرطوم" : "Khartoum", community: "healthcare", avatar_url: null }
-        ]
-        setMembers(allMock.filter(m => m.community === slug))
       } finally {
         setIsLoading(false)
       }
@@ -96,6 +127,22 @@ export default function CommunityDetailPage() {
   const name = isRtl ? communityObj.nameAr : communityObj.nameEn
   const description = t("communities.desc_template").replace("{name}", name)
   const Icon = communityObj.icon
+
+  // Helper to render locked overlay
+  const renderLockedOverlay = (title: string, desc: string) => (
+    <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-slate-50/60 dark:bg-slate-950/60 backdrop-blur-[3px] rounded-2xl">
+      <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 flex flex-col items-center text-center max-w-sm mx-4">
+        <div className="h-12 w-12 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mb-4">
+          <Lock className="h-6 w-6 text-slate-500 dark:text-slate-400" />
+        </div>
+        <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">{title}</h3>
+        <p className="text-slate-500 text-sm mb-6 leading-relaxed">{desc}</p>
+        <Button className="bg-emerald-600 hover:bg-emerald-700 w-full font-semibold">
+          {isRtl ? "الانضمام للمجتمع" : "Join Community"}
+        </Button>
+      </div>
+    </div>
+  )
 
   return (
     <div dir={isRtl ? "rtl" : "ltr"} className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100">
@@ -125,9 +172,15 @@ export default function CommunityDetailPage() {
              <p className="text-lg text-slate-300 leading-relaxed max-w-2xl">{description}</p>
 
              <div className="pt-4 flex flex-wrap gap-4">
-                <Button className="bg-emerald-600 hover:bg-emerald-700 h-10 px-6 font-semibold shadow-lg">
-                  {t("community_detail.join")}
-                </Button>
+                {!isMember ? (
+                  <Button className="bg-emerald-600 hover:bg-emerald-700 h-10 px-6 font-semibold shadow-lg">
+                    {t("community_detail.join")}
+                  </Button>
+                ) : (
+                  <Button variant="outline" className="border-emerald-700 text-emerald-400 hover:bg-emerald-900 hover:text-emerald-300 h-10 px-6 font-semibold pointer-events-none">
+                    {isRtl ? "أنت عضو" : "Joined"}
+                  </Button>
+                )}
                 <Button variant="outline" className="border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white h-10 px-6 font-semibold">
                   {t("community_detail.schedule")}
                 </Button>
@@ -137,7 +190,7 @@ export default function CommunityDetailPage() {
       </div>
 
       {/* ── CONTENT GRID ── */}
-      <div className="container mx-auto px-4 py-12 md:px-6">
+      <div className="container mx-auto px-4 py-8 md:px-6">
         {isLoading ? (
           <div className="flex items-center justify-center py-20">
             <Loader2 className="h-8 w-8 text-emerald-600 animate-spin" />
@@ -145,57 +198,173 @@ export default function CommunityDetailPage() {
         ) : (
           <div className="grid lg:grid-cols-3 gap-8">
 
-            {/* ── MAIN COLUMN (Events & Discussions) ── */}
-            <div className="lg:col-span-2 space-y-8">
+            {/* ── MAIN COLUMN (Tabs: Events, Discussions, Activity) ── */}
+            <div className="lg:col-span-2 space-y-6">
 
-              {/* Events Section */}
-              <section className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 space-y-4">
-                <div className="flex items-center gap-3 border-b border-slate-100 dark:border-slate-800 pb-4">
-                   <Calendar className="h-5.5 w-5.5 text-emerald-600 dark:text-emerald-400" />
-                   <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">{t("community_detail.latest_events")}</h2>
-                </div>
-                {events.length === 0 ? (
-                  <div className="py-12 text-center text-slate-400 dark:text-slate-500 text-sm">
-                     {t("community_detail.no_events")}
+              {/* Tabs Navigation */}
+              <div className="flex space-x-6 rtl:space-x-reverse border-b border-slate-200 dark:border-slate-800 overflow-x-auto">
+                <button 
+                  onClick={() => setActiveTab("events")}
+                  className={`px-2 py-3 text-sm font-bold border-b-2 whitespace-nowrap transition-colors ${activeTab === 'events' ? 'border-emerald-600 text-emerald-600 dark:text-emerald-400' : 'border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'}`}
+                >
+                  {isRtl ? "الفعاليات" : "Events"}
+                </button>
+                <button 
+                  onClick={() => setActiveTab("discussions")}
+                  className={`px-2 py-3 text-sm font-bold border-b-2 whitespace-nowrap transition-colors ${activeTab === 'discussions' ? 'border-emerald-600 text-emerald-600 dark:text-emerald-400' : 'border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'}`}
+                >
+                  <div className="flex items-center gap-2">
+                    {isRtl ? "لوحة النقاشات" : "Discussion Board"}
+                    {!isMember && <Lock className="h-3 w-3 text-slate-400" />}
                   </div>
-                ) : (
-                  <div className="space-y-4">
-                    {events.map((event) => {
-                      const dateObj = new Date(event.start_time)
-                      const date = dateObj.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
-                      return (
-                        <div key={event.id} className="p-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-150 dark:border-slate-850 flex flex-col md:flex-row gap-4 hover:border-emerald-300 dark:hover:border-emerald-800 hover:bg-emerald-50/10 dark:hover:bg-emerald-950/10 transition-all">
-                          {event.image && (
-                            <img src={event.image} alt={event.title} className="w-full md:w-32 h-20 object-cover rounded-lg shrink-0" />
-                          )}
-                          <div className="flex-1 min-w-0 space-y-1">
-                            <h4 className="font-bold text-slate-900 dark:text-slate-100 text-base">{event.title}</h4>
-                            <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500 dark:text-slate-400">
-                              <span className="flex items-center gap-1"><Calendar className="h-3.5 w-3.5" /> {date}</span>
-                              <span className="flex items-center gap-1"><MapPin className="h-3.5 w-3.5" /> {event.location || "Virtual"}</span>
+                </button>
+                <button 
+                  onClick={() => setActiveTab("activity")}
+                  className={`px-2 py-3 text-sm font-bold border-b-2 whitespace-nowrap transition-colors ${activeTab === 'activity' ? 'border-emerald-600 text-emerald-600 dark:text-emerald-400' : 'border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'}`}
+                >
+                  <div className="flex items-center gap-2">
+                    {isRtl ? "النشاطات" : "Activity Feed"}
+                    {!isMember && <Lock className="h-3 w-3 text-slate-400" />}
+                  </div>
+                </button>
+              </div>
+
+              {/* TAB CONTENT: EVENTS */}
+              {activeTab === "events" && (
+                <section className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 space-y-4">
+                  <div className="flex items-center gap-3 border-b border-slate-100 dark:border-slate-800 pb-4">
+                     <Calendar className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                     <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">{t("community_detail.latest_events")}</h2>
+                  </div>
+                  {events.length === 0 ? (
+                    <div className="py-12 text-center text-slate-400 dark:text-slate-500 text-sm">
+                       {t("community_detail.no_events")}
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {events.map((event) => {
+                        const dateObj = new Date(event.start_time)
+                        const date = dateObj.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+                        return (
+                          <div key={event.id} className="p-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-150 dark:border-slate-850 flex flex-col md:flex-row gap-4 hover:border-emerald-300 dark:hover:border-emerald-800 hover:bg-emerald-50/10 dark:hover:bg-emerald-950/10 transition-all">
+                            {event.image && (
+                              <img src={event.image} alt={event.title} className="w-full md:w-32 h-20 object-cover rounded-lg shrink-0" />
+                            )}
+                            <div className="flex-1 min-w-0 space-y-1">
+                              <h4 className="font-bold text-slate-900 dark:text-slate-100 text-base">{event.title}</h4>
+                              <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500 dark:text-slate-400">
+                                <span className="flex items-center gap-1"><Calendar className="h-3.5 w-3.5" /> {date}</span>
+                                <span className="flex items-center gap-1"><MapPin className="h-3.5 w-3.5" /> {event.location || "Virtual"}</span>
+                              </div>
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )}
+                </section>
+              )}
+
+              {/* TAB CONTENT: DISCUSSIONS */}
+              {activeTab === "discussions" && (
+                <section className="relative bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 min-h-[400px]">
+                  {!isMember && renderLockedOverlay(
+                    isRtl ? "لوحة النقاشات مغلقة" : "Locked Discussion Board",
+                    isRtl ? "انضم إلى هذا المجتمع لتتمكن من قراءة النقاشات وطرح أسئلتك على الأعضاء الآخرين." : "Join this community to read discussions and ask questions to other members."
+                  )}
+                  
+                  <div className={cn("space-y-6", !isMember && "opacity-30 blur-sm pointer-events-none select-none")}>
+                    <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
+                      <div className="flex items-center gap-3">
+                        <MessageSquare className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                        <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">{t("community_detail.discussion_board")}</h2>
+                      </div>
+                      <Button className="bg-slate-900 hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-slate-200 h-9 px-4 text-sm font-semibold">
+                        {isRtl ? "موضوع جديد" : "New Topic"}
+                      </Button>
+                    </div>
+
+                    <div className="space-y-4">
+                      {discussions.length === 0 ? (
+                        <div className="py-12 text-center text-slate-400 dark:text-slate-500 text-sm">
+                          {isRtl ? "لا توجد نقاشات بعد." : "No discussions yet."}
+                        </div>
+                      ) : discussions.map((disc) => (
+                        <div key={disc.id} className="p-5 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/50 hover:border-emerald-200 dark:hover:border-emerald-900 transition-colors">
+                          <h4 className="font-bold text-slate-900 dark:text-slate-100 text-lg mb-2">{disc.title}</h4>
+                          <p className="text-sm text-slate-600 dark:text-slate-300 line-clamp-2 mb-4">{disc.content}</p>
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <Avatar className="h-6 w-6">
+                                <AvatarImage src={disc.profiles?.avatar_url || ""} />
+                                <AvatarFallback className="text-[10px] bg-emerald-100 text-emerald-700">{disc.profiles?.full_name?.charAt(0) || disc.mock_author_name?.charAt(0)}</AvatarFallback>
+                              </Avatar>
+                              <span className="text-xs font-medium text-slate-700 dark:text-slate-300">{disc.profiles?.full_name || disc.mock_author_name}</span>
+                              <span className="text-xs text-slate-400 dark:text-slate-500 hidden sm:inline">• {disc.profiles?.title || disc.mock_author_title}</span>
+                            </div>
+                            <div className="flex items-center gap-4 text-xs text-slate-500 dark:text-slate-400">
+                              <span className="flex items-center gap-1.5"><Heart className="h-3.5 w-3.5" /> {disc.likes}</span>
+                              <span className="flex items-center gap-1.5"><MessageCircle className="h-3.5 w-3.5" /> {disc.replies}</span>
                             </div>
                           </div>
                         </div>
-                      )
-                    })}
+                      ))}
+                    </div>
                   </div>
-                )}
-              </section>
+                </section>
+              )}
 
-              {/* Discussions Section */}
-              <section className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 space-y-4">
-                <div className="flex items-center gap-3 border-b border-slate-100 dark:border-slate-800 pb-4">
-                   <MessageSquare className="h-5.5 w-5.5 text-emerald-600 dark:text-emerald-400" />
-                   <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">{t("community_detail.discussion_board")}</h2>
-                </div>
-                <div className="py-12 text-center text-slate-400 dark:text-slate-500 text-sm flex flex-col items-center justify-center gap-2">
-                   <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 px-3 py-1 text-xs text-emerald-700 dark:text-emerald-300 font-semibold mb-2">
-                     <Sparkles className="h-3.5 w-3.5 animate-pulse" />
-                     {locale === "ar" ? "ميزة مستقبلية" : "Future Feature"}
-                   </span>
-                   {t("community_detail.no_discussions")}
-                </div>
-              </section>
+              {/* TAB CONTENT: ACTIVITY */}
+              {activeTab === "activity" && (
+                <section className="relative bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 min-h-[400px]">
+                  {!isMember && renderLockedOverlay(
+                    isRtl ? "سجل النشاطات مغلق" : "Locked Activity Feed",
+                    isRtl ? "اكتشف ما يقوم به الأعضاء من مشاركة موارد ونقاشات بالانضمام إلى المجتمع." : "Discover what members are sharing and discussing by joining the community."
+                  )}
+
+                  <div className={cn("space-y-6", !isMember && "opacity-30 blur-sm pointer-events-none select-none")}>
+                    <div className="flex items-center gap-3 border-b border-slate-100 dark:border-slate-800 pb-4">
+                      <Activity className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                      <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">{isRtl ? "سجل النشاطات" : "Activity Feed"}</h2>
+                    </div>
+
+                    <div className="space-y-6">
+                      {activities.length === 0 ? (
+                        <div className="py-12 text-center text-slate-400 dark:text-slate-500 text-sm">
+                          {isRtl ? "لا توجد نشاطات بعد." : "No activities yet."}
+                        </div>
+                      ) : activities.map((act) => (
+                        <div key={act.id} className="flex gap-4">
+                          <Avatar className="h-10 w-10 border border-slate-200 dark:border-slate-700 shrink-0">
+                            <AvatarImage src={act.profiles?.avatar_url || ""} />
+                            <AvatarFallback className="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+                              {act.profiles?.full_name?.charAt(0) || act.mock_author_name?.charAt(0)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="space-y-1">
+                            <p className="text-sm text-slate-900 dark:text-slate-100">
+                              <span className="font-semibold">{act.profiles?.full_name || act.mock_author_name}</span>
+                              <span className="text-slate-500 dark:text-slate-400">
+                                {act.action_type === 'joined' && (isRtl ? " انضم إلى المجتمع." : " joined the community.")}
+                                {act.action_type === 'shared_resource' && (isRtl ? " شارك مورداً جديداً." : " shared a new resource.")}
+                                {act.action_type === 'started_discussion' && (isRtl ? " بدأ نقاشاً جديداً." : " started a new discussion.")}
+                              </span>
+                            </p>
+                            {act.content && (
+                              <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 text-sm text-slate-700 dark:text-slate-300 italic">
+                                "{act.content}"
+                              </div>
+                            )}
+                            <div className="text-xs text-slate-400 dark:text-slate-500">
+                              {new Date(act.created_at).toLocaleString()}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </section>
+              )}
 
             </div>
 
@@ -224,6 +393,15 @@ export default function CommunityDetailPage() {
                        </div>
                        <span className="font-bold text-slate-900 dark:text-slate-100 bg-slate-100 dark:bg-slate-800 px-2.5 py-0.5 rounded-full text-xs">
                          {members.length > 0 ? members.length * 2 : 0}
+                       </span>
+                     </div>
+                     <div className="flex items-center justify-between">
+                       <div className="flex items-center gap-2.5 text-slate-600 dark:text-slate-300">
+                         <MessageSquare className="h-4.5 w-4.5 text-slate-400 dark:text-slate-500" />
+                         <span className="text-sm font-medium">{isRtl ? "النقاشات" : "Discussions"}</span>
+                       </div>
+                       <span className="font-bold text-slate-900 dark:text-slate-100 bg-slate-100 dark:bg-slate-800 px-2.5 py-0.5 rounded-full text-xs">
+                         {discussions.length}
                        </span>
                      </div>
                   </div>
