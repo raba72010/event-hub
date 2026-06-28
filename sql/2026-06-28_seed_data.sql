@@ -1,10 +1,14 @@
 -- ════════════════════════════════════════════════════════════════════
 -- PLATFORM SEED DATA (2026-06-28)
 -- ════════════════════════════════════════════════════════════════════
--- Purpose: Seed documents and media_articles tables with demo data.
+-- Purpose: Clean and seed documents and media_articles tables with demo data.
 -- ════════════════════════════════════════════════════════════════════
 
--- 1. Seed Documents Table
+-- 1. Clean existing records to avoid duplicates
+delete from public.documents;
+delete from public.media_articles;
+
+-- 2. Seed Documents Table
 insert into public.documents (
   title_ar, title_en, description_ar, description_en, category, file_size, download_url
 ) values 
@@ -45,7 +49,7 @@ insert into public.documents (
     '#'
   );
 
--- 2. Seed Media Articles Table
+-- 3. Seed Media Articles Table
 insert into public.media_articles (
   title_ar, title_en, summary_ar, summary_en, content_ar, content_en, type, image_url, video_url
 ) values
