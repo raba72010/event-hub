@@ -32,9 +32,19 @@ function useSheetContext() {
   return context
 }
 
-export function Sheet({ children }: { children: ReactNode }) {
-  const [open, setOpen] = useState(false)
-  const value = useMemo(() => ({ open, setOpen }), [open])
+export function Sheet({ children, open: controlledOpen, onOpenChange }: { children: ReactNode, open?: boolean, onOpenChange?: (open: boolean) => void }) {
+  const [uncontrolledOpen, setUncontrolledOpen] = useState(false)
+  const isControlled = controlledOpen !== undefined
+  const open = isControlled ? controlledOpen : uncontrolledOpen
+  
+  const setOpen = useCallback((newOpen: boolean) => {
+    if (!isControlled) {
+      setUncontrolledOpen(newOpen)
+    }
+    onOpenChange?.(newOpen)
+  }, [isControlled, onOpenChange])
+
+  const value = useMemo(() => ({ open, setOpen }), [open, setOpen])
 
   return <SheetContext.Provider value={value}>{children}</SheetContext.Provider>
 }
