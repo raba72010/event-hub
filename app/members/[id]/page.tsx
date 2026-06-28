@@ -1,8 +1,8 @@
 "use client"
 
-import { useEffect, useState, use } from "react"
+import { useEffect, useState, use, useRef } from "react"
 import Link from "next/link"
-import { ArrowLeft, ArrowRight, Briefcase, MapPin, Users as UsersIcon, Mail, Loader2, Calendar, MessageSquare, Sparkles } from "lucide-react"
+import { ArrowLeft, ArrowRight, Briefcase, MapPin, Users as UsersIcon, Mail, Loader2, Calendar, MessageSquare, Sparkles, Send } from "lucide-react"
 import { supabase } from "@/lib/supabase"
 import { useTranslation } from "@/lib/i18n-context"
 import { COMMUNITIES } from "@/lib/communities"
@@ -42,6 +42,119 @@ export default function MemberProfilePage({ params }: { params: Promise<{ id: st
   const [isLoading, setIsLoading] = useState(true)
   const [notFound, setNotFound] = useState(false)
   const [isPrivate, setIsPrivate] = useState(false)
+
+  // Real-time Chat States
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null)
+  const [messages, setMessages] = useState<any[]>([])
+  const [chatInput, setChatInput] = useState("")
+  const [isSending, setIsSending] = useState(false)
+  const messagesEndRef = useRef<HTMLDivElement>(null)
+
+  // Fetch authenticated user context
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) {
+        setCurrentUserId(user.id)
+      } else if (typeof window !== "undefined" && localStorage.getItem("mock_admin_session") === "true") {
+        setCurrentUserId("mock-admin-id")
+      }
+    })
+  }, [])
+
+  // Scroll to bottom on new messages
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+  }, [messages])
+
+  // Load chat history & subscribe to live updates
+  useEffect(() => {
+    if (!currentUserId || currentUserId === "mock-admin-id" || currentUserId === id) return
+
+    let active = true
+
+    async function loadMessages() {
+      try {
+        const { data, error } = await supabase
+          .from("messages")
+          .select("*")
+          .or(`and(sender_id.eq.${currentUserId},receiver_id.eq.${id}),and(sender_id.eq.${id},receiver_id.eq.${currentUserId})`)
+          .order("created_at", { ascending: true })
+
+        if (error) throw error
+        if (active) {
+          setMessages(data || [])
+        }
+      } catch (err) {
+        console.error("Error loading chat messages:", err)
+      }
+    }
+
+    loadMessages()
+
+    const channel = supabase
+      .channel(`chat_${currentUserId}_${id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "messages",
+        },
+        (payload) => {
+          const newMsg = payload.new
+          if (
+            (newMsg.sender_id === currentUserId && newMsg.receiver_id === id) ||
+            (newMsg.sender_id === id && newMsg.receiver_id === currentUserId)
+          ) {
+            if (active) {
+              setMessages(prev => {
+                if (prev.some(m => m.id === newMsg.id)) return prev
+                return [...prev, newMsg]
+              })
+            }
+          }
+        }
+      )
+      .subscribe()
+
+    return () => {
+      active = false
+      supabase.removeChannel(channel)
+    }
+  }, [currentUserId, id])
+
+  const sendMessage = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!chatInput.trim() || !currentUserId || currentUserId === "mock-admin-id") return
+
+    const content = chatInput.trim()
+    setChatInput("")
+    setIsSending(true)
+
+    try {
+      const { data, error } = await supabase
+        .from("messages")
+        .insert({
+          sender_id: currentUserId,
+          receiver_id: id,
+          content,
+        })
+        .select()
+        .single()
+
+      if (error) throw error
+      if (data) {
+        setMessages(prev => {
+          if (prev.some(m => m.id === data.id)) return prev
+          return [...prev, data]
+        })
+      }
+    } catch (err) {
+      console.error("Failed to send message:", err)
+    } finally {
+      setIsSending(false)
+    }
+  }
 
   useEffect(() => {
     async function fetch() {
@@ -101,7 +214,7 @@ export default function MemberProfilePage({ params }: { params: Promise<{ id: st
   if (notFound || isPrivate) {
     return (
       <div dir={isRtl ? "rtl" : "ltr"} className="container mx-auto px-4 py-20 md:px-6 text-center">
-        <UsersIcon className="h-12 w-12 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
+        <UsersIcon className="h-12 w-12 text-slate-300 dark:text-slate-650 mx-auto mb-4" />
         <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
           {isPrivate ? t("members.private_profile") : t("member.not_found")}
         </h1>
@@ -228,7 +341,7 @@ export default function MemberProfilePage({ params }: { params: Promise<{ id: st
                   return (
                     <div key={ev.id} className="flex items-start gap-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-850 hover:border-emerald-300 dark:hover:border-emerald-800 hover:bg-emerald-50/10 dark:hover:bg-emerald-950/10 transition-colors">
                       <div className="h-9 w-9 rounded-lg bg-emerald-100 dark:bg-emerald-900/40 flex flex-col items-center justify-center shrink-0">
-                        <span className="text-xs font-bold text-emerald-700 dark:text-emerald-300 leading-none">
+                        <span className="text-xs font-bold text-emerald-700 dark:text-emerald-350 leading-none">
                           {d.toLocaleDateString("en-US", { day: "numeric" })}
                         </span>
                         <span className="text-[10px] text-emerald-600 dark:text-emerald-400 leading-none">
@@ -246,59 +359,93 @@ export default function MemberProfilePage({ params }: { params: Promise<{ id: st
             )}
           </div>
 
-          {/* Chat Panel placeholder */}
-          <div className="relative bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm overflow-hidden min-h-[300px]">
-            {/* Frosted overlay */}
-            <div className="absolute inset-0 z-10 backdrop-blur-[2.5px] bg-white/70 dark:bg-slate-900/75 flex flex-col items-center justify-center text-center p-8 rounded-2xl">
-              <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 shadow-lg mb-4">
-                <Sparkles className="h-7 w-7 text-white animate-pulse" />
-              </div>
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-xs font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-400">
-                  {t("member.coming_soon")}
-                </span>
-              </div>
-              <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-2">{t("member.chat_title")}</h3>
-              <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed max-w-xs">{t("member.chat_sub")}</p>
-              <div className="mt-5 inline-flex items-center gap-2 rounded-full bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 px-4 py-2 text-sm font-medium text-emerald-700 dark:text-emerald-350">
-                <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
-                {t("member.chat_cta")}
-              </div>
-            </div>
-
-            {/* Background preview (blurred behind overlay) */}
-            <div className="flex items-center gap-2.5 mb-5 border-b border-slate-100 dark:border-slate-800 pb-3">
+          {/* Chat Panel */}
+          <div className="flex flex-col bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm min-h-[350px]">
+            <div className="flex items-center gap-2.5 mb-4 border-b border-slate-100 dark:border-slate-800 pb-3">
               <div className="p-2 bg-blue-50 dark:bg-blue-950/40 rounded-lg text-blue-600 dark:text-blue-400">
                 <MessageSquare className="h-5 w-5" />
               </div>
               <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">{t("member.direct_message")}</h2>
             </div>
 
-            <div className="space-y-3">
-              {["Hello!", "Nice to connect!", "Let's collaborate"].map((msg, i) => (
-                <div key={i} className={`flex ${i % 2 === 0 ? "justify-start" : "justify-end"}`}>
-                  <div className={`px-4 py-2 rounded-2xl text-sm max-w-[75%] ${
-                    i % 2 === 0
-                      ? "bg-slate-100 dark:bg-slate-850 text-slate-700 dark:text-slate-300 rounded-tl-sm"
-                      : "bg-emerald-600 text-white rounded-tr-sm"
-                  }`}>
-                    {msg}
-                  </div>
+            {/* Case A: Not logged in */}
+            {!currentUserId ? (
+              <div className="flex-1 flex flex-col items-center justify-center text-center p-4">
+                <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 shadow-md mb-3">
+                  <Sparkles className="h-6 w-6 text-white" />
                 </div>
-              ))}
-            </div>
+                <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 mb-1">{t("member.chat_title")}</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 max-w-xs mb-4">{t("member.chat_sub")}</p>
+                <Link href={`/login?redirect=/members/${id}`}>
+                  <Button size="sm" className="bg-slate-900 hover:bg-slate-800 text-white rounded-full">
+                    {t("member.chat_cta")}
+                  </Button>
+                </Link>
+              </div>
+            ) : currentUserId === id ? (
+              /* Case B: Own profile */
+              <div className="flex-1 flex flex-col items-center justify-center text-center text-slate-500 p-4">
+                <UsersIcon className="h-10 w-10 text-slate-350 dark:text-slate-650 mb-2" />
+                <p className="text-sm">
+                  {isRtl ? "هذه هي صفحتك الشخصية العامة. لا يمكنك مراسلة نفسك." : "This is your public profile. You cannot message yourself."}
+                </p>
+              </div>
+            ) : currentUserId === "mock-admin-id" ? (
+              /* Case C: Mock admin warning */
+              <div className="flex-1 flex flex-col items-center justify-center text-center text-slate-500 p-4">
+                <Sparkles className="h-8 w-8 text-amber-500 mb-2 animate-bounce" />
+                <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">
+                  {isRtl ? "وضع المعاينة التجريبي" : "Demo Preview Mode"}
+                </p>
+                <p className="text-xs text-slate-500 mt-1">
+                  {isRtl ? "مراسلة الأعضاء تتطلب تسجيل الدخول بحساب حقيقي." : "Messaging members requires logging in with a real account."}
+                </p>
+              </div>
+            ) : (
+              /* Case D: Real Messaging Interface */
+              <div className="flex-1 flex flex-col min-h-0">
+                {/* Message Logs */}
+                <div className="flex-1 overflow-y-auto max-h-[220px] min-h-[160px] space-y-3 pr-1 py-1">
+                  {messages.length === 0 ? (
+                    <div className="h-full flex items-center justify-center text-center text-slate-400 dark:text-slate-500 text-xs py-10">
+                      {isRtl ? "لا توجد رسائل بعد. ابدأ المحادثة الآن!" : "No messages yet. Say hello!"}
+                    </div>
+                  ) : (
+                    messages.map((msg) => {
+                      const isMe = msg.sender_id === currentUserId
+                      return (
+                        <div key={msg.id} className={cn("flex", isMe ? "justify-end" : "justify-start")}>
+                          <div className={cn(
+                            "px-3.5 py-2 rounded-2xl text-xs max-w-[85%] leading-relaxed break-words shadow-sm",
+                            isMe 
+                              ? "bg-emerald-600 text-white rounded-br-sm" 
+                              : "bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 rounded-bl-sm"
+                          )}>
+                            {msg.content}
+                          </div>
+                        </div>
+                      )
+                    })
+                  )}
+                  <div ref={messagesEndRef} />
+                </div>
 
-            <div className="mt-4 flex gap-2">
-              <input
-                type="text"
-                disabled
-                placeholder={t("member.chat_placeholder")}
-                className="flex-1 px-4 py-2.5 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 text-slate-400 cursor-not-allowed"
-              />
-              <button disabled className="px-4 py-2.5 bg-slate-200 dark:bg-slate-800 text-slate-400 rounded-xl text-sm font-medium cursor-not-allowed">
-                {t("member.send")}
-              </button>
-            </div>
+                {/* Input Area */}
+                <form onSubmit={sendMessage} className="mt-4 flex gap-2 border-t border-slate-100 dark:border-slate-800 pt-3">
+                  <input
+                    type="text"
+                    required
+                    value={chatInput}
+                    onChange={(e) => setChatInput(e.target.value)}
+                    placeholder={t("member.chat_placeholder")}
+                    className="flex-1 px-4 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 dark:text-slate-100 outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
+                  />
+                  <Button type="submit" disabled={isSending || !chatInput.trim()} className="bg-emerald-600 hover:bg-emerald-700 text-white p-2 rounded-xl">
+                    <Send className="h-4 w-4" />
+                  </Button>
+                </form>
+              </div>
+            )}
           </div>
 
         </div>
