@@ -29,6 +29,11 @@ export function Navbar() {
   const [isSignedIn, setIsSignedIn] = useState(false)
   const [isAdmin, setIsAdmin] = useState(false)
   const [userEmail, setUserEmail] = useState<string | null>(null)
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+
+  useEffect(() => {
+    setIsMobileMenuOpen(false)
+  }, [pathname])
 
   useEffect(() => {
     async function checkAuth() {
@@ -172,7 +177,7 @@ export function Navbar() {
         </div>
 
         {/* MOBILE MENU */}
-        <Sheet>
+        <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
           <SheetTrigger asChild className="md:hidden"><Button variant="ghost" size="icon" className="dark:text-slate-300 dark:hover:text-white"><Menu className="h-5 w-5" /></Button></SheetTrigger>
           <SheetContent side={locale === "ar" ? "left" : "right"} className="w-80 bg-white dark:bg-slate-950 overflow-y-auto">
             <div className="flex flex-col gap-6 mt-6" dir={locale === "ar" ? "rtl" : "ltr"}>

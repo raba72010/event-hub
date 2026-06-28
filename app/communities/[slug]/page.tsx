@@ -128,6 +128,30 @@ export default function CommunityDetailPage() {
   const description = t("communities.desc_template").replace("{name}", name)
   const Icon = communityObj.icon
 
+  const [isJoining, setIsJoining] = useState(false)
+
+  const handleJoin = async () => {
+    if (!sessionUser) {
+      router.push("/login")
+      return
+    }
+    setIsJoining(true)
+    try {
+      const { error } = await supabase
+        .from("profiles")
+        .update({ community: slug })
+        .eq("id", sessionUser.id)
+      
+      if (error) throw error
+      
+      setIsMember(true)
+      window.location.reload()
+    } catch (err) {
+      console.error("Failed to join community", err)
+      setIsJoining(false)
+    }
+  }
+
   // Helper to render locked overlay
   const renderLockedOverlay = (title: string, desc: string) => (
     <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-slate-50/60 dark:bg-slate-950/60 backdrop-blur-[3px] rounded-2xl">
@@ -137,8 +161,8 @@ export default function CommunityDetailPage() {
         </div>
         <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">{title}</h3>
         <p className="text-slate-500 text-sm mb-6 leading-relaxed">{desc}</p>
-        <Button className="bg-emerald-600 hover:bg-emerald-700 w-full font-semibold">
-          {isRtl ? "الانضمام للمجتمع" : "Join Community"}
+        <Button onClick={handleJoin} disabled={isJoining} className="bg-emerald-600 hover:bg-emerald-700 w-full font-semibold">
+          {isJoining ? <Loader2 className="h-4 w-4 animate-spin" /> : (isRtl ? "الانضمام للمجتمع" : "Join Community")}
         </Button>
       </div>
     </div>
@@ -173,8 +197,8 @@ export default function CommunityDetailPage() {
 
              <div className="pt-4 flex flex-wrap gap-4">
                 {!isMember ? (
-                  <Button className="bg-emerald-600 hover:bg-emerald-700 h-10 px-6 font-semibold shadow-lg">
-                    {t("community_detail.join")}
+                  <Button onClick={handleJoin} disabled={isJoining} className="bg-emerald-600 hover:bg-emerald-700 h-10 px-6 font-semibold shadow-lg">
+                    {isJoining ? <Loader2 className="h-4 w-4 animate-spin" /> : t("community_detail.join")}
                   </Button>
                 ) : (
                   <Button variant="outline" className="border-emerald-700 text-emerald-400 hover:bg-emerald-900 hover:text-emerald-300 h-10 px-6 font-semibold pointer-events-none">

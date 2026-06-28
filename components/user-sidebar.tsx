@@ -143,7 +143,7 @@ export function UserSidebar(_props: UserSidebarProps = {}) {
           href="/favorites"
           active={pathname === "/favorites"}
         />
-        {userRole === "admin" && (
+        {["main_admin", "super_admin", "community_admin", "admin"].includes(userRole || "") && (
           <SidebarLink
             icon={<Shield className="h-4 w-4" />}
             label={t("sidebar.admin_dashboard")}
