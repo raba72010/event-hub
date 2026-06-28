@@ -11,7 +11,9 @@ import {
   Users,
   Settings,
   LogOut,
-  Loader2
+  Loader2,
+  BookOpen,
+  Newspaper
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -84,6 +86,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { key: "nav_dashboard", href: "/admin", icon: LayoutDashboard },
     { key: "nav_events", href: "/admin/events", icon: CalendarDays },
     { key: "nav_members", href: "/admin/members", icon: Users },
+    { key: "nav_library", href: "/admin/library", icon: BookOpen },
+    { key: "nav_media", href: "/admin/media", icon: Newspaper },
     { key: "nav_settings", href: "/admin/settings", icon: Settings },
   ]
 
