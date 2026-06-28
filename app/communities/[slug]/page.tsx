@@ -36,6 +36,9 @@ export default function CommunityDetailPage() {
   const [events, setEvents] = useState<any[]>([])
   const [activities, setActivities] = useState<any[]>([])
   const [discussions, setDiscussions] = useState<any[]>([])
+  const [sections, setSections] = useState<any[]>([])
+  const [userActivities, setUserActivities] = useState<Set<string>>(new Set())
+  const [userRole, setUserRole] = useState<string>("")
   const [isLoading, setIsLoading] = useState(true)
   const [activeTab, setActiveTab] = useState("events") // 'events' | 'discussions' | 'activity'
   const [isMember, setIsMember] = useState(false)
@@ -81,25 +84,37 @@ export default function CommunityDetailPage() {
           setEvents(matched)
         }
 
-        // 3. Fetch activities
+        // 3. Fetch activities (projects)
         const { data: activityData } = await supabase
           .from("community_activities")
-          .select("*, profiles(full_name, avatar_url, title)")
+          .select(`
+            id, title, description, date_string, location, created_at,
+            participants:community_activity_participants(count)
+          `)
           .eq("community_slug", slug)
           .order("created_at", { ascending: false })
-          .limit(10)
-        
         if (activityData) setActivities(activityData)
 
-        // 4. Fetch discussions
-        const { data: discussionData } = await supabase
-          .from("community_discussions")
-          .select("*, profiles(full_name, avatar_url, title)")
-          .eq("community_slug", slug)
-          .order("created_at", { ascending: false })
-          .limit(10)
+        // 3b. Fetch user's participation
+        if (user) {
+          const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single()
+          if (profile) setUserRole(profile.role || "")
           
-        if (discussionData) setDiscussions(discussionData)
+          const { data: parts } = await supabase
+            .from("community_activity_participants")
+            .select("activity_id")
+            .eq("user_id", user.id)
+          if (parts) setUserActivities(new Set(parts.map(p => p.activity_id)))
+        }
+
+        // 4. Fetch sections instead of single discussions list
+        const { data: sectionData } = await supabase
+          .from("community_discussion_sections")
+          .select("*, discussions:community_discussions(count)")
+          .eq("community_slug", slug)
+          .order("created_at", { ascending: true })
+          
+        if (sectionData) setSections(sectionData)
 
       } catch (err) {
         console.error("Error fetching community data:", err)
@@ -149,6 +164,40 @@ export default function CommunityDetailPage() {
     } catch (err) {
       console.error("Failed to join community", err)
       setIsJoining(false)
+    }
+  }
+
+  const handleParticipate = async (activityId: string) => {
+    if (!sessionUser) return router.push("/login")
+    if (!isMember) return
+    
+    const isParticipating = userActivities.has(activityId)
+    
+    try {
+      if (isParticipating) {
+        // Leave
+        await supabase.from("community_activity_participants").delete().match({ activity_id: activityId, user_id: sessionUser.id })
+        const next = new Set(userActivities)
+        next.delete(activityId)
+        setUserActivities(next)
+      } else {
+        // Join
+        await supabase.from("community_activity_participants").insert({ activity_id: activityId, user_id: sessionUser.id })
+        const next = new Set(userActivities)
+        next.add(activityId)
+        setUserActivities(next)
+      }
+      
+      // Update count locally
+      setActivities(activities.map(a => {
+        if (a.id === activityId) {
+          const currentCount = a.participants?.[0]?.count || 0
+          return { ...a, participants: [{ count: isParticipating ? currentCount - 1 : currentCount + 1 }] }
+        }
+        return a
+      }))
+    } catch (err) {
+      console.error("Error toggling participation", err)
     }
   }
 
@@ -298,40 +347,39 @@ export default function CommunityDetailPage() {
                   )}
                   
                   <div className={cn("space-y-6", !isMember && "opacity-30 blur-sm pointer-events-none select-none")}>
-                    <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4 gap-4">
                       <div className="flex items-center gap-3">
                         <MessageSquare className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
                         <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">{t("community_detail.discussion_board")}</h2>
                       </div>
-                      <Button className="bg-slate-900 hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-slate-200 h-9 px-4 text-sm font-semibold">
-                        {isRtl ? "موضوع جديد" : "New Topic"}
-                      </Button>
+                      
+                      {['main_admin', 'super_admin'].includes(userRole) || (userRole === 'community_admin' && isMember) ? (
+                        <Button className="bg-slate-900 hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-slate-200 h-9 px-4 text-sm font-semibold">
+                          {isRtl ? "إضافة قسم جديد" : "Add Section"}
+                        </Button>
+                      ) : null}
                     </div>
 
                     <div className="space-y-4">
-                      {discussions.length === 0 ? (
+                      {sections.length === 0 ? (
                         <div className="py-12 text-center text-slate-400 dark:text-slate-500 text-sm">
-                          {isRtl ? "لا توجد نقاشات بعد." : "No discussions yet."}
+                          {isRtl ? "لا توجد أقسام بعد." : "No sections yet."}
                         </div>
-                      ) : discussions.map((disc) => (
-                        <div key={disc.id} className="p-5 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/50 hover:border-emerald-200 dark:hover:border-emerald-900 transition-colors">
-                          <h4 className="font-bold text-slate-900 dark:text-slate-100 text-lg mb-2">{disc.title}</h4>
-                          <p className="text-sm text-slate-600 dark:text-slate-300 line-clamp-2 mb-4">{disc.content}</p>
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <Avatar className="h-6 w-6">
-                                <AvatarImage src={disc.profiles?.avatar_url || ""} />
-                                <AvatarFallback className="text-[10px] bg-emerald-100 text-emerald-700">{disc.profiles?.full_name?.charAt(0) || disc.mock_author_name?.charAt(0)}</AvatarFallback>
-                              </Avatar>
-                              <span className="text-xs font-medium text-slate-700 dark:text-slate-300">{disc.profiles?.full_name || disc.mock_author_name}</span>
-                              <span className="text-xs text-slate-400 dark:text-slate-500 hidden sm:inline">• {disc.profiles?.title || disc.mock_author_title}</span>
-                            </div>
-                            <div className="flex items-center gap-4 text-xs text-slate-500 dark:text-slate-400">
-                              <span className="flex items-center gap-1.5"><Heart className="h-3.5 w-3.5" /> {disc.likes}</span>
-                              <span className="flex items-center gap-1.5"><MessageCircle className="h-3.5 w-3.5" /> {disc.replies}</span>
+                      ) : sections.map((sec) => (
+                        <Link href={`/communities/${slug}/sections/${sec.id}`} key={sec.id} className="block">
+                          <div className="p-5 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/50 hover:border-emerald-200 dark:hover:border-emerald-900 hover:shadow-md transition-all">
+                            <div className="flex justify-between items-start gap-4">
+                              <div>
+                                <h4 className="font-bold text-slate-900 dark:text-slate-100 text-lg mb-1">{sec.name}</h4>
+                                <p className="text-sm text-slate-600 dark:text-slate-300 line-clamp-2">{sec.description}</p>
+                              </div>
+                              <div className="flex flex-col items-center justify-center shrink-0 w-16 h-16 rounded-xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
+                                <span className="font-bold text-emerald-600 dark:text-emerald-400 text-lg">{sec.discussions?.[0]?.count || 0}</span>
+                                <span className="text-[10px] text-slate-500 font-medium uppercase tracking-wider">{isRtl ? "نقاش" : "Topics"}</span>
+                              </div>
                             </div>
                           </div>
-                        </div>
+                        </Link>
                       ))}
                     </div>
                   </div>
@@ -342,49 +390,46 @@ export default function CommunityDetailPage() {
               {activeTab === "activity" && (
                 <section className="relative bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 min-h-[400px]">
                   {!isMember && renderLockedOverlay(
-                    isRtl ? "سجل النشاطات مغلق" : "Locked Activity Feed",
-                    isRtl ? "اكتشف ما يقوم به الأعضاء من مشاركة موارد ونقاشات بالانضمام إلى المجتمع." : "Discover what members are sharing and discussing by joining the community."
+                    isRtl ? "سجل النشاطات مغلق" : "Locked Activities",
+                    isRtl ? "انضم إلى المجتمع للمشاركة في الفعاليات والأنشطة." : "Join the community to participate in activities and projects."
                   )}
 
                   <div className={cn("space-y-6", !isMember && "opacity-30 blur-sm pointer-events-none select-none")}>
                     <div className="flex items-center gap-3 border-b border-slate-100 dark:border-slate-800 pb-4">
                       <Activity className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
-                      <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">{isRtl ? "سجل النشاطات" : "Activity Feed"}</h2>
+                      <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">{isRtl ? "المبادرات والأنشطة" : "Initiatives & Activities"}</h2>
                     </div>
 
-                    <div className="space-y-6">
+                    <div className="grid md:grid-cols-2 gap-4">
                       {activities.length === 0 ? (
-                        <div className="py-12 text-center text-slate-400 dark:text-slate-500 text-sm">
+                        <div className="col-span-full py-12 text-center text-slate-400 dark:text-slate-500 text-sm">
                           {isRtl ? "لا توجد نشاطات بعد." : "No activities yet."}
                         </div>
-                      ) : activities.map((act) => (
-                        <div key={act.id} className="flex gap-4">
-                          <Avatar className="h-10 w-10 border border-slate-200 dark:border-slate-700 shrink-0">
-                            <AvatarImage src={act.profiles?.avatar_url || ""} />
-                            <AvatarFallback className="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
-                              {act.profiles?.full_name?.charAt(0) || act.mock_author_name?.charAt(0)}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="space-y-1">
-                            <p className="text-sm text-slate-900 dark:text-slate-100">
-                              <span className="font-semibold">{act.profiles?.full_name || act.mock_author_name}</span>
-                              <span className="text-slate-500 dark:text-slate-400">
-                                {act.action_type === 'joined' && (isRtl ? " انضم إلى المجتمع." : " joined the community.")}
-                                {act.action_type === 'shared_resource' && (isRtl ? " شارك مورداً جديداً." : " shared a new resource.")}
-                                {act.action_type === 'started_discussion' && (isRtl ? " بدأ نقاشاً جديداً." : " started a new discussion.")}
-                              </span>
-                            </p>
-                            {act.content && (
-                              <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 text-sm text-slate-700 dark:text-slate-300 italic">
-                                "{act.content}"
-                              </div>
-                            )}
-                            <div className="text-xs text-slate-400 dark:text-slate-500">
-                              {new Date(act.created_at).toLocaleString()}
+                      ) : activities.map((act) => {
+                        const count = act.participants?.[0]?.count || 0
+                        const isParticipating = userActivities.has(act.id)
+                        
+                        return (
+                          <div key={act.id} className="p-5 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 flex flex-col h-full hover:border-emerald-200 dark:hover:border-emerald-900 transition-all">
+                            <h4 className="font-bold text-slate-900 dark:text-slate-100 mb-2">{act.title}</h4>
+                            <p className="text-sm text-slate-600 dark:text-slate-400 mb-4 flex-1">{act.description}</p>
+                            
+                            <div className="space-y-2 mb-4">
+                              {act.date_string && <div className="flex items-center gap-2 text-xs text-slate-500"><Calendar className="h-3.5 w-3.5" />{act.date_string}</div>}
+                              {act.location && <div className="flex items-center gap-2 text-xs text-slate-500"><MapPin className="h-3.5 w-3.5" />{act.location}</div>}
+                              <div className="flex items-center gap-2 text-xs font-semibold text-emerald-600 dark:text-emerald-400"><Users className="h-3.5 w-3.5" />{count} {isRtl ? "مشارك" : "participants"}</div>
                             </div>
+                            
+                            <Button 
+                              onClick={() => handleParticipate(act.id)}
+                              variant={isParticipating ? "outline" : "default"} 
+                              className={cn("w-full font-semibold", isParticipating ? "border-emerald-600 text-emerald-600 dark:text-emerald-400" : "bg-emerald-600 hover:bg-emerald-700")}
+                            >
+                              {isParticipating ? (isRtl ? "مشارك" : "Participating") : (isRtl ? "شارك الآن" : "Participate")}
+                            </Button>
                           </div>
-                        </div>
-                      ))}
+                        )
+                      })}
                     </div>
                   </div>
                 </section>
@@ -422,10 +467,10 @@ export default function CommunityDetailPage() {
                      <div className="flex items-center justify-between">
                        <div className="flex items-center gap-2.5 text-slate-600 dark:text-slate-300">
                          <MessageSquare className="h-4.5 w-4.5 text-slate-400 dark:text-slate-500" />
-                         <span className="text-sm font-medium">{isRtl ? "النقاشات" : "Discussions"}</span>
+                         <span className="text-sm font-medium">{isRtl ? "أقسام النقاش" : "Discussion Sections"}</span>
                        </div>
                        <span className="font-bold text-slate-900 dark:text-slate-100 bg-slate-100 dark:bg-slate-800 px-2.5 py-0.5 rounded-full text-xs">
-                         {discussions.length}
+                         {sections.length}
                        </span>
                      </div>
                   </div>
