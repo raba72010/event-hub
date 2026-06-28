@@ -217,7 +217,7 @@ export default function AdminMembersPage() {
                   <option value="community_admin">{isRtl ? "مشرف مجتمعي" : "Community Admin"}</option>
                   <option value="super_admin">{isRtl ? "مشرف عام" : "Super Admin"}</option>
                   {currentUser?.role === "main_admin" && (
-                    <option value="main_admin">{isRtl ? "المدير الرئيسي (God Mode)" : "Main Admin (God Mode)"}</option>
+                    <option value="main_admin">{isRtl ? "المدير الرئيسي" : "Main Admin"}</option>
                   )}
                 </select>
               </div>

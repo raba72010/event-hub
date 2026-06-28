@@ -11,7 +11,7 @@ update public.profiles set role = 'super_admin' where role = 'admin';
 -- ====================================================================
 -- MANUAL INTERVENTION REQUIRED
 -- ====================================================================
--- To establish the first "main_admin" (God Mode), you must run this 
+-- To establish the first "main_admin", you must run this 
 -- command manually in the Supabase SQL Editor, replacing the ID with 
 -- your own user ID (which you can find in the Authentication > Users tab).
 --
