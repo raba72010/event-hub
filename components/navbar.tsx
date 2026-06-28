@@ -52,7 +52,7 @@ export function Navbar() {
             .eq('id', session.user.id)
             .single()
           
-          if (profile?.role === 'admin') setIsAdmin(true)
+          if (profile?.role === 'main_admin' || profile?.role === 'super_admin' || profile?.role === 'community_admin' || profile?.role === 'admin') setIsAdmin(true)
         }
       } catch (e) {
         // Fallback or ignore for mock mode
