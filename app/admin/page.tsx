@@ -103,7 +103,7 @@ export default function AdminDashboardOverview() {
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm" style={{ textAlign: locale === "ar" ? "right" : "left" }}>
-            <thead className="bg-slate-50 text-slate-500 border-b border-slate-200">
+            <thead className="bg-slate-50 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800">
               <tr>
                 <th className="px-6 py-4 font-medium">{t("admin.dash_col_title")}</th>
                 <th className="px-6 py-4 font-medium">{t("admin.dash_col_date")}</th>
@@ -112,7 +112,7 @@ export default function AdminDashboardOverview() {
                 <th className="px-6 py-4 font-medium" style={{ textAlign: locale === "ar" ? "left" : "right" }}>{t("admin.dash_col_actions")}</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
               {recentEvents.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="px-6 py-8 text-center text-slate-500">
@@ -121,17 +121,17 @@ export default function AdminDashboardOverview() {
                 </tr>
               ) : (
                 recentEvents.map(event => (
-                  <tr key={event.id} className="hover:bg-slate-50 transition-colors">
-                    <td className="px-6 py-4 font-medium text-slate-900">{event.title}</td>
-                    <td className="px-6 py-4 text-slate-600">{new Date(event.start_time).toLocaleDateString(dateLocale)}</td>
-                    <td className="px-6 py-4 text-slate-600">{event.category}</td>
+                  <tr key={event.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+                    <td className="px-6 py-4 font-medium text-slate-900 dark:text-slate-100">{event.title}</td>
+                    <td className="px-6 py-4 text-slate-600 dark:text-slate-300">{new Date(event.start_time).toLocaleDateString(dateLocale)}</td>
+                    <td className="px-6 py-4 text-slate-600 dark:text-slate-300">{event.category}</td>
                     <td className="px-6 py-4">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400">
                         {event.status === "upcoming" ? t("admin.dash_upcoming") : t("admin.dash_past")}
                       </span>
                     </td>
                     <td className="px-6 py-4" style={{ textAlign: locale === "ar" ? "left" : "right" }}>
-                      <Link href={`/admin/edit/${event.id}`} className="text-indigo-600 hover:text-indigo-900 font-medium">
+                      <Link href={`/admin/edit/${event.id}`} className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 font-medium">
                         {t("admin.dash_edit")}
                       </Link>
                     </td>

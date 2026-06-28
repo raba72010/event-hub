@@ -104,7 +104,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   if (isLoading) {
     return (
-      <div className="min-h-[80vh] bg-slate-50 flex items-center justify-center">
+      <div className="min-h-[80vh] bg-slate-50 dark:bg-slate-950 flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-emerald-600" />
       </div>
     )
@@ -134,7 +134,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   })
 
   return (
-    <div className="min-h-screen bg-slate-50 flex" dir={isRtl ? "rtl" : "ltr"}>
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex" dir={isRtl ? "rtl" : "ltr"}>
       {/* Sidebar Navigation */}
       <aside className={cn(
         "w-64 bg-slate-900 text-slate-300 hidden md:flex flex-col",

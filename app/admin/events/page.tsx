@@ -61,7 +61,7 @@ export default function AdminEventsPage() {
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm" style={{ textAlign: locale === "ar" ? "right" : "left" }}>
-                <thead className="bg-slate-50 text-slate-500 border-b border-slate-200">
+                <thead className="bg-slate-50 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800">
                   <tr>
                     <th className="px-6 py-4 font-medium">{t("admin.events_col_event")}</th>
                     <th className="px-6 py-4 font-medium">{t("admin.events_col_date")}</th>
@@ -71,32 +71,32 @@ export default function AdminEventsPage() {
                     <th className="px-6 py-4 font-medium" style={{ textAlign: locale === "ar" ? "left" : "right" }}>{t("admin.events_col_actions")}</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                   {events.map(event => {
                     const dateObj = event.start_time ? new Date(event.start_time) : null
                     const dateStr = dateObj ? dateObj.toLocaleDateString(dateLocale) : "—"
                     return (
-                      <tr key={event.id} className="hover:bg-slate-50 transition-colors">
+                      <tr key={event.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
                             {event.image ? (
                               <img src={event.image} alt={event.title} className="w-10 h-10 rounded-lg object-cover shrink-0" />
                             ) : (
-                              <div className="w-10 h-10 rounded-lg bg-emerald-100 flex items-center justify-center shrink-0 text-emerald-600 font-bold">
+                              <div className="w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center shrink-0 text-emerald-600 dark:text-emerald-400 font-bold">
                                 {event.title?.charAt(0) || "E"}
                               </div>
                             )}
-                            <span className="font-medium text-slate-900 max-w-xs truncate">{event.title}</span>
+                            <span className="font-medium text-slate-900 dark:text-slate-100 max-w-xs truncate">{event.title}</span>
                           </div>
                         </td>
-                        <td className="px-6 py-4 text-slate-600">{dateStr}</td>
-                        <td className="px-6 py-4 text-slate-600">{event.category || "—"}</td>
-                        <td className="px-6 py-4 text-slate-600">{event.level || "—"}</td>
+                        <td className="px-6 py-4 text-slate-600 dark:text-slate-300">{dateStr}</td>
+                        <td className="px-6 py-4 text-slate-600 dark:text-slate-300">{event.category || "—"}</td>
+                        <td className="px-6 py-4 text-slate-600 dark:text-slate-300">{event.level || "—"}</td>
                         <td className="px-6 py-4">
                           <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                             event.status === "upcoming"
-                              ? "bg-emerald-100 text-emerald-800"
-                              : "bg-slate-100 text-slate-600"
+                              ? "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-300"
+                              : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400"
                           }`}>
                             {event.status === "upcoming" ? t("admin.events_status_upcoming") : t("admin.events_status_past")}
                           </span>
