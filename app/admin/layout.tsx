@@ -22,13 +22,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const pathname = usePathname()
   const { t, locale } = useTranslation()
   const isRtl = locale === "ar"
+  
   const [isLoading, setIsLoading] = useState(true)
-  const [isAdmin, setIsAdmin] = useState(false)
+  const [adminProfile, setAdminProfile] = useState<{ role: string, permissions: string[] } | null>(null)
 
   useEffect(() => {
     async function checkAdminAccess() {
+      // Mock session logic fallback
       if (typeof window !== "undefined" && localStorage.getItem("mock_admin_session") === "true") {
-        setIsAdmin(true)
+        setAdminProfile({ role: "main_admin", permissions: [] })
         setIsLoading(false)
         return
       }
@@ -43,16 +45,44 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
         const { data: profile, error: profileError } = await supabase
           .from("profiles")
-          .select("role")
+          .select("role, permissions")
           .eq("id", user.id)
           .single()
 
-        if (profileError || profile?.role !== "admin") {
+        const allowedRoles = ["main_admin", "super_admin", "community_admin", "admin"] // Retain "admin" as fallback for unmigrated DBs
+        if (profileError || !allowedRoles.includes(profile?.role)) {
           router.push("/")
           return
         }
 
-        setIsAdmin(true)
+        // RBAC Route Protection
+        const currentModule = pathname.split('/')[2] // /admin/events -> events
+        if (profile.role === "community_admin" && currentModule) {
+          const permMap: Record<string, string> = {
+            "events": "events",
+            "media": "media",
+            "library": "media", 
+            "members": "users",
+            "settings": "settings" // settings is usually super admin only
+          }
+          
+          const requiredPerm = permMap[currentModule]
+          const perms = profile.permissions || []
+          
+          // If the module requires a specific permission and they don't have it
+          if (requiredPerm && !perms.includes(requiredPerm)) {
+            router.push("/admin")
+            return
+          }
+          
+          // Community Admins should not access settings at all
+          if (currentModule === "settings") {
+            router.push("/admin")
+            return
+          }
+        }
+
+        setAdminProfile(profile)
       } catch (error) {
         console.error("Error checking admin access:", error)
         router.push("/")
@@ -62,7 +92,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     }
 
     checkAdminAccess()
-  }, [router])
+  }, [router, pathname])
 
   const handleSignOut = async () => {
     if (typeof window !== "undefined") {
@@ -80,16 +110,28 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     )
   }
 
-  if (!isAdmin) return null
+  if (!adminProfile) return null
 
-  const ADMIN_LINKS = [
-    { key: "nav_dashboard", href: "/admin", icon: LayoutDashboard },
-    { key: "nav_events", href: "/admin/events", icon: CalendarDays },
-    { key: "nav_members", href: "/admin/members", icon: Users },
-    { key: "nav_library", href: "/admin/library", icon: BookOpen },
-    { key: "nav_media", href: "/admin/media", icon: Newspaper },
-    { key: "nav_settings", href: "/admin/settings", icon: Settings },
+  // Define Links
+  const ALL_LINKS = [
+    { key: "nav_dashboard", href: "/admin", icon: LayoutDashboard, requiredPerm: null },
+    { key: "nav_events", href: "/admin/events", icon: CalendarDays, requiredPerm: "events" },
+    { key: "nav_members", href: "/admin/members", icon: Users, requiredPerm: "users" },
+    { key: "nav_library", href: "/admin/library", icon: BookOpen, requiredPerm: "media" },
+    { key: "nav_media", href: "/admin/media", icon: Newspaper, requiredPerm: "media" },
+    { key: "nav_settings", href: "/admin/settings", icon: Settings, requiredPerm: "settings" },
   ]
+
+  // Filter links based on role
+  const ADMIN_LINKS = ALL_LINKS.filter(link => {
+    if (adminProfile.role === "main_admin" || adminProfile.role === "super_admin" || adminProfile.role === "admin") {
+      return true
+    }
+    // community_admin logic
+    if (link.requiredPerm === null) return true // everyone gets dashboard
+    if (link.requiredPerm === "settings") return false // hide settings
+    return (adminProfile.permissions || []).includes(link.requiredPerm)
+  })
 
   return (
     <div className="min-h-screen bg-slate-50 flex" dir={isRtl ? "rtl" : "ltr"}>
