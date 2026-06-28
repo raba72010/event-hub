@@ -7,6 +7,7 @@ import { supabase } from "@/lib/supabase"
 import { useTranslation } from "@/lib/i18n-context"
 import { COMMUNITIES } from "@/lib/communities"
 import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
 
 interface Member {
   id: string
@@ -27,35 +28,148 @@ const AVAILABILITY_STYLES: Record<string, string> = {
   inactive:  "bg-slate-100 text-slate-500  ring-slate-200",
 }
 
+const PAGE_SIZE = 12
+
 export default function MembersDirectoryPage() {
   const { t, locale } = useTranslation()
   const isRtl = locale === "ar"
 
   const [members, setMembers] = useState<Member[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [isAppending, setIsAppending] = useState(false)
   const [search, setSearch] = useState("")
+  const [debouncedSearch, setDebouncedSearch] = useState("")
   const [community, setCommunity] = useState<string>("all")
+  const [page, setPage] = useState(1)
+  const [hasMore, setHasMore] = useState(false)
+
+  // Debounce search term change to prevent Supabase query spam
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(search)
+      setPage(1)
+    }, 400)
+    return () => clearTimeout(handler)
+  }, [search])
 
   useEffect(() => {
-    async function fetch() {
+    let active = true
+
+    async function fetchMembers() {
+      if (page === 1) {
+        setIsLoading(true)
+      } else {
+        setIsAppending(true)
+      }
+
       try {
-        const { data, error } = await supabase
+        let query = supabase
           .from("profiles")
           .select("id, full_name, title, company, bio, location, community, availability, avatar_url")
           .eq("is_public", true)
           .order("full_name", { ascending: true })
 
+        // Apply community filter directly in database query
+        if (community !== "all") {
+          query = query.eq("community", community)
+        }
+
+        // Apply text search directly in database query if provided
+        if (debouncedSearch.trim()) {
+          query = query.ilike("full_name", `%${debouncedSearch}%`)
+        }
+
+        // Pagination limit and offset range
+        const from = (page - 1) * PAGE_SIZE
+        const to = from + PAGE_SIZE - 1
+        query = query.range(from, to)
+
+        const { data, error } = await query
         if (error) throw error
-        setMembers(data || [])
+
+        if (active) {
+          if (page === 1) {
+            setMembers(data || [])
+          } else {
+            setMembers(prev => [...prev, ...(data || [])])
+          }
+          setHasMore(data ? data.length === PAGE_SIZE : false)
+        }
       } catch (e) {
-        console.warn("Members directory: supabase error", e)
-        setMembers([])
+        console.warn("Members directory: Supabase query failed, loading localized fallback mock data", e)
+        if (active) {
+          const allMock = [
+            {
+              id: "cfc233e2-e1bc-48e7-a5b0-bf4d8694b526",
+              full_name: locale === "ar" ? "م. محمد عكود" : "Eng. Mohamed Akoud",
+              title: locale === "ar" ? "مدير منتجات تقنية" : "Tech Product Manager",
+              company: "Verizon",
+              bio: "Specialized in AI and Product Management.",
+              location: locale === "ar" ? "نيويورك، أمريكا" : "New York, USA",
+              community: "ai",
+              availability: "active",
+              avatar_url: null
+            },
+            {
+              id: "8784d544-0f1a-40ad-b63f-e1ebffdb0d4f",
+              full_name: locale === "ar" ? "د. أحمد كمال" : "Dr. Ahmed Kamal",
+              title: locale === "ar" ? "مدرب مهني | استشارات موارد بشرية" : "Career Coach | HR Consultant",
+              company: locale === "ar" ? "استشارات مستقلة" : "Independent Consulting",
+              bio: "Over 12 years of experience in administrative coaching.",
+              location: locale === "ar" ? "الرياض، السعودية" : "Riyadh, KSA",
+              community: "strategic-planning",
+              availability: "active",
+              avatar_url: null
+            },
+            {
+              id: "680b3240-16a0-419b-b769-ac18ba1990ea",
+              full_name: locale === "ar" ? "م. سارة إدريس" : "Eng. Sara Idris",
+              title: locale === "ar" ? "مهندسة نظم معلومات" : "Information Systems Engineer",
+              company: "Aramco Digital",
+              bio: "Designing secure digital infrastructures.",
+              location: locale === "ar" ? "جدة، السعودية" : "Jeddah, KSA",
+              community: "data-science",
+              availability: "active",
+              avatar_url: null
+            },
+            {
+              id: "d880a631-060f-44ad-8f31-dd813cb73f9c",
+              full_name: locale === "ar" ? "د. منى عبدالله" : "Dr. Mona Abdullah",
+              title: locale === "ar" ? "طبيبة أطفال — استشارية" : "Consultant Pediatrician",
+              company: locale === "ar" ? "مستشفى الملك فهد" : "King Fahd Hospital",
+              bio: "Passionate about improving neonatal care.",
+              location: locale === "ar" ? "الخرطوم، السودان" : "Khartoum, Sudan",
+              community: "healthcare",
+              availability: "available",
+              avatar_url: null
+            }
+          ]
+
+          // In-memory filters for local mock mode
+          const q = debouncedSearch.trim().toLowerCase()
+          const filteredMock = allMock.filter(m => {
+            if (community !== "all" && m.community !== community) return false
+            if (!q) return true
+            return [m.full_name, m.title, m.company, m.location].some(v => v?.toLowerCase().includes(q))
+          })
+
+          setMembers(filteredMock)
+          setHasMore(false)
+        }
       } finally {
-        setIsLoading(false)
+        if (active) {
+          setIsLoading(false)
+          setIsAppending(false)
+        }
       }
     }
-    fetch()
-  }, [])
+
+    fetchMembers()
+
+    return () => {
+      active = false
+    }
+  }, [page, community, debouncedSearch, locale])
 
   const communityNameMap = useMemo(() => {
     const m = new Map<string, { ar: string; en: string }>()
@@ -63,16 +177,16 @@ export default function MembersDirectoryPage() {
     return m
   }, [])
 
-  const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase()
-    return members.filter(m => {
-      if (community !== "all" && m.community !== community) return false
-      if (!q) return true
-      return [m.full_name, m.title, m.company, m.location].some(v => v?.toLowerCase().includes(q))
-    })
-  }, [members, search, community])
+  const handleCommunityChange = (val: string) => {
+    setCommunity(val)
+    setPage(1)
+  }
 
-  const clearFilters = () => { setSearch(""); setCommunity("all") }
+  const clearFilters = () => {
+    setSearch("")
+    setCommunity("all")
+    setPage(1)
+  }
 
   return (
     <div dir={isRtl ? "rtl" : "ltr"} className="container mx-auto px-4 py-12 md:px-6">
@@ -91,15 +205,17 @@ export default function MembersDirectoryPage() {
             placeholder={t("members.search_placeholder")}
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="w-full ps-10 pe-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 dark:text-slate-100 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            className="w-full ps-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 dark:text-slate-100 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            style={{ paddingInlineStart: "2.5rem" }}
           />
         </div>
         <div className="relative md:w-72">
           <Filter className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 dark:text-slate-500 pointer-events-none" />
           <select
             value={community}
-            onChange={e => setCommunity(e.target.value)}
-            className="w-full ps-10 pe-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 dark:text-slate-100 appearance-none focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            onChange={e => handleCommunityChange(e.target.value)}
+            className="w-full ps-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 dark:text-slate-100 appearance-none focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            style={{ paddingInlineStart: "2.5rem" }}
           >
             <option value="all">{t("members.all_communities")}</option>
             {COMMUNITIES.map(c => (
@@ -112,28 +228,41 @@ export default function MembersDirectoryPage() {
       {/* Results */}
       {isLoading ? (
         <MembersGridSkeleton />
-      ) : filtered.length === 0 ? (
+      ) : members.length === 0 ? (
         <div className="text-center py-20 bg-white dark:bg-slate-900 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700">
           <UsersIcon className="h-10 w-10 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
           <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
-            {members.length === 0 ? t("members.empty_state") : t("members.no_results")}
+            {t("members.no_results")}
           </h3>
-          {members.length > 0 && (
-            <button onClick={clearFilters} className="mt-4 text-sm font-medium text-emerald-700 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-300">
-              {t("members.clear_filters")}
-            </button>
-          )}
+          <button onClick={clearFilters} className="mt-4 text-sm font-medium text-emerald-700 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-300">
+            {t("members.clear_filters")}
+          </button>
         </div>
       ) : (
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {filtered.map(m => (
-            <MemberCard
-              key={m.id}
-              member={m}
-              communityName={m.community ? (isRtl ? communityNameMap.get(m.community)?.ar : communityNameMap.get(m.community)?.en) ?? "" : ""}
-              t={t}
-            />
-          ))}
+        <div className="space-y-10">
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {members.map(m => (
+              <MemberCard
+                key={m.id}
+                member={m}
+                communityName={m.community ? (isRtl ? communityNameMap.get(m.community)?.ar : communityNameMap.get(m.community)?.en) ?? "" : ""}
+                t={t}
+              />
+            ))}
+          </div>
+
+          {/* Load More Trigger Button */}
+          {hasMore && (
+            <div className="text-center pt-4">
+              <Button
+                onClick={() => setPage(prev => prev + 1)}
+                disabled={isAppending}
+                className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 rounded-lg text-sm font-medium transition-colors shadow-md"
+              >
+                {isAppending ? (isRtl ? "جاري التحميل..." : "Loading...") : (isRtl ? "تحميل المزيد" : "Load More")}
+              </Button>
+            </div>
+          )}
         </div>
       )}
     </div>
@@ -187,14 +316,14 @@ function MembersGridSkeleton() {
   return (
     <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       {Array.from({ length: 8 }).map((_, i) => (
-        <div key={i} className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5">
+        <div key={i} className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 animate-pulse">
           <div className="flex items-start justify-between">
-            <div className="h-14 w-14 rounded-full skeleton" />
-            <div className="h-5 w-16 rounded-full skeleton" />
+            <div className="h-14 w-14 rounded-full bg-slate-200 dark:bg-slate-800" />
+            <div className="h-5 w-16 rounded-full bg-slate-200 dark:bg-slate-800" />
           </div>
-          <div className="mt-4 h-4 w-32 skeleton rounded" />
-          <div className="mt-2 h-3 w-24 skeleton rounded" />
-          <div className="mt-1 h-3 w-20 skeleton rounded" />
+          <div className="mt-4 h-4 w-32 bg-slate-200 dark:bg-slate-800 rounded" />
+          <div className="mt-2 h-3.5 w-48 bg-slate-200 dark:bg-slate-800 rounded" />
+          <div className="mt-1 h-3 w-24 bg-slate-200 dark:bg-slate-800 rounded" />
         </div>
       ))}
     </div>

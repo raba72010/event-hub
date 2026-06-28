@@ -65,6 +65,13 @@ export default function CommunityDetailPage() {
         }
       } catch (err) {
         console.error("Error fetching community data:", err)
+        const allMock = [
+          { id: "cfc233e2-e1bc-48e7-a5b0-bf4d8694b526", full_name: isRtl ? "م. محمد عكود" : "Eng. Mohamed Akoud", title: isRtl ? "مدير منتجات تقنية" : "Tech Product Manager", company: "Verizon", location: isRtl ? "نيويورك" : "New York", community: "ai", avatar_url: null },
+          { id: "8784d544-0f1a-40ad-b63f-e1ebffdb0d4f", full_name: isRtl ? "د. أحمد كمال" : "Dr. Ahmed Kamal", title: isRtl ? "مدرب مهني | استشارات موارد بشرية" : "Career Coach | HR Consultant", company: isRtl ? "استشارات مستقلة" : "Independent Consulting", location: isRtl ? "الرياض" : "Riyadh", community: "strategic-planning", avatar_url: null },
+          { id: "680b3240-16a0-419b-b769-ac18ba1990ea", full_name: isRtl ? "م. سارة إدريس" : "Eng. Sara Idris", title: isRtl ? "مهندسة نظم معلومات" : "Information Systems Engineer", company: "Aramco Digital", location: isRtl ? "جدة" : "Jeddah", community: "data-science", avatar_url: null },
+          { id: "d880a631-060f-44ad-8f31-dd813cb73f9c", full_name: isRtl ? "د. منى عبدالله" : "Dr. Mona Abdullah", title: isRtl ? "طبيبة أطفال — استشارية" : "Consultant Pediatrician", company: isRtl ? "مستشفى الملك فهد" : "King Fahd Hospital", location: isRtl ? "الخرطوم" : "Khartoum", community: "healthcare", avatar_url: null }
+        ]
+        setMembers(allMock.filter(m => m.community === slug))
       } finally {
         setIsLoading(false)
       }

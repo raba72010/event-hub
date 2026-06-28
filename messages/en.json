@@ -203,7 +203,10 @@
     "gallery_desc": "Visual coverage of club events and activities.",
     "videos": "Video Library",
     "videos_desc": "Recordings of sessions, workshops, and seminars.",
-    "coming_soon": "Media Center content coming soon"
+    "coming_soon": "Media Center content coming soon",
+    "no_results": "No media articles found.",
+    "all_types": "All Media",
+    "read_more": "Read More"
   },
   "library": {
     "title": "Digital Library",
@@ -215,7 +218,8 @@
     "worksheets": "Worksheets",
     "download": "Download",
     "placeholder_title": "Research or Book Title",
-    "placeholder_desc": "A brief description of the research or book content and its importance to professionals in this field."
+    "placeholder_desc": "A brief description of the research or book content and its importance to professionals in this field.",
+    "no_results": "No documents found matching your search."
   },
   "profile": {
     "back": "Back to Events",

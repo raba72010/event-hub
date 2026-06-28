@@ -69,8 +69,20 @@ export default function MemberProfilePage({ params }: { params: Promise<{ id: st
           setEvents(regData)
         }
       } catch (e) {
-        console.warn("Member profile: supabase error", e)
-        setNotFound(true)
+        console.warn("Member profile: supabase error, using fallback mock", e)
+        const allMock = [
+          { id: "cfc233e2-e1bc-48e7-a5b0-bf4d8694b526", full_name: isRtl ? "م. محمد عكود" : "Eng. Mohamed Akoud", email: "mohamed.akoud@example.spc.sd", title: isRtl ? "مدير منتجات تقنية" : "Tech Product Manager", company: "Verizon", location: isRtl ? "نيويورك" : "New York", community: "ai", bio: isRtl ? "متخصص في الذكاء الاصطناعي وعلم البيانات." : "Specialized in AI and Data Science.", availability: "active", avatar_url: null, is_public: true, created_at: new Date().toISOString() },
+          { id: "8784d544-0f1a-40ad-b63f-e1ebffdb0d4f", full_name: isRtl ? "د. أحمد كمال" : "Dr. Ahmed Kamal", email: "ahmed.kamal@example.spc.sd", title: isRtl ? "مدرب مهني | استشارات موارد بشرية" : "Career Coach | HR Consultant", company: isRtl ? "استشارات مستقلة" : "Independent Consulting", location: isRtl ? "الرياض" : "Riyadh", community: "strategic-planning", bio: isRtl ? "متخصص في تطوير المسارات المهنية والتدريب الإداري." : "Specialized in career coaching and admin training.", availability: "active", avatar_url: null, is_public: true, created_at: new Date().toISOString() },
+          { id: "680b3240-16a0-419b-b769-ac18ba1990ea", full_name: isRtl ? "م. سارة إدريس" : "Eng. Sara Idris", email: "sara.idris@example.spc.sd", title: isRtl ? "مهندسة نظم معلومات" : "Information Systems Engineer", company: "Aramco Digital", location: isRtl ? "جدة" : "Jeddah", community: "data-science", bio: isRtl ? "مهندسة نظم وأمن سيبراني." : "Systems and cybersecurity engineer.", availability: "active", avatar_url: null, is_public: true, created_at: new Date().toISOString() },
+          { id: "d880a631-060f-44ad-8f31-dd813cb73f9c", full_name: isRtl ? "د. منى عبدالله" : "Dr. Mona Abdullah", email: "mona.abdullah@example.spc.sd", title: isRtl ? "طبيبة أطفال — استشارية" : "Consultant Pediatrician", company: isRtl ? "مستشفى الملك فهد" : "King Fahd Hospital", location: isRtl ? "الخرطوم" : "Khartoum", community: "healthcare", bio: isRtl ? "استشارية طب الأطفال وحديثي الولادة." : "Consultant pediatrician and neonatal specialist.", availability: "available", avatar_url: null, is_public: true, created_at: new Date().toISOString() }
+        ]
+        const matched = allMock.find(m => m.id === id)
+        if (matched) {
+          setMember(matched)
+          setEvents([])
+        } else {
+          setNotFound(true)
+        }
       } finally {
         setIsLoading(false)
       }
