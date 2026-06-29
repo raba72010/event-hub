@@ -58,7 +58,7 @@ export default function CommunityDetailPage() {
         if (user) {
           setSessionUser(user)
           const { data: profile } = await supabase.from("profiles").select("community").eq("id", user.id).single()
-          if (profile && profile.community === slug) {
+          if (profile && profile.community && profile.community.split(",").includes(slug)) {
             setIsMember(true)
           }
         }
@@ -67,7 +67,7 @@ export default function CommunityDetailPage() {
         const { data: profileData } = await supabase
           .from("profiles")
           .select("id, full_name, title, company, location, avatar_url")
-          .eq("community", slug)
+          .ilike("community", `%${slug}%`)
           .eq("is_public", true)
 
         if (profileData) setMembers(profileData)
@@ -152,9 +152,20 @@ export default function CommunityDetailPage() {
     }
     setIsJoining(true)
     try {
+      const { data: profile } = await supabase.from("profiles").select("community").eq("id", sessionUser.id).single()
+      
+      let newCommunity = slug
+      if (profile && profile.community) {
+        const list = profile.community.split(",")
+        if (!list.includes(slug)) {
+          list.push(slug)
+        }
+        newCommunity = list.join(",")
+      }
+
       const { error } = await supabase
         .from("profiles")
-        .update({ community: slug })
+        .update({ community: newCommunity })
         .eq("id", sessionUser.id)
       
       if (error) throw error
