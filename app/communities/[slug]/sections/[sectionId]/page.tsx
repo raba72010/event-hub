@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button"
 import { COMMUNITIES } from "@/lib/communities"
 import { ArrowLeft, ArrowRight, MessageSquare, Loader2, MessageCircle, Heart, Plus } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
 
 export default function SectionPage() {
   const { slug, sectionId } = useParams<{ slug: string, sectionId: string }>()
@@ -20,6 +22,11 @@ export default function SectionPage() {
   const [discussions, setDiscussions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [sessionUser, setSessionUser] = useState<any>(null)
+
+  const [isCreatingTopic, setIsCreatingTopic] = useState(false)
+  const [newTopicTitle, setNewTopicTitle] = useState("")
+  const [newTopicContent, setNewTopicContent] = useState("")
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const communityObj = COMMUNITIES.find(c => c.slug === slug)
 
@@ -55,6 +62,35 @@ export default function SectionPage() {
     fetchData()
   }, [sectionId])
 
+  const handleCreateTopic = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!sessionUser) return router.push("/login")
+    if (!newTopicTitle.trim() || !newTopicContent.trim()) return
+
+    setIsSubmitting(true)
+    try {
+      const { data, error } = await supabase.from("community_discussions").insert({
+        section_id: sectionId,
+        user_id: sessionUser.id,
+        title: newTopicTitle.trim(),
+        content: newTopicContent.trim(),
+        community_slug: slug
+      }).select().single()
+
+      if (error) throw error
+
+      setIsCreatingTopic(false)
+      setNewTopicTitle("")
+      setNewTopicContent("")
+      
+      // Redirect to the new topic
+      router.push(`/communities/${slug}/discussions/${data.id}`)
+    } catch (err) {
+      console.error("Error posting topic", err)
+      setIsSubmitting(false)
+    }
+  }
+
   if (isLoading) {
     return <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950"><Loader2 className="h-8 w-8 animate-spin text-emerald-600" /></div>
   }
@@ -86,7 +122,13 @@ export default function SectionPage() {
       <div className="container mx-auto px-4 md:px-6 py-8">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-bold">{isRtl ? "المواضيع" : "Topics"}</h2>
-          <Button className="bg-emerald-600 hover:bg-emerald-700 font-semibold gap-2">
+          <Button 
+            onClick={() => {
+              if (!sessionUser) return router.push("/login")
+              setIsCreatingTopic(true)
+            }}
+            className="bg-emerald-600 hover:bg-emerald-700 font-semibold gap-2"
+          >
             <Plus className="h-4 w-4" />
             {isRtl ? "موضوع جديد" : "New Topic"}
           </Button>
@@ -120,6 +162,55 @@ export default function SectionPage() {
             </Link>
           ))}
         </div>
+
+        {/* Modal: New Topic */}
+        {isCreatingTopic && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+            <div className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-2xl overflow-hidden shadow-xl border border-slate-200 dark:border-slate-800 flex flex-col max-h-[90vh]">
+              <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-950">
+                <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100">{isRtl ? "إنشاء موضوع جديد" : "Create New Topic"}</h3>
+                <button onClick={() => setIsCreatingTopic(false)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                  <Plus className="h-6 w-6 rotate-45" />
+                </button>
+              </div>
+              <form onSubmit={handleCreateTopic} className="p-6 overflow-y-auto flex-1 flex flex-col gap-5">
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                    {isRtl ? "عنوان الموضوع" : "Topic Title"}
+                  </label>
+                  <Input 
+                    value={newTopicTitle}
+                    onChange={(e) => setNewTopicTitle(e.target.value)}
+                    placeholder={isRtl ? "اكتب عنواناً واضحاً لموضوعك..." : "Write a clear title for your topic..."}
+                    required
+                    className="bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800"
+                  />
+                </div>
+                <div className="flex-1 flex flex-col">
+                  <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                    {isRtl ? "محتوى الموضوع" : "Topic Content"}
+                  </label>
+                  <Textarea 
+                    value={newTopicContent}
+                    onChange={(e) => setNewTopicContent(e.target.value)}
+                    placeholder={isRtl ? "اكتب تفاصيل موضوعك هنا..." : "Write your topic details here..."}
+                    required
+                    className="flex-1 min-h-[200px] bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 resize-none"
+                  />
+                </div>
+                <div className="flex justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
+                  <Button type="button" variant="ghost" onClick={() => setIsCreatingTopic(false)}>
+                    {isRtl ? "إلغاء" : "Cancel"}
+                  </Button>
+                  <Button type="submit" disabled={isSubmitting} className="bg-emerald-600 hover:bg-emerald-700">
+                    {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    {isRtl ? "نشر الموضوع" : "Publish Topic"}
+                  </Button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )
